@@ -1,0 +1,2 @@
+# Install only this extra dependency in the existing timefilter environment.
+PyYAML==6.0.3

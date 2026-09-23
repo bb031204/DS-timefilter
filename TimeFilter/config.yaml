@@ -1,0 +1,47 @@
+# TimeFilter 金融实验配置：修改后运行 python scripts/run_financial.py 即可。
+# 路径相对于 TimeFilter 项目目录；命令行同名参数会覆盖本文件。
+# 辅助损失对照实验：只修改 training.moe_aux_weight，其他参数保持一致。
+# 相同配置已完成时复用已有结果；有意重跑或更新代码/数据后，加 --force-rerun。
+dataset: SP500  # 市场：SP500（也接受 S&P500）、NASDAQ、NYSE
+data_root: stockmixer_dataset  # 数据父目录，其下应有对应市场的子目录
+mode: train  # train：从头训练并测试最佳权重；evaluate：只测试已有权重
+checkpoint: null  # evaluate 时填写 best.pth 路径，并保持模型配置与训练时一致
+
+# 预测任务
+forecast:
+  seq_len: 16  # 输入历史长度，单位为交易日；必须能被 patch_len 整除
+  label_len: 0  # 当前 TimeFilter 不使用解码器历史标签，保持 0
+  pred_len: 1  # 预测下一交易日；当前金融适配固定为 1
+
+# 模型超参数：本次辅助损失实验保持此部分不变
+model:
+  d_model: 512  # 隐藏特征维度，需能被 n_heads 整除；越大通常越占显存
+  d_ff: 2048  # 前馈网络中间维度
+  n_heads: 4  # 图关系学习的头数
+  e_layers: 2  # 图网络层数
+  patch_len: 16  # 每个片段的天数；seq_len=16 时，16/8/4 对应每股 1/2/4 个片段
+  alpha: 0.1  # 建图时每行去掉最小权重边的比例；不是辅助损失权重
+  top_p: 0.5  # MoE 路由累计概率阈值；本次保持不变，不用它关闭辅助损失
+  dropout: 0.1  # Dropout 概率，用于正则化
+  pos: 1  # 位置编码开关：1 开启，0 关闭
+
+# 训练与验证集选模
+training:
+  # 总损失 = 预测 MSE + moe_aux_weight × MoE 辅助损失；需为有限非负数。
+  # 依次比较 0（关闭）、0.005（原来的十分之一）、0.05（原权重）。
+  # 设为 0 仍保留 MoE 路由和模型结构；三组不要按总 Train Loss 大小评优。
+  moe_aux_weight: 0.005
+  financial_seed: 2021  # 随机种子；三组使用相同种子，后续复验时再成组更换
+  financial_selection: mse  # 验证集选最佳权重：mse 越低越好，IC / RankIC 越高越好
+  batch_size: 32  # 每批历史窗口数；显存不足可减小，但所有对照组需一致
+  train_epochs: 100  # 训练轮数；当前金融流程跑满轮数，最终测试验证集最优的 best.pth
+  learning_rate: 0.0001  # Adam 初始学习率
+  patience: 3  # 原框架早停参数；当前金融流程不启用早停，此值不影响训练轮数
+  lradj: cosine  # 学习率调度：cosine（当前）、type1、type2
+  itr: 1  # 单次启动的训练次数；建议保持 1，多种子实验应显式更换 financial_seed
+
+# 运行设备
+runtime:
+  num_workers: 0  # 数据加载子进程数；Windows 建议先保持 0
+  gpu: 0  # 使用的 GPU 编号，从 0 开始
+  cpu: false  # true 强制使用 CPU；false 在 CUDA 可用时使用 GPU
