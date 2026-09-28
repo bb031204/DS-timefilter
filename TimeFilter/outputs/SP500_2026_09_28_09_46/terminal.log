@@ -1,0 +1,116 @@
+Run directory: D:\finance\model\Timefilter\TimeFilter\outputs\SP500_2026_09_28_09_46
+Args in experiment:
+Basic Config
+  Task Name:          long_term_forecast  Is Training:        1                   
+  Model ID:           SP500_returns_16_1  Model:              TimeFilter          
+
+Data Loader
+  Data:               SP500               Root Path:          D:\finance\model\Timefilter\TimeFilter\stockmixer_dataset\SP500
+  Data Path:          SP500.npy           Features:           M                   
+  Target:             OT                  Freq:               d                   
+  Checkpoints:        ./checkpoints/      
+
+Forecasting Task
+  Seq Len:            16                  Label Len:          0                   
+  Pred Len:           1                   Seasonal Patterns:  Monthly             
+  Inverse:            0                   
+
+Model Parameters
+  Top k:              5                   Num Kernels:        6                   
+  Enc In:             474                 Dec In:             474                 
+  C Out:              474                 d model:            512                 
+  n heads:            4                   e layers:           2                   
+  d layers:           1                   d FF:               2048                
+  Moving Avg:         25                  Factor:             1                   
+  Distil:             1                   Dropout:            0.1                 
+  Embed:              timeF               Activation:         gelu                
+  Output Attention:   0                   
+
+Run Parameters
+  Num Workers:        0                   Itr:                1                   
+  Train Epochs:       100                 Batch Size:         32                  
+  Patience:           3                   Learning Rate:      0.0001              
+  Des:                test                Loss:               MSE                 
+  Lradj:              cosine              Use Amp:            0                   
+
+GPU
+  Use GPU:            1                   GPU:                0                   
+  Use Multi GPU:      0                   Devices:            0,1,2,3             
+
+De-stationary Projector Params
+  P Hidden Dims:      128, 128            P Hidden Layers:    2                   
+
+Financial protocol | seed=2021 patch_len=8 moe_aux_weight=0.005 selection=validation:mse validation_only=False
+Use GPU: cuda:0
+>>>>>>>start training : long_term_forecast_SP500_returns_16_1_TimeFilter_SP500_ftM_sl16_ll0_pl1_dm512_nh4_el2_dl1_df2048_fc1_ebtimeF_dtTrue_test_0>>>>>>>>>>>>>>>>>>>>>>>>>>
+train 990
+val 253
+test 352
+Financial reports: D:\finance\model\Timefilter\TimeFilter\outputs\SP500_2026_09_28_09_46\results\long_term_forecast_SP500_returns_16_1_TimeFilter_SP500_ftM_sl16_ll0_pl1_dm512_nh4_el2_dl1_df2048_fc1_ebtimeF_dtTrue_test_0\financial
+Epoch: 1 cost time: 167.01734399795532
+Epoch: 1, Steps: 31 | Train Loss: 0.0303914 Vali Loss: 0.0012862 Test Loss: 0.0004483
+Val Financial | IC: 0.005592 RIC: 0.030258 RankIC: 0.001987 Precision@10: 0.505929 SR(top5): 1.978596
+Test Financial | IC: 0.000336 RIC: 0.001901 RankIC: 0.002199 Precision@10: 0.501989 SR(top5): -0.000546
+Train components | MSE: 0.00033332 MoE: 6.01161910 weighted MoE: 0.03005810
+Validation best: epoch=1, mse=0.00129717; saved best.pth
+Updating learning rate to 9.997532801828658e-05
+Epoch: 2 cost time: 157.23502588272095
+Epoch: 2, Steps: 31 | Train Loss: 0.0105060 Vali Loss: 0.0013070 Test Loss: 0.0004475
+Val Financial | IC: 0.001224 RIC: 0.005905 RankIC: -0.003621 Precision@10: 0.504743 SR(top5): 1.806435
+Test Financial | IC: -0.001997 RIC: -0.010707 RankIC: -0.002117 Precision@10: 0.503409 SR(top5): 0.581901
+Train components | MSE: 0.00030757 MoE: 2.03969082 weighted MoE: 0.01019845
+Updating learning rate to 9.990133642141359e-05
+Epoch: 3 cost time: 153.515198469162
+Epoch: 3, Steps: 31 | Train Loss: 0.0103729 Vali Loss: 0.0012810 Test Loss: 0.0004399
+Val Financial | IC: 0.002329 RIC: 0.010920 RankIC: 0.000397 Precision@10: 0.509091 SR(top5): 2.016412
+Test Financial | IC: -0.001172 RIC: -0.005573 RankIC: 0.000529 Precision@10: 0.501420 SR(top5): 0.968413
+Train components | MSE: 0.00029787 MoE: 2.01500266 weighted MoE: 0.01007501
+Validation best: epoch=3, mse=0.00129204; saved best.pth
+Updating learning rate to 9.977809823015401e-05
+Epoch: 4 cost time: 159.15582156181335
+Epoch: 4, Steps: 31 | Train Loss: 0.0103403 Vali Loss: 0.0012625 Test Loss: 0.0004357
+Val Financial | IC: 0.007830 RIC: 0.035786 RankIC: 0.001704 Precision@10: 0.500000 SR(top5): 1.910627
+Test Financial | IC: 0.002391 RIC: 0.012545 RankIC: 0.003106 Precision@10: 0.513352 SR(top5): 0.323789
+Train components | MSE: 0.00029269 MoE: 2.00952189 weighted MoE: 0.01004761
+Validation best: epoch=4, mse=0.00127331; saved best.pth
+Updating learning rate to 9.96057350657239e-05
+Epoch: 5 cost time: 169.3202805519104
+Epoch: 5, Steps: 31 | Train Loss: 0.0103262 Vali Loss: 0.0013000 Test Loss: 0.0004499
+Val Financial | IC: -0.004019 RIC: -0.017397 RankIC: -0.013798 Precision@10: 0.501976 SR(top5): 1.808287
+Test Financial | IC: -0.004322 RIC: -0.022515 RankIC: -0.005764 Precision@10: 0.501136 SR(top5): 0.361932
+Train components | MSE: 0.00029188 MoE: 2.00685496 weighted MoE: 0.01003427
+Updating learning rate to 9.938441702975689e-05
+Epoch: 6 cost time: 164.4432487487793
+Epoch: 6, Steps: 31 | Train Loss: 0.0103229 Vali Loss: 0.0014354 Test Loss: 0.0004777
+Val Financial | IC: 0.001330 RIC: 0.005527 RankIC: 0.003062 Precision@10: 0.520553 SR(top5): 1.783580
+Test Financial | IC: 0.002334 RIC: 0.009983 RankIC: 0.007305 Precision@10: 0.515909 SR(top5): 0.970258
+Train components | MSE: 0.00029657 MoE: 2.00525685 weighted MoE: 0.01002628
+Updating learning rate to 9.911436253643445e-05
+Epoch: 7 cost time: 164.48270463943481
+Epoch: 7, Steps: 31 | Train Loss: 0.0103170 Vali Loss: 0.0012711 Test Loss: 0.0004319
+Val Financial | IC: 0.006830 RIC: 0.029323 RankIC: 0.001019 Precision@10: 0.509881 SR(top5): 2.125288
+Test Financial | IC: -0.000579 RIC: -0.002687 RankIC: 0.001683 Precision@10: 0.494602 SR(top5): 0.794220
+Train components | MSE: 0.00029553 MoE: 2.00429381 weighted MoE: 0.01002147
+Updating learning rate to 9.879583809693738e-05
+Epoch: 8 cost time: 167.62819170951843
+Epoch: 8, Steps: 31 | Train Loss: 0.0103067 Vali Loss: 0.0012577 Test Loss: 0.0004347
+Val Financial | IC: 0.009097 RIC: 0.039900 RankIC: 0.002145 Precision@10: 0.498419 SR(top5): 2.238461
+Test Financial | IC: 0.000397 RIC: 0.002028 RankIC: 0.000747 Precision@10: 0.503409 SR(top5): 0.262064
+Train components | MSE: 0.00028863 MoE: 2.00360637 weighted MoE: 0.01001803
+Validation best: epoch=8, mse=0.00126850; saved best.pth
+Updating learning rate to 9.842915805643155e-05
+Epoch: 9 cost time: 165.83811235427856
+Epoch: 9, Steps: 31 | Train Loss: 0.0103064 Vali Loss: 0.0012566 Test Loss: 0.0004315
+Val Financial | IC: 0.004158 RIC: 0.018125 RankIC: -0.000204 Precision@10: 0.500791 SR(top5): 2.029141
+Test Financial | IC: 0.006264 RIC: 0.029228 RankIC: 0.006909 Precision@10: 0.511364 SR(top5): 0.813487
+Train components | MSE: 0.00029083 MoE: 2.00312151 weighted MoE: 0.01001561
+Validation best: epoch=9, mse=0.00126745; saved best.pth
+Updating learning rate to 9.801468428384716e-05
+Epoch: 10 cost time: 164.786691904068
+Epoch: 10, Steps: 31 | Train Loss: 0.0103048 Vali Loss: 0.0012433 Test Loss: 0.0004344
+Val Financial | IC: 0.003598 RIC: 0.015906 RankIC: -0.000900 Precision@10: 0.515415 SR(top5): 1.557783
+Test Financial | IC: 0.002697 RIC: 0.013140 RankIC: 0.005308 Precision@10: 0.513068 SR(top5): 0.660827
+Train components | MSE: 0.00029114 MoE: 2.00273405 weighted MoE: 0.01001367
+Validation best: epoch=10, mse=0.00125400; saved best.pth
+Updating learning rate to 9.755282581475769e-05
+Interrupted by user

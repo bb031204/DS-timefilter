@@ -93,6 +93,8 @@ if __name__ == '__main__':
     parser.add_argument('--learning_rate', type=float, default=0.0001, help='optimizer learning rate')
     parser.add_argument('--moe_aux_weight', type=float, default=0.05,
                         help='MoE auxiliary loss weight for long-term forecasting; 0 disables the auxiliary objective')
+    parser.add_argument('--rank_weight', type=float, default=0.0,
+                        help='Financial cross-sectional ranking loss weight; 0 preserves original loss')
     parser.add_argument('--des', type=str, default='test', help='exp description')
     parser.add_argument('--loss', type=str, default='MSE', help='loss function')
     parser.add_argument('--lradj', type=str, default='cosine', help='adjust learning rate')
@@ -139,6 +141,8 @@ if __name__ == '__main__':
     parser.add_argument('--financial_checkpoint', default=None)
     parser.add_argument('--financial_cpu', action='store_true')
     parser.add_argument('--financial_seed', type=int, default=2021)
+    parser.add_argument('--financial_norm', type=int, choices=[0, 1], default=1,
+                        help='Financial TimeFilter normalization: 1 original behavior, 0 bypass')
     parser.add_argument('--financial_selection', choices=['mse', 'RankIC', 'IC'], default='mse')
     parser.add_argument('--financial_validation_only', action='store_true')
     parser.add_argument('--financial_force_rerun', action='store_true',
@@ -146,7 +150,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
     if not np.isfinite(args.moe_aux_weight) or args.moe_aux_weight < 0:
         parser.error('--moe_aux_weight must be finite and non-negative')
+    if not np.isfinite(args.rank_weight) or args.rank_weight < 0:
+        parser.error('--rank_weight must be finite and non-negative')
     from data_provider.financial_registry import is_financial_dataset, validate_files
+    if not is_financial_dataset(args.data) and (args.financial_norm != 1 or args.rank_weight != 0):
+        parser.error('--financial_norm and --rank_weight only apply to financial datasets')
     if is_financial_dataset(args.data):
         if not args.financial_output_dir:
             import sys
@@ -173,7 +181,8 @@ if __name__ == '__main__':
     print_args(args)
     if is_financial_dataset(args.data):
         print(f'Financial protocol | seed={args.financial_seed} patch_len={args.patch_len} '
-              f'moe_aux_weight={args.moe_aux_weight} '
+              f'norm={bool(args.financial_norm)} rank_weight={args.rank_weight} '
+              f'alpha={args.alpha} moe_aux_weight={args.moe_aux_weight} '
               f'selection=validation:{args.financial_selection} validation_only={args.financial_validation_only}')
 
     if args.task_name == 'long_term_forecast':

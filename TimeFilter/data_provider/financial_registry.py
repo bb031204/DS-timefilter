@@ -12,9 +12,13 @@ def is_financial_dataset(name):
     return canonical_market(name) in MARKETS
 
 
-def validate_files(root, market):
-    names = ('SP500.npy',) if canonical_market(market) == 'SP500' else (
+def required_files(market):
+    return ('SP500.npy',) if canonical_market(market) == 'SP500' else (
         'price_data.pkl', 'gt_data.pkl', 'mask_data.pkl')
+
+
+def validate_files(root, market):
+    names = required_files(market)
     bad = [str(Path(root) / name) for name in names
            if not (Path(root) / name).is_file() or (Path(root) / name).stat().st_size == 0]
     if bad:

@@ -10,8 +10,8 @@ from data_provider.financial_registry import MARKETS, canonical_market
 
 SECTIONS = {
     'forecast': {'seq_len', 'label_len', 'pred_len'},
-    'model': {'d_model', 'd_ff', 'n_heads', 'e_layers', 'patch_len', 'alpha', 'top_p', 'dropout', 'pos'},
-    'training': {'batch_size', 'train_epochs', 'learning_rate', 'patience', 'lradj', 'itr', 'financial_seed', 'financial_selection', 'moe_aux_weight'},
+    'model': {'d_model', 'd_ff', 'n_heads', 'e_layers', 'patch_len', 'alpha', 'top_p', 'dropout', 'pos', 'norm'},
+    'training': {'batch_size', 'train_epochs', 'learning_rate', 'patience', 'lradj', 'itr', 'financial_seed', 'financial_selection', 'moe_aux_weight', 'rank_weight'},
     'runtime': {'num_workers', 'gpu', 'cpu'},
 }
 
@@ -28,6 +28,11 @@ def build_command(cli):
         entries = config.get(section, {})
         if not isinstance(entries, dict) or set(entries) - keys:
             raise ValueError(f'Unknown or invalid config section: {section}')
+        if section == 'model' and 'norm' in entries:
+            if not isinstance(entries['norm'], bool):
+                raise ValueError('model.norm must be YAML true or false')
+            values['financial_norm'] = int(entries['norm'])
+            entries = {key: value for key, value in entries.items() if key != 'norm'}
         values.update(entries)
     for key in ('batch_size', 'train_epochs', 'learning_rate', 'moe_aux_weight'):
         if getattr(cli, key, None) is not None:

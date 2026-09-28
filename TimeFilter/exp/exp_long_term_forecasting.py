@@ -3,6 +3,8 @@ from exp.exp_basic import Exp_Basic
 from utils.tools import EarlyStopping, adjust_learning_rate, visual
 from utils.metrics import metric
 from utils.financial_selection import FinancialSelection
+from utils.financial_progress import emit_progress
+from utils.financial_losses import stockmixer_rank_loss
 from utils.financial_report import FinancialReport, financial_metrics, metric_line
 from data_provider.financial_registry import is_financial_dataset
 import torch
@@ -138,6 +140,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         model_optim = self._select_optimizer()
         criterion = self._select_criterion()
         moe_aux_weight = getattr(self.args, 'moe_aux_weight', 0.05)
+        rank_weight = getattr(self.args, 'rank_weight', 0.0) if is_financial_dataset(self.args.data) else 0.0
 
         if is_financial_dataset(self.args.data):
             self._financial_report = FinancialReport(setting, self.args, 'training')
@@ -149,7 +152,9 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         for epoch in range(self.args.train_epochs):
             iter_count = 0
             train_loss = []
-            train_mse, train_moe = [], []
+            train_mse, train_rank, train_moe = [], [], []
+            if is_financial_dataset(self.args.data):
+                emit_progress(epoch + 1, self.args.train_epochs, 0, train_steps)
             if is_financial_dataset(self.args.data) and self.device.type == 'cuda':
                 torch.cuda.reset_peak_memory_stats(self.device)
 
@@ -168,8 +173,13 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 outputs = outputs[:, -self.args.pred_len:, f_dim:]
                 batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
                 prediction_loss = self._prediction_loss(outputs, batch_y, batch_y_mark, criterion)
-                loss = prediction_loss if moe_aux_weight == 0 else prediction_loss + moe_aux_weight * moe_loss
+                rank_loss = (stockmixer_rank_loss(outputs, batch_y, self._financial_mask(batch_y_mark, outputs))
+                             if rank_weight else prediction_loss.new_zeros(()))
+                loss = prediction_loss + rank_weight * rank_loss
+                if moe_aux_weight:
+                    loss = loss + moe_aux_weight * moe_loss
                 train_mse.append(prediction_loss.item())
+                train_rank.append(rank_loss.item())
                 train_moe.append(float(moe_loss.detach()) if torch.is_tensor(moe_loss) else float(moe_loss))
                 train_loss.append(loss.item())
 
@@ -188,6 +198,8 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 else:
                     loss.backward()
                     model_optim.step()
+                if is_financial_dataset(self.args.data):
+                    emit_progress(epoch + 1, self.args.train_epochs, i + 1, train_steps)
 
             print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
             train_loss = np.average(train_loss)
@@ -206,11 +218,16 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                     print(metric_line('Test', test_financial))
                 components = {'train_mse': float(np.mean(train_mse)), 'train_moe': float(np.mean(train_moe)),
                               'train_moe_weighted': float(moe_aux_weight * np.mean(train_moe)) if moe_aux_weight else 0.0,
+                              'train_rank': float(np.mean(train_rank)),
+                              'train_rank_weighted': float(rank_weight * np.mean(train_rank)),
+                              'rank_weight': rank_weight,
                               'moe_aux_weight': moe_aux_weight,
                               'learning_rate': model_optim.param_groups[0]['lr']}
                 components['peak_cuda_allocated_mb'] = (torch.cuda.max_memory_allocated(self.device) / 2**20
                                                        if self.device.type == 'cuda' else 0.0)
-                print(f"Train components | MSE: {components['train_mse']:.8f} MoE: {components['train_moe']:.8f} weighted MoE: {components['train_moe_weighted']:.8f}")
+                print(f"Train components | MSE: {components['train_mse']:.8f} "
+                      f"Rank: {components['train_rank']:.8f} weighted Rank: {components['train_rank_weighted']:.8f} "
+                      f"MoE: {components['train_moe']:.8f} weighted MoE: {components['train_moe_weighted']:.8f}")
                 self._financial_report.epoch(
                     epoch + 1, train_loss, vali_loss, test_loss,
                     val_financial, test_financial, components,
@@ -230,14 +247,18 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         return self.model
 
     def test(self, setting, test=0):
+        checkpoint = None
+        if test and is_financial_dataset(self.args.data):
+            from pathlib import Path
+            from utils.financial_checkpoint import resolve_financial_checkpoint
+            checkpoint = resolve_financial_checkpoint(
+                self.args, setting, Path(__file__).resolve().parents[1])
         test_data, test_loader = self._get_data(flag='test')
         if test:
             print('loading model')
-            checkpoint = os.path.join('./checkpoints/' + setting, 'checkpoint.pth')
-            if is_financial_dataset(self.args.data):
-                checkpoint = getattr(self.args, 'financial_checkpoint', None) or os.path.join(
-                    getattr(self.args, 'financial_checkpoint_root', None) or self.args.checkpoints,
-                    setting, 'checkpoint.pth')
+            if checkpoint is None:
+                checkpoint = os.path.join(self.args.checkpoints, setting, 'checkpoint.pth')
+            else:
                 print(f'Checkpoint source: {checkpoint}')
             self.model.load_state_dict(torch.load(checkpoint, map_location=self.device))
 

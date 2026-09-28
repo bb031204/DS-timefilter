@@ -27,8 +27,8 @@ def allocate_run(market, root=None, now=None):
     raise RuntimeError('Too many runs in the same minute')
 
 
-def experiment_key(values):
-    """Compare effective settings, independent of output and source-config paths."""
+def experiment_key(values, provenance):
+    """Compare effective settings and code/data bytes, not output paths."""
     from data_provider.financial_registry import canonical_market
     settings = dict(values)
     for key in ('financial_output_dir', 'financial_checkpoint_root', 'financial_config',
@@ -39,10 +39,14 @@ def experiment_key(values):
         if settings.get(key):
             settings[key] = os.path.normcase(str(Path(settings[key]).resolve()))
     # Configs saved before these options existed retain their original defaults.
-    for key, default in (('moe_aux_weight', 0.05), ('financial_seed', 2021),
+    for key, default in (('moe_aux_weight', 0.05), ('rank_weight', 0.0), ('financial_norm', 1),
+                         ('financial_seed', 2021),
                          ('financial_selection', 'mse'), ('financial_validation_only', False)):
         settings.setdefault(key, default)
-    return hashlib.sha256(json.dumps(settings, sort_keys=True).encode('utf-8')).hexdigest()
+    identity = {'settings': settings,
+                'code_sha256': provenance['code_sha256'],
+                'data_sha256': provenance['data_sha256']}
+    return hashlib.sha256(json.dumps(identity, sort_keys=True).encode('utf-8')).hexdigest()
 
 
 class DuplicateFinancialRunError(RuntimeError):
@@ -81,23 +85,27 @@ def experiment_lock(root, key):
 
 def launch_financial(args, argv):
     import yaml
+    from utils.financial_provenance import collect_provenance
+    provenance = collect_provenance(PROJECT_ROOT, args.root_path, args.data)
     # Evaluation can intentionally use an overwritten checkpoint at the same path.
     if not args.is_training:
-        return _launch_financial(args, argv)
+        return _launch_financial(args, argv, provenance)
     root = PROJECT_ROOT / 'outputs'
-    key = experiment_key(vars(args))
+    key = experiment_key(vars(args), provenance)
     try:
         with experiment_lock(root, key):
             if not getattr(args, 'financial_force_rerun', False):
                 for directory in sorted(root.glob('*'), reverse=True):
                     status_file = directory / 'run_status.json'
                     config_file = directory / 'config.yaml'
-                    if not status_file.is_file() or not config_file.is_file():
+                    provenance_file = directory / 'provenance.json'
+                    if not status_file.is_file() or not config_file.is_file() or not provenance_file.is_file():
                         continue
                     try:
                         status = json.loads(status_file.read_text(encoding='utf-8'))
                         config = yaml.safe_load(config_file.read_text(encoding='utf-8-sig'))
-                        matches = status.get('status') == 'completed' and experiment_key(config) == key
+                        previous = json.loads(provenance_file.read_text(encoding='utf-8'))
+                        matches = status.get('status') == 'completed' and experiment_key(config, previous) == key
                     except (OSError, ValueError, KeyError, TypeError, yaml.YAMLError):
                         continue
                     if matches:
@@ -105,13 +113,13 @@ def launch_financial(args, argv):
                         print('Identical training already completed; reused existing results. No new training or output directory. '
                               'Use scripts/run_financial.py --force-rerun to intentionally repeat.', flush=True)
                         return 0
-            return _launch_financial(args, argv)
+            return _launch_financial(args, argv, provenance)
     except DuplicateFinancialRunError as error:
         print(str(error), flush=True)
         return 2
 
 
-def _launch_financial(args, argv):
+def _launch_financial(args, argv, provenance):
     import yaml
     from data_provider.financial_registry import canonical_market
     market = canonical_market(args.data)
@@ -131,6 +139,8 @@ def _launch_financial(args, argv):
     if checkpoint:
         snapshot['financial_checkpoint'] = str(Path(checkpoint).resolve())
     (directory / 'config.yaml').write_text(yaml.safe_dump(snapshot, allow_unicode=True, sort_keys=False), encoding='utf-8')
+    (directory / 'provenance.json').write_text(
+        json.dumps(provenance, ensure_ascii=False, indent=2), encoding='utf-8')
     source = getattr(args, 'financial_config', None)
     if source:
         (directory / 'source_config.yaml').write_bytes(Path(source).read_bytes())
@@ -147,6 +157,8 @@ def _launch_financial(args, argv):
     code = 1
     with (directory / 'terminal.log').open('w', encoding='utf-8', buffering=1) as log:
         log.write(f'Run directory: {directory}\n')
+        from utils.financial_progress import FinancialProgress, PROGRESS_PREFIX
+        progress = FinancialProgress(log)
         try:
             environment = dict(os.environ, PYTHONIOENCODING='utf-8', PYTHONUNBUFFERED='1')
             child = subprocess.Popen(command, cwd=directory, env=environment,
@@ -155,6 +167,10 @@ def _launch_financial(args, argv):
             status['training_pid'] = child.pid
             save_status()
             for line in child.stdout:
+                if line.startswith(PROGRESS_PREFIX):
+                    progress.update(line)
+                    continue
+                progress.clear_line()
                 log.write(re.sub(r'\x1b\[[0-9;]*m', '', line))
                 print(line, end='', flush=True)
             code = child.wait()
@@ -171,6 +187,7 @@ def _launch_financial(args, argv):
             log.write(f'{type(error).__name__}: {error}\n')
             raise
         finally:
+            progress.clear_line()
             status.update(return_code=code, finished_at=datetime.now().isoformat())
             save_status()
     return code

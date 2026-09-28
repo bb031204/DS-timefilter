@@ -58,7 +58,8 @@ class Model(nn.Module):
 
         # Without RevIN
         self.use_RevIN = False
-        self.norm = Normalize(configs.enc_in, affine=self.use_RevIN)
+        self.norm = Normalize(configs.enc_in, affine=self.use_RevIN,
+                              non_norm=not bool(getattr(configs, 'financial_norm', 1)))
     
     def forward(self, x, masks, is_training=False, target=None):
         # x: [B, T, C]
@@ -78,4 +79,3 @@ class Model(nn.Module):
         x = self.norm(x, 'denorm')
 
         return x, moe_loss
-        
