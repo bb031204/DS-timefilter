@@ -144,6 +144,10 @@ if __name__ == '__main__':
     parser.add_argument('--financial_norm', type=int, choices=[0, 1], default=1,
                         help='Financial TimeFilter normalization: 1 original behavior, 0 bypass')
     parser.add_argument('--financial_selection', choices=['mse', 'RankIC', 'IC'], default='mse')
+    parser.add_argument('--gradient_diagnostic_epochs', type=int, nargs='*', default=[],
+                        help='Financial gradient checks before training (0) and after selected epochs; empty disables')
+    parser.add_argument('--gradient_diagnostic_batch_size', type=int, default=8,
+                        help='Number of fixed training dates used by each financial gradient check')
     parser.add_argument('--financial_validation_only', action='store_true')
     parser.add_argument('--financial_force_rerun', action='store_true',
                         help='Repeat completed financial training; concurrent identical training remains blocked')
@@ -152,9 +156,16 @@ if __name__ == '__main__':
         parser.error('--moe_aux_weight must be finite and non-negative')
     if not np.isfinite(args.rank_weight) or args.rank_weight < 0:
         parser.error('--rank_weight must be finite and non-negative')
+    if (any(epoch < 0 for epoch in args.gradient_diagnostic_epochs)
+            or args.gradient_diagnostic_epochs != sorted(set(args.gradient_diagnostic_epochs))):
+        parser.error('--gradient_diagnostic_epochs must be sorted, distinct and non-negative')
+    if args.gradient_diagnostic_batch_size <= 0:
+        parser.error('--gradient_diagnostic_batch_size must be positive')
     from data_provider.financial_registry import is_financial_dataset, validate_files
     if not is_financial_dataset(args.data) and (args.financial_norm != 1 or args.rank_weight != 0):
         parser.error('--financial_norm and --rank_weight only apply to financial datasets')
+    if not is_financial_dataset(args.data) and args.gradient_diagnostic_epochs:
+        parser.error('--gradient_diagnostic_epochs only applies to financial datasets')
     if is_financial_dataset(args.data):
         if not args.financial_output_dir:
             import sys

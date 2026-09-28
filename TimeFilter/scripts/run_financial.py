@@ -11,7 +11,7 @@ from data_provider.financial_registry import MARKETS, canonical_market
 SECTIONS = {
     'forecast': {'seq_len', 'label_len', 'pred_len'},
     'model': {'d_model', 'd_ff', 'n_heads', 'e_layers', 'patch_len', 'alpha', 'top_p', 'dropout', 'pos', 'norm'},
-    'training': {'batch_size', 'train_epochs', 'learning_rate', 'patience', 'lradj', 'itr', 'financial_seed', 'financial_selection', 'moe_aux_weight', 'rank_weight'},
+    'training': {'batch_size', 'train_epochs', 'learning_rate', 'patience', 'lradj', 'itr', 'financial_seed', 'financial_selection', 'moe_aux_weight', 'rank_weight', 'gradient_diagnostic_epochs', 'gradient_diagnostic_batch_size'},
     'runtime': {'num_workers', 'gpu', 'cpu'},
 }
 
@@ -54,6 +54,13 @@ def build_command(cli):
     for key in ('batch_size', 'train_epochs', 'learning_rate', 'itr'):
         if key in values and values[key] <= 0:
             raise ValueError(f'{key} must be positive')
+    epochs = values.get('gradient_diagnostic_epochs', [])
+    if (not isinstance(epochs, list) or any(type(epoch) is not int or epoch < 0 for epoch in epochs)
+            or epochs != sorted(set(epochs))):
+        raise ValueError('gradient_diagnostic_epochs must be a sorted list of distinct non-negative integers')
+    batch_size = values.get('gradient_diagnostic_batch_size', 8)
+    if type(batch_size) is not int or batch_size <= 0:
+        raise ValueError('gradient_diagnostic_batch_size must be a positive integer')
     root = (PROJECT_ROOT / config.get('data_root', 'stockmixer_dataset') / market).resolve()
     command = [sys.executable, '-u', str(PROJECT_ROOT / 'run.py'),
                '--task_name', 'long_term_forecast', '--is_training', str(int(mode == 'train')),
@@ -69,7 +76,11 @@ def build_command(cli):
     if cpu:
         command.append('--financial_cpu')
     for key, value in values.items():
-        command.extend(['--' + key, str(value)])
+        command.append('--' + key)
+        if key == 'gradient_diagnostic_epochs':
+            command.extend(map(str, value))
+        else:
+            command.append(str(value))
     if checkpoint:
         command.extend(['--financial_checkpoint', str((PROJECT_ROOT / checkpoint).resolve())])
     if getattr(cli, 'force_rerun', False):

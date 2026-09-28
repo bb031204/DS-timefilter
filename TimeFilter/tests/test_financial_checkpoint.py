@@ -41,6 +41,14 @@ class FinancialCheckpointTests(unittest.TestCase):
     def test_default_resolves_best_and_verifies_config(self):
         self.assertEqual(resolve_financial_checkpoint(self.args, 'setting', self.project), self.checkpoint)
 
+    def test_diagnostic_settings_do_not_block_independent_evaluation(self):
+        saved = yaml.safe_load((self.run / 'config.yaml').read_text())
+        saved.update(gradient_diagnostic_epochs=[0, 5, 50], gradient_diagnostic_batch_size=8)
+        (self.run / 'config.yaml').write_text(yaml.safe_dump(saved))
+        self.args.gradient_diagnostic_epochs = []
+        self.args.gradient_diagnostic_batch_size = 1
+        self.assertEqual(resolve_financial_checkpoint(self.args, 'setting', self.project), self.checkpoint)
+
     def test_explicit_last_is_rejected(self):
         self.args.financial_checkpoint = str(self.checkpoint.with_name('last.pth'))
         with self.assertRaisesRegex(ValueError, 'best.pth'):

@@ -4,6 +4,7 @@ from utils.tools import EarlyStopping, adjust_learning_rate, visual
 from utils.metrics import metric
 from utils.financial_selection import FinancialSelection
 from utils.financial_progress import emit_progress
+from utils.financial_gradient_diagnostic import record_gradient_diagnostic
 from utils.financial_losses import stockmixer_rank_loss
 from utils.financial_report import FinancialReport, financial_metrics, metric_line
 from data_provider.financial_registry import is_financial_dataset
@@ -14,6 +15,7 @@ import os
 import time
 import warnings
 import numpy as np
+from torch.utils.data import default_collate
 
 warnings.filterwarnings('ignore')
 
@@ -84,6 +86,12 @@ class Exp_Long_Term_Forecast(Exp_Basic):
             return ((prediction - target).square() * mask).sum() / mask.sum().clamp_min(1)
         return criterion(prediction, target)
 
+    def _training_loss_components(self, outputs, target, batch_y_mark, criterion, rank_weight):
+        prediction_loss = self._prediction_loss(outputs, target, batch_y_mark, criterion)
+        rank_loss = (stockmixer_rank_loss(outputs, target, self._financial_mask(batch_y_mark, outputs))
+                     if rank_weight else prediction_loss.new_zeros(()))
+        return prediction_loss, rank_loss
+
     def vali(self, vali_data, vali_loader, criterion):
         total_loss = []
         collect_financial = is_financial_dataset(self.args.data)
@@ -149,6 +157,34 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         if self.args.use_amp:
             scaler = torch.cuda.amp.GradScaler()
 
+        diagnostic_epochs = set(getattr(self.args, 'gradient_diagnostic_epochs', [])) if is_financial_dataset(self.args.data) else set()
+        if diagnostic_epochs:
+            batch_size = min(self.args.gradient_diagnostic_batch_size, len(train_data))
+            if batch_size == 0:
+                raise ValueError('Gradient diagnostic requires a nonempty training dataset')
+            train_indices = np.linspace(0, len(train_data) - 1, batch_size, dtype=int).tolist()
+            diagnostic_batch = default_collate([train_data[index] for index in train_indices])
+
+            def run_diagnostic(epoch):
+                def losses_for_batch(batch):
+                    batch_x, batch_y, _, batch_y_mark = batch
+                    batch_x = batch_x.float().to(self.device)
+                    batch_y = batch_y.float().to(self.device)
+                    outputs, moe_loss = self.model(batch_x, self.masks, is_training=True)
+                    f_dim = -1 if self.args.features == 'MS' else 0
+                    outputs = outputs[:, -self.args.pred_len:, f_dim:]
+                    target = batch_y[:, -self.args.pred_len:, f_dim:]
+                    mse, rank = self._training_loss_components(
+                        outputs, target, batch_y_mark, criterion, rank_weight)
+                    return {'MSE': (mse, 1.0), 'Rank': (rank, rank_weight),
+                            'MoE': (moe_loss, moe_aux_weight)}
+
+                record_gradient_diagnostic(self.model, diagnostic_batch, train_indices,
+                                           losses_for_batch, self._financial_report.path, epoch)
+
+            if 0 in diagnostic_epochs:
+                run_diagnostic(0)
+
         for epoch in range(self.args.train_epochs):
             iter_count = 0
             train_loss = []
@@ -172,9 +208,8 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 f_dim = -1 if self.args.features == 'MS' else 0
                 outputs = outputs[:, -self.args.pred_len:, f_dim:]
                 batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
-                prediction_loss = self._prediction_loss(outputs, batch_y, batch_y_mark, criterion)
-                rank_loss = (stockmixer_rank_loss(outputs, batch_y, self._financial_mask(batch_y_mark, outputs))
-                             if rank_weight else prediction_loss.new_zeros(()))
+                prediction_loss, rank_loss = self._training_loss_components(
+                    outputs, batch_y, batch_y_mark, criterion, rank_weight)
                 loss = prediction_loss + rank_weight * rank_loss
                 if moe_aux_weight:
                     loss = loss + moe_aux_weight * moe_loss
@@ -240,6 +275,8 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 break
 
             adjust_learning_rate(model_optim, epoch + 1, self.args)
+            if epoch + 1 in diagnostic_epochs:
+                run_diagnostic(epoch + 1)
 
         best_model_path = selection.finish() if is_financial_dataset(self.args.data) else path + '/' + 'checkpoint.pth'
         self.model.load_state_dict(torch.load(best_model_path))

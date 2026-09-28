@@ -1,0 +1,776 @@
+Run directory: D:\finance\model\Timefilter\TimeFilter\outputs\SP500_2026_09_28_13_08
+Args in experiment:
+Basic Config
+  Task Name:          long_term_forecast  Is Training:        1                   
+  Model ID:           SP500_returns_16_1  Model:              TimeFilter          
+
+Data Loader
+  Data:               SP500               Root Path:          D:\finance\model\Timefilter\TimeFilter\stockmixer_dataset\SP500
+  Data Path:          SP500.npy           Features:           M                   
+  Target:             OT                  Freq:               d                   
+  Checkpoints:        ./checkpoints/      
+
+Forecasting Task
+  Seq Len:            16                  Label Len:          0                   
+  Pred Len:           1                   Seasonal Patterns:  Monthly             
+  Inverse:            0                   
+
+Model Parameters
+  Top k:              5                   Num Kernels:        6                   
+  Enc In:             474                 Dec In:             474                 
+  C Out:              474                 d model:            512                 
+  n heads:            4                   e layers:           2                   
+  d layers:           1                   d FF:               2048                
+  Moving Avg:         25                  Factor:             1                   
+  Distil:             1                   Dropout:            0.1                 
+  Embed:              timeF               Activation:         gelu                
+  Output Attention:   0                   
+
+Run Parameters
+  Num Workers:        0                   Itr:                1                   
+  Train Epochs:       100                 Batch Size:         32                  
+  Patience:           3                   Learning Rate:      0.0001              
+  Des:                test                Loss:               MSE                 
+  Lradj:              cosine              Use Amp:            0                   
+
+GPU
+  Use GPU:            1                   GPU:                0                   
+  Use Multi GPU:      0                   Devices:            0,1,2,3             
+
+De-stationary Projector Params
+  P Hidden Dims:      128, 128            P Hidden Layers:    2                   
+
+Financial protocol | seed=2021 patch_len=8 norm=False rank_weight=0.1 alpha=0.7 moe_aux_weight=0.005 selection=validation:mse validation_only=False
+Use GPU: cuda:0
+>>>>>>>start training : long_term_forecast_SP500_returns_16_1_TimeFilter_SP500_ftM_sl16_ll0_pl1_dm512_nh4_el2_dl1_df2048_fc1_ebtimeF_dtTrue_test_0>>>>>>>>>>>>>>>>>>>>>>>>>>
+train 990
+val 253
+test 352
+Financial reports: D:\finance\model\Timefilter\TimeFilter\outputs\SP500_2026_09_28_13_08\results\long_term_forecast_SP500_returns_16_1_TimeFilter_SP500_ftM_sl16_ll0_pl1_dm512_nh4_el2_dl1_df2048_fc1_ebtimeF_dtTrue_test_0\financial
+Epoch   1/100 [####################]  31/31  | used 04:40 | left 00:00 | total 04:40 | ETA 7:42:52
+Epoch: 1 cost time: 280.537805557251
+Epoch: 1, Steps: 31 | Train Loss: 0.2743639 Vali Loss: 0.0228544 Test Loss: 0.0221279
+Val Financial | IC: 0.003247 RIC: 0.070923 RankIC: 0.004817 Precision@10: 0.525296 SR(top5): 0.593449
+Test Financial | IC: 0.001291 RIC: 0.027675 RankIC: 0.002244 Precision@10: 0.535511 SR(top5): 0.616941
+Train components | MSE: 0.19482672 Rank: 0.00139907 weighted Rank: 0.00013991 MoE: 15.87945480 weighted MoE: 0.07939727
+Validation best: epoch=1, mse=0.02287107; saved best.pth
+Updating learning rate to 9.997532801828658e-05
+Epoch   2/100 [####################]  31/31  | used 04:45 | left 00:00 | total 09:35 | ETA 7:50:03
+Epoch: 2 cost time: 285.37818241119385
+Epoch: 2, Steps: 31 | Train Loss: 0.0473847 Vali Loss: 0.0030890 Test Loss: 0.0022371
+Val Financial | IC: 0.002442 RIC: 0.044639 RankIC: 0.001788 Precision@10: 0.513439 SR(top5): 0.696383
+Test Financial | IC: 0.001904 RIC: 0.040271 RankIC: 0.002118 Precision@10: 0.516761 SR(top5): 0.755073
+Train components | MSE: 0.01186724 Rank: 0.00063491 weighted Rank: 0.00006349 MoE: 7.09079153 weighted MoE: 0.03545396
+Validation best: epoch=2, mse=0.00309914; saved best.pth
+Updating learning rate to 9.990133642141359e-05
+Epoch   3/100 [####################]  31/31  | used 04:46 | left 00:00 | total 14:32 | ETA 7:49:55
+Epoch: 3 cost time: 286.87710094451904
+Epoch: 3, Steps: 31 | Train Loss: 0.0349423 Vali Loss: 0.0018939 Test Loss: 0.0010440
+Val Financial | IC: -0.000224 RIC: -0.003070 RankIC: -0.001116 Precision@10: 0.506324 SR(top5): 0.038205
+Test Financial | IC: 0.002248 RIC: 0.043124 RankIC: 0.002112 Precision@10: 0.519886 SR(top5): 0.729055
+Train components | MSE: 0.00383901 Rank: 0.00044441 weighted Rank: 0.00004444 MoE: 6.21176806 weighted MoE: 0.03105884
+Validation best: epoch=3, mse=0.00190468; saved best.pth
+Updating learning rate to 9.977809823015401e-05
+Epoch   4/100 [####################]  31/31  | used 04:50 | left 00:00 | total 19:32 | ETA 7:49:09
+Epoch: 4 cost time: 290.6338264942169
+Epoch: 4, Steps: 31 | Train Loss: 0.0322068 Vali Loss: 0.0015277 Test Loss: 0.0006918
+Val Financial | IC: -0.000052 RIC: -0.000599 RankIC: 0.000082 Precision@10: 0.515810 SR(top5): -0.298235
+Test Financial | IC: 0.002334 RIC: 0.037199 RankIC: 0.003946 Precision@10: 0.517614 SR(top5): 1.150862
+Train components | MSE: 0.00285395 Rank: 0.00039066 weighted Rank: 0.00003907 MoE: 5.86274718 weighted MoE: 0.02931374
+Validation best: epoch=4, mse=0.00153799; saved best.pth
+Updating learning rate to 9.96057350657239e-05
+Epoch   5/100 [####################]  31/31  | used 04:50 | left 00:00 | total 24:33 | ETA 7:46:39
+Epoch: 5 cost time: 290.38930344581604
+Epoch: 5, Steps: 31 | Train Loss: 0.0311759 Vali Loss: 0.0014038 Test Loss: 0.0005738
+Val Financial | IC: 0.000170 RIC: 0.001726 RankIC: -0.000167 Precision@10: 0.523715 SR(top5): 0.682247
+Test Financial | IC: 0.003033 RIC: 0.041857 RankIC: 0.004433 Precision@10: 0.527273 SR(top5): 1.055151
+Train components | MSE: 0.00249616 Rank: 0.00036017 weighted Rank: 0.00003602 MoE: 5.72874105 weighted MoE: 0.02864371
+Validation best: epoch=5, mse=0.00141412; saved best.pth
+Updating learning rate to 9.938441702975689e-05
+Epoch   6/100 [####################]  31/31  | used 04:50 | left 00:00 | total 29:34 | ETA 7:43:18
+Epoch: 6 cost time: 290.6531653404236
+Epoch: 6, Steps: 31 | Train Loss: 0.0308376 Vali Loss: 0.0013603 Test Loss: 0.0005336
+Val Financial | IC: 0.002592 RIC: 0.024184 RankIC: 0.002118 Precision@10: 0.516206 SR(top5): 0.290198
+Test Financial | IC: 0.000719 RIC: 0.009094 RankIC: 0.002392 Precision@10: 0.532386 SR(top5): 0.963764
+Train components | MSE: 0.00230007 Rank: 0.00034395 weighted Rank: 0.00003440 MoE: 5.70062671 weighted MoE: 0.02850313
+Validation best: epoch=6, mse=0.00137025; saved best.pth
+Updating learning rate to 9.911436253643445e-05
+Epoch   7/100 [####################]  31/31  | used 04:50 | left 00:00 | total 34:34 | ETA 7:39:24
+Epoch: 7 cost time: 290.1754152774811
+Epoch: 7, Steps: 31 | Train Loss: 0.0306614 Vali Loss: 0.0013115 Test Loss: 0.0004920
+Val Financial | IC: 0.002419 RIC: 0.021083 RankIC: 0.000048 Precision@10: 0.513834 SR(top5): 0.697372
+Test Financial | IC: 0.003029 RIC: 0.035490 RankIC: 0.004164 Precision@10: 0.523295 SR(top5): 1.312327
+Train components | MSE: 0.00215277 Rank: 0.00033286 weighted Rank: 0.00003329 MoE: 5.69506313 weighted MoE: 0.02847532
+Validation best: epoch=7, mse=0.00132153; saved best.pth
+Updating learning rate to 9.879583809693738e-05
+Epoch   8/100 [####################]  31/31  | used 04:50 | left 00:00 | total 39:35 | ETA 7:35:22
+Epoch: 8 cost time: 290.63965225219727
+Epoch: 8, Steps: 31 | Train Loss: 0.0305101 Vali Loss: 0.0012860 Test Loss: 0.0004724
+Val Financial | IC: 0.004151 RIC: 0.035271 RankIC: 0.000735 Precision@10: 0.502767 SR(top5): 0.560257
+Test Financial | IC: 0.002647 RIC: 0.030032 RankIC: 0.004376 Precision@10: 0.523864 SR(top5): 1.844958
+Train components | MSE: 0.00201185 Rank: 0.00031895 weighted Rank: 0.00003189 MoE: 5.69327145 weighted MoE: 0.02846636
+Validation best: epoch=8, mse=0.00129613; saved best.pth
+Updating learning rate to 9.842915805643155e-05
+Epoch   9/100 [####################]  31/31  | used 04:50 | left 00:00 | total 44:36 | ETA 7:31:00
+Epoch: 9 cost time: 290.32022881507874
+Epoch: 9, Steps: 31 | Train Loss: 0.0304028 Vali Loss: 0.0012676 Test Loss: 0.0004629
+Val Financial | IC: 0.005751 RIC: 0.047216 RankIC: 0.003888 Precision@10: 0.507905 SR(top5): 0.751078
+Test Financial | IC: 0.002854 RIC: 0.030646 RankIC: 0.003587 Precision@10: 0.527841 SR(top5): 1.277768
+Train components | MSE: 0.00190676 Rank: 0.00030943 weighted Rank: 0.00003094 MoE: 5.69301004 weighted MoE: 0.02846505
+Validation best: epoch=9, mse=0.00127782; saved best.pth
+Updating learning rate to 9.801468428384716e-05
+Epoch  10/100 [####################]  31/31  | used 04:50 | left 00:00 | total 49:36 | ETA 7:26:31
+Epoch: 10 cost time: 290.3751311302185
+Epoch: 10, Steps: 31 | Train Loss: 0.0303062 Vali Loss: 0.0012513 Test Loss: 0.0004498
+Val Financial | IC: 0.004895 RIC: 0.039661 RankIC: 0.002204 Precision@10: 0.504743 SR(top5): 0.484343
+Test Financial | IC: 0.003239 RIC: 0.033419 RankIC: 0.003530 Precision@10: 0.528977 SR(top5): 0.862723
+Train components | MSE: 0.00181365 Rank: 0.00029864 weighted Rank: 0.00002986 MoE: 5.69254537 weighted MoE: 0.02846273
+Validation best: epoch=10, mse=0.00126142; saved best.pth
+Updating learning rate to 9.755282581475769e-05
+Epoch  11/100 [####################]  31/31  | used 04:50 | left 00:00 | total 54:37 | ETA 7:21:56
+Epoch: 11 cost time: 290.35457611083984
+Epoch: 11, Steps: 31 | Train Loss: 0.0302207 Vali Loss: 0.0012662 Test Loss: 0.0004732
+Val Financial | IC: 0.004588 RIC: 0.035695 RankIC: 0.003269 Precision@10: 0.507510 SR(top5): 0.814313
+Test Financial | IC: 0.004165 RIC: 0.041349 RankIC: 0.004707 Precision@10: 0.534659 SR(top5): 1.413753
+Train components | MSE: 0.00173078 Rank: 0.00029208 weighted Rank: 0.00002921 MoE: 5.69215176 weighted MoE: 0.02846076
+Updating learning rate to 9.704403844771128e-05
+Epoch  12/100 [####################]  31/31  | used 04:50 | left 00:00 | total 59:38 | ETA 7:17:19
+Epoch: 12 cost time: 290.2501826286316
+Epoch: 12, Steps: 31 | Train Loss: 0.0301529 Vali Loss: 0.0012684 Test Loss: 0.0004812
+Val Financial | IC: 0.008107 RIC: 0.062475 RankIC: 0.004585 Precision@10: 0.513834 SR(top5): 0.844144
+Test Financial | IC: 0.003603 RIC: 0.033997 RankIC: 0.003137 Precision@10: 0.526989 SR(top5): 0.772191
+Train components | MSE: 0.00166421 Rank: 0.00028253 weighted Rank: 0.00002825 MoE: 5.69209057 weighted MoE: 0.02846045
+Updating learning rate to 9.648882429441257e-05
+Epoch  13/100 [####################]  31/31  | used 04:50 | left 00:00 | total 1:04:38 | ETA 7:12:37
+Epoch: 13 cost time: 290.2054512500763
+Epoch: 13, Steps: 31 | Train Loss: 0.0300691 Vali Loss: 0.0012262 Test Loss: 0.0004348
+Val Financial | IC: 0.009072 RIC: 0.069844 RankIC: 0.004567 Precision@10: 0.517391 SR(top5): 1.227299
+Test Financial | IC: 0.004384 RIC: 0.041555 RankIC: 0.005648 Precision@10: 0.516193 SR(top5): 0.829870
+Train components | MSE: 0.00158223 Rank: 0.00027610 weighted Rank: 0.00002761 MoE: 5.69185754 weighted MoE: 0.02845929
+Validation best: epoch=13, mse=0.00123635; saved best.pth
+Updating learning rate to 9.588773128419906e-05
+Epoch  14/100 [####################]  31/31  | used 04:50 | left 00:00 | total 1:09:39 | ETA 7:07:51
+Epoch: 14 cost time: 290.0057315826416
+Epoch: 14, Steps: 31 | Train Loss: 0.0300068 Vali Loss: 0.0012287 Test Loss: 0.0004356
+Val Financial | IC: 0.010885 RIC: 0.083773 RankIC: 0.007028 Precision@10: 0.517787 SR(top5): 0.820096
+Test Financial | IC: 0.001992 RIC: 0.018654 RankIC: 0.003109 Precision@10: 0.528409 SR(top5): 0.555676
+Train components | MSE: 0.00151993 Rank: 0.00027093 weighted Rank: 0.00002709 MoE: 5.69196235 weighted MoE: 0.02845981
+Updating learning rate to 9.524135262330098e-05
+Epoch  15/100 [####################]  31/31  | used 04:50 | left 00:00 | total 1:14:39 | ETA 7:03:05
+Epoch: 15 cost time: 290.197824716568
+Epoch: 15, Steps: 31 | Train Loss: 0.0299389 Vali Loss: 0.0012160 Test Loss: 0.0004293
+Val Financial | IC: 0.010984 RIC: 0.082386 RankIC: 0.007799 Precision@10: 0.508300 SR(top5): 1.382453
+Test Financial | IC: 0.004940 RIC: 0.045292 RankIC: 0.005277 Precision@10: 0.529545 SR(top5): 0.689825
+Train components | MSE: 0.00145295 Rank: 0.00026318 weighted Rank: 0.00002632 MoE: 5.69193691 weighted MoE: 0.02845968
+Validation best: epoch=15, mse=0.00122613; saved best.pth
+Updating learning rate to 9.45503262094184e-05
+Epoch  16/100 [####################]  31/31  | used 04:50 | left 00:00 | total 1:19:40 | ETA 6:58:15
+Epoch: 16 cost time: 290.29356384277344
+Epoch: 16, Steps: 31 | Train Loss: 0.0298855 Vali Loss: 0.0012428 Test Loss: 0.0004492
+Val Financial | IC: 0.009564 RIC: 0.073039 RankIC: 0.006369 Precision@10: 0.518577 SR(top5): 0.841944
+Test Financial | IC: 0.006420 RIC: 0.059812 RankIC: 0.006558 Precision@10: 0.528409 SR(top5): 0.864197
+Train components | MSE: 0.00139956 Rank: 0.00025828 weighted Rank: 0.00002583 MoE: 5.69203206 weighted MoE: 0.02846016
+Updating learning rate to 9.381533400219318e-05
+Epoch  17/100 [####################]  31/31  | used 04:50 | left 00:00 | total 1:24:40 | ETA 6:53:24
+Epoch: 17 cost time: 290.2137665748596
+Epoch: 17, Steps: 31 | Train Loss: 0.0298382 Vali Loss: 0.0012124 Test Loss: 0.0004309
+Val Financial | IC: 0.012811 RIC: 0.097646 RankIC: 0.010706 Precision@10: 0.512648 SR(top5): 0.841274
+Test Financial | IC: 0.003941 RIC: 0.036364 RankIC: 0.005195 Precision@10: 0.527557 SR(top5): 1.047416
+Train components | MSE: 0.00135605 Rank: 0.00024983 weighted Rank: 0.00002498 MoE: 5.69143483 weighted MoE: 0.02845717
+Validation best: epoch=17, mse=0.00122257; saved best.pth
+Updating learning rate to 9.30371013501972e-05
+Epoch  18/100 [####################]  31/31  | used 04:50 | left 00:00 | total 1:29:41 | ETA 6:48:34
+Epoch: 18 cost time: 290.1332130432129
+Epoch: 18, Steps: 31 | Train Loss: 0.0297813 Vali Loss: 0.0012365 Test Loss: 0.0004622
+Val Financial | IC: 0.011445 RIC: 0.086082 RankIC: 0.007334 Precision@10: 0.518972 SR(top5): 0.955160
+Test Financial | IC: 0.002986 RIC: 0.027347 RankIC: 0.002856 Precision@10: 0.512216 SR(top5): 0.673272
+Train components | MSE: 0.00130053 Rank: 0.00024470 weighted Rank: 0.00002447 MoE: 5.69126886 weighted MoE: 0.02845634
+Updating learning rate to 9.221639627510076e-05
+Epoch  19/100 [####################]  31/31  | used 04:50 | left 00:00 | total 1:34:41 | ETA 6:43:41
+Epoch: 19 cost time: 290.09079933166504
+Epoch: 19, Steps: 31 | Train Loss: 0.0297613 Vali Loss: 0.0012099 Test Loss: 0.0004255
+Val Financial | IC: 0.012509 RIC: 0.093730 RankIC: 0.010351 Precision@10: 0.535178 SR(top5): 0.724244
+Test Financial | IC: 0.002034 RIC: 0.017902 RankIC: 0.003191 Precision@10: 0.521875 SR(top5): 0.769899
+Train components | MSE: 0.00127504 Rank: 0.00023986 weighted Rank: 0.00002399 MoE: 5.69245408 weighted MoE: 0.02846227
+Validation best: epoch=19, mse=0.00121985; saved best.pth
+Updating learning rate to 9.135402871372808e-05
+Epoch  20/100 [####################]  31/31  | used 04:50 | left 00:00 | total 1:39:42 | ETA 6:38:48
+Epoch: 20 cost time: 290.409441947937
+Epoch: 20, Steps: 31 | Train Loss: 0.0296977 Vali Loss: 0.0012028 Test Loss: 0.0004262
+Val Financial | IC: 0.010476 RIC: 0.079176 RankIC: 0.007166 Precision@10: 0.515415 SR(top5): 1.065992
+Test Financial | IC: 0.004749 RIC: 0.042124 RankIC: 0.004568 Precision@10: 0.518466 SR(top5): 1.022116
+Train components | MSE: 0.00121715 Rank: 0.00023446 weighted Rank: 0.00002345 MoE: 5.69141874 weighted MoE: 0.02845709
+Validation best: epoch=20, mse=0.00121302; saved best.pth
+Updating learning rate to 9.045084971874738e-05
+Epoch  21/100 [####################]  31/31  | used 04:50 | left 00:00 | total 1:44:42 | ETA 6:33:55
+Epoch: 21 cost time: 290.15308713912964
+Epoch: 21, Steps: 31 | Train Loss: 0.0296647 Vali Loss: 0.0012053 Test Loss: 0.0004230
+Val Financial | IC: 0.012003 RIC: 0.091153 RankIC: 0.009759 Precision@10: 0.518577 SR(top5): 1.148631
+Test Financial | IC: 0.003455 RIC: 0.031114 RankIC: 0.003400 Precision@10: 0.519318 SR(top5): 0.677794
+Train components | MSE: 0.00118708 Rank: 0.00022983 weighted Rank: 0.00002298 MoE: 5.69092006 weighted MoE: 0.02845460
+Updating learning rate to 8.950775061878453e-05
+Epoch  22/100 [####################]  31/31  | used 04:50 | left 00:00 | total 1:49:43 | ETA 6:29:01
+Epoch: 22 cost time: 290.1964204311371
+Epoch: 22, Steps: 31 | Train Loss: 0.0296280 Vali Loss: 0.0011977 Test Loss: 0.0004179
+Val Financial | IC: 0.012148 RIC: 0.092072 RankIC: 0.009674 Precision@10: 0.513043 SR(top5): 0.716267
+Test Financial | IC: 0.004375 RIC: 0.039001 RankIC: 0.004508 Precision@10: 0.518466 SR(top5): 1.008652
+Train components | MSE: 0.00114977 Rank: 0.00022466 weighted Rank: 0.00002247 MoE: 5.69115570 weighted MoE: 0.02845578
+Validation best: epoch=22, mse=0.00120777; saved best.pth
+Updating learning rate to 8.852566213878947e-05
+Epoch  23/100 [####################]  31/31  | used 04:50 | left 00:00 | total 1:54:44 | ETA 6:24:06
+Epoch: 23 cost time: 290.32595467567444
+Epoch: 23, Steps: 31 | Train Loss: 0.0295759 Vali Loss: 0.0012158 Test Loss: 0.0004469
+Val Financial | IC: 0.011061 RIC: 0.084941 RankIC: 0.007798 Precision@10: 0.514229 SR(top5): 0.902380
+Test Financial | IC: 0.005273 RIC: 0.048523 RankIC: 0.005971 Precision@10: 0.526136 SR(top5): 0.991320
+Train components | MSE: 0.00109952 Rank: 0.00022014 weighted Rank: 0.00002201 MoE: 5.69087281 weighted MoE: 0.02845436
+Updating learning rate to 8.750555348152298e-05
+Epoch  24/100 [####################]  31/31  | used 04:51 | left 00:00 | total 1:59:45 | ETA 6:19:14
+Epoch: 24 cost time: 291.1396052837372
+Epoch: 24, Steps: 31 | Train Loss: 0.0295656 Vali Loss: 0.0011923 Test Loss: 0.0004154
+Val Financial | IC: 0.009944 RIC: 0.075623 RankIC: 0.008220 Precision@10: 0.523320 SR(top5): 1.136908
+Test Financial | IC: 0.004368 RIC: 0.038461 RankIC: 0.006085 Precision@10: 0.521307 SR(top5): 0.832432
+Train components | MSE: 0.00108749 Rank: 0.00021646 weighted Rank: 0.00002165 MoE: 5.69129642 weighted MoE: 0.02845648
+Validation best: epoch=24, mse=0.00120232; saved best.pth
+Updating learning rate to 8.644843137107059e-05
+Epoch  25/100 [####################]  31/31  | used 04:50 | left 00:00 | total 2:04:46 | ETA 6:14:19
+Epoch: 25 cost time: 290.6495170593262
+Epoch: 25, Steps: 31 | Train Loss: 0.0295872 Vali Loss: 0.0012619 Test Loss: 0.0004761
+Val Financial | IC: 0.010584 RIC: 0.081975 RankIC: 0.011064 Precision@10: 0.530040 SR(top5): 1.217407
+Test Financial | IC: 0.004068 RIC: 0.037396 RankIC: 0.005283 Precision@10: 0.517045 SR(top5): 0.562222
+Train components | MSE: 0.00111105 Rank: 0.00021216 weighted Rank: 0.00002122 MoE: 5.69097747 weighted MoE: 0.02845489
+Updating learning rate to 8.535533905932738e-05
+Epoch  26/100 [####################]  31/31  | used 04:50 | left 00:00 | total 2:09:47 | ETA 6:09:25
+Epoch: 26 cost time: 290.5914034843445
+Epoch: 26, Steps: 31 | Train Loss: 0.0295036 Vali Loss: 0.0011908 Test Loss: 0.0004159
+Val Financial | IC: 0.009223 RIC: 0.072740 RankIC: 0.006939 Precision@10: 0.513834 SR(top5): 0.910891
+Test Financial | IC: 0.005790 RIC: 0.053451 RankIC: 0.005609 Precision@10: 0.513636 SR(top5): 0.812881
+Train components | MSE: 0.00102670 Rank: 0.00020779 weighted Rank: 0.00002078 MoE: 5.69121556 weighted MoE: 0.02845608
+Validation best: epoch=26, mse=0.00120088; saved best.pth
+Updating learning rate to 8.422735529643444e-05
+Epoch  27/100 [####################]  31/31  | used 04:49 | left 00:00 | total 2:14:48 | ETA 6:04:28
+Epoch: 27 cost time: 289.92169761657715
+Epoch: 27, Steps: 31 | Train Loss: 0.0295044 Vali Loss: 0.0013439 Test Loss: 0.0005547
+Val Financial | IC: 0.008712 RIC: 0.068837 RankIC: 0.005976 Precision@10: 0.526087 SR(top5): 1.017818
+Test Financial | IC: 0.004363 RIC: 0.040451 RankIC: 0.004809 Precision@10: 0.525284 SR(top5): 0.881572
+Train components | MSE: 0.00103074 Rank: 0.00020358 weighted Rank: 0.00002036 MoE: 5.69065605 weighted MoE: 0.02845328
+Updating learning rate to 8.306559326618259e-05
+Epoch  28/100 [####################]  31/31  | used 04:50 | left 00:00 | total 2:19:48 | ETA 5:59:30
+Epoch: 28 cost time: 290.30462312698364
+Epoch: 28, Steps: 31 | Train Loss: 0.0294954 Vali Loss: 0.0013146 Test Loss: 0.0005581
+Val Financial | IC: 0.010349 RIC: 0.080570 RankIC: 0.010359 Precision@10: 0.525692 SR(top5): 1.371757
+Test Financial | IC: 0.003854 RIC: 0.035143 RankIC: 0.006354 Precision@10: 0.516477 SR(top5): 0.673049
+Train components | MSE: 0.00102279 Rank: 0.00020060 weighted Rank: 0.00002006 MoE: 5.69050941 weighted MoE: 0.02845255
+Updating learning rate to 8.18711994874345e-05
+Epoch  29/100 [####################]  31/31  | used 04:50 | left 00:00 | total 2:24:49 | ETA 5:54:33
+Epoch: 29 cost time: 290.06477975845337
+Epoch: 29, Steps: 31 | Train Loss: 0.0294244 Vali Loss: 0.0012064 Test Loss: 0.0004410
+Val Financial | IC: 0.011521 RIC: 0.091789 RankIC: 0.009136 Precision@10: 0.534387 SR(top5): 1.083016
+Test Financial | IC: 0.006314 RIC: 0.058199 RankIC: 0.006902 Precision@10: 0.511648 SR(top5): 0.787657
+Train components | MSE: 0.00095086 Rank: 0.00019643 weighted Rank: 0.00001964 MoE: 5.69077938 weighted MoE: 0.02845390
+Updating learning rate to 8.064535268264883e-05
+Epoch  30/100 [####################]  31/31  | used 04:50 | left 00:00 | total 2:29:49 | ETA 5:49:35
+Epoch: 30 cost time: 290.0052499771118
+Epoch: 30, Steps: 31 | Train Loss: 0.0294229 Vali Loss: 0.0012142 Test Loss: 0.0004357
+Val Financial | IC: 0.012398 RIC: 0.096675 RankIC: 0.009002 Precision@10: 0.527668 SR(top5): 1.187455
+Test Financial | IC: 0.005767 RIC: 0.052666 RankIC: 0.006365 Precision@10: 0.521023 SR(top5): 1.115765
+Train components | MSE: 0.00095362 Rank: 0.00019442 weighted Rank: 0.00001944 MoE: 5.68996363 weighted MoE: 0.02844982
+Updating learning rate to 7.938926261462366e-05
+Epoch  31/100 [####################]  31/31  | used 04:50 | left 00:00 | total 2:34:49 | ETA 5:44:37
+Epoch: 31 cost time: 290.28031373023987
+Epoch: 31, Steps: 31 | Train Loss: 0.0294144 Vali Loss: 0.0011846 Test Loss: 0.0004137
+Val Financial | IC: 0.007681 RIC: 0.060398 RankIC: 0.004744 Precision@10: 0.520158 SR(top5): 0.951969
+Test Financial | IC: 0.005197 RIC: 0.047374 RankIC: 0.007229 Precision@10: 0.514205 SR(top5): 0.813251
+Train components | MSE: 0.00093800 Rank: 0.00019103 weighted Rank: 0.00001910 MoE: 5.69146432 weighted MoE: 0.02845732
+Validation best: epoch=31, mse=0.00119482; saved best.pth
+Updating learning rate to 7.810416889260653e-05
+Epoch  32/100 [####################]  31/31  | used 04:50 | left 00:00 | total 2:39:50 | ETA 5:39:40
+Epoch: 32 cost time: 290.28510093688965
+Epoch: 32, Steps: 31 | Train Loss: 0.0293728 Vali Loss: 0.0012015 Test Loss: 0.0004248
+Val Financial | IC: 0.013781 RIC: 0.108588 RankIC: 0.012115 Precision@10: 0.527668 SR(top5): 1.407611
+Test Financial | IC: 0.004786 RIC: 0.042375 RankIC: 0.007235 Precision@10: 0.514489 SR(top5): 0.677422
+Train components | MSE: 0.00089974 Rank: 0.00018751 weighted Rank: 0.00001875 MoE: 5.69085616 weighted MoE: 0.02845428
+Updating learning rate to 7.679133974894983e-05
+Epoch  33/100 [####################]  31/31  | used 04:49 | left 00:00 | total 2:44:50 | ETA 5:34:41
+Epoch: 33 cost time: 289.9309651851654
+Epoch: 33, Steps: 31 | Train Loss: 0.0293473 Vali Loss: 0.0011902 Test Loss: 0.0004148
+Val Financial | IC: 0.008892 RIC: 0.073122 RankIC: 0.008887 Precision@10: 0.511858 SR(top5): 0.979780
+Test Financial | IC: 0.004067 RIC: 0.037768 RankIC: 0.004167 Precision@10: 0.512784 SR(top5): 0.753830
+Train components | MSE: 0.00087602 Rank: 0.00018401 weighted Rank: 0.00001840 MoE: 5.69057826 weighted MoE: 0.02845289
+Updating learning rate to 7.545207078751857e-05
+Epoch  34/100 [####################]  31/31  | used 04:50 | left 00:00 | total 2:49:51 | ETA 5:29:43
+Epoch: 34 cost time: 290.15735030174255
+Epoch: 34, Steps: 31 | Train Loss: 0.0293163 Vali Loss: 0.0012103 Test Loss: 0.0004457
+Val Financial | IC: 0.013459 RIC: 0.108537 RankIC: 0.012876 Precision@10: 0.527273 SR(top5): 0.955986
+Test Financial | IC: 0.004424 RIC: 0.038618 RankIC: 0.005729 Precision@10: 0.510511 SR(top5): 0.769675
+Train components | MSE: 0.00084609 Rank: 0.00018135 weighted Rank: 0.00001814 MoE: 5.69042167 weighted MoE: 0.02845211
+Updating learning rate to 7.408768370508576e-05
+Epoch  35/100 [####################]  31/31  | used 04:50 | left 00:00 | total 2:54:51 | ETA 5:24:44
+Epoch: 35 cost time: 290.01786851882935
+Epoch: 35, Steps: 31 | Train Loss: 0.0292984 Vali Loss: 0.0012441 Test Loss: 0.0004616
+Val Financial | IC: 0.010033 RIC: 0.081435 RankIC: 0.009937 Precision@10: 0.532411 SR(top5): 0.989579
+Test Financial | IC: 0.006600 RIC: 0.060025 RankIC: 0.008728 Precision@10: 0.524432 SR(top5): 0.495405
+Train components | MSE: 0.00083035 Rank: 0.00017869 weighted Rank: 0.00001787 MoE: 5.69004513 weighted MoE: 0.02845023
+Updating learning rate to 7.269952498697734e-05
+Epoch  36/100 [####################]  31/31  | used 04:50 | left 00:00 | total 2:59:51 | ETA 5:19:45
+Epoch: 36 cost time: 290.24347138404846
+Epoch: 36, Steps: 31 | Train Loss: 0.0292887 Vali Loss: 0.0012182 Test Loss: 0.0004539
+Val Financial | IC: 0.012174 RIC: 0.098001 RankIC: 0.011130 Precision@10: 0.534783 SR(top5): 1.237752
+Test Financial | IC: 0.007166 RIC: 0.064493 RankIC: 0.007619 Precision@10: 0.521023 SR(top5): 1.279887
+Train components | MSE: 0.00081967 Rank: 0.00017660 weighted Rank: 0.00001766 MoE: 5.69028254 weighted MoE: 0.02845141
+Updating learning rate to 7.128896457825364e-05
+Epoch  37/100 [####################]  31/31  | used 04:50 | left 00:00 | total 3:04:52 | ETA 5:14:47
+Epoch: 37 cost time: 290.3292429447174
+Epoch: 37, Steps: 31 | Train Loss: 0.0292778 Vali Loss: 0.0012096 Test Loss: 0.0004309
+Val Financial | IC: 0.011052 RIC: 0.092620 RankIC: 0.009786 Precision@10: 0.538340 SR(top5): 0.555826
+Test Financial | IC: 0.005756 RIC: 0.052439 RankIC: 0.006916 Precision@10: 0.523580 SR(top5): 0.932459
+Train components | MSE: 0.00080951 Rank: 0.00017332 weighted Rank: 0.00001733 MoE: 5.69019539 weighted MoE: 0.02845098
+Updating learning rate to 6.985739453173903e-05
+Epoch  38/100 [####################]  31/31  | used 04:49 | left 00:00 | total 3:09:52 | ETA 5:09:48
+Epoch: 38 cost time: 289.9159061908722
+Epoch: 38, Steps: 31 | Train Loss: 0.0292617 Vali Loss: 0.0011826 Test Loss: 0.0004107
+Val Financial | IC: 0.014260 RIC: 0.115607 RankIC: 0.012826 Precision@10: 0.523715 SR(top5): 1.032787
+Test Financial | IC: 0.006434 RIC: 0.057227 RankIC: 0.009235 Precision@10: 0.521023 SR(top5): 0.683007
+Train components | MSE: 0.00079399 Rank: 0.00017054 weighted Rank: 0.00001705 MoE: 5.69012170 weighted MoE: 0.02845061
+Validation best: epoch=38, mse=0.00119281; saved best.pth
+Updating learning rate to 6.840622763423391e-05
+Epoch  39/100 [####################]  31/31  | used 04:50 | left 00:00 | total 3:14:53 | ETA 5:04:50
+Epoch: 39 cost time: 290.2359561920166
+Epoch: 39, Steps: 31 | Train Loss: 0.0292281 Vali Loss: 0.0011840 Test Loss: 0.0004145
+Val Financial | IC: 0.012805 RIC: 0.105014 RankIC: 0.012772 Precision@10: 0.530435 SR(top5): 0.848624
+Test Financial | IC: 0.005647 RIC: 0.050217 RankIC: 0.007527 Precision@10: 0.521591 SR(top5): 0.978312
+Train components | MSE: 0.00075971 Rank: 0.00016801 weighted Rank: 0.00001680 MoE: 5.69032040 weighted MoE: 0.02845160
+Updating learning rate to 6.693689601226458e-05
+Epoch  40/100 [####################]  31/31  | used 04:50 | left 00:00 | total 3:19:54 | ETA 4:59:51
+Epoch: 40 cost time: 290.16741967201233
+Epoch: 40, Steps: 31 | Train Loss: 0.0292442 Vali Loss: 0.0011871 Test Loss: 0.0004180
+Val Financial | IC: 0.012747 RIC: 0.106160 RankIC: 0.012985 Precision@10: 0.519368 SR(top5): 0.559874
+Test Financial | IC: 0.003429 RIC: 0.031308 RankIC: 0.005532 Precision@10: 0.514205 SR(top5): 0.266977
+Train components | MSE: 0.00077751 Rank: 0.00016595 weighted Rank: 0.00001660 MoE: 5.69002253 weighted MoE: 0.02845011
+Updating learning rate to 6.545084971874738e-05
+Epoch  41/100 [####################]  31/31  | used 04:50 | left 00:00 | total 3:24:54 | ETA 4:54:52
+Epoch: 41 cost time: 289.99605226516724
+Epoch: 41, Steps: 31 | Train Loss: 0.0292212 Vali Loss: 0.0012318 Test Loss: 0.0004689
+Val Financial | IC: 0.012194 RIC: 0.102879 RankIC: 0.010787 Precision@10: 0.521344 SR(top5): 0.714882
+Test Financial | IC: 0.003029 RIC: 0.027532 RankIC: 0.005264 Precision@10: 0.512500 SR(top5): 1.097060
+Train components | MSE: 0.00075255 Rank: 0.00016438 weighted Rank: 0.00001644 MoE: 5.69043469 weighted MoE: 0.02845217
+Updating learning rate to 6.394955530196147e-05
+Epoch  42/100 [####################]  31/31  | used 04:49 | left 00:00 | total 3:29:54 | ETA 4:49:52
+Epoch: 42 cost time: 289.754674911499
+Epoch: 42, Steps: 31 | Train Loss: 0.0291974 Vali Loss: 0.0011846 Test Loss: 0.0004104
+Val Financial | IC: 0.012358 RIC: 0.102454 RankIC: 0.012045 Precision@10: 0.521739 SR(top5): 1.066167
+Test Financial | IC: 0.003073 RIC: 0.026812 RankIC: 0.003481 Precision@10: 0.519034 SR(top5): 0.690326
+Train components | MSE: 0.00072932 Rank: 0.00016281 weighted Rank: 0.00001628 MoE: 5.69035585 weighted MoE: 0.02845178
+Updating learning rate to 6.243449435824276e-05
+Epoch  43/100 [####################]  31/31  | used 04:50 | left 00:00 | total 3:34:55 | ETA 4:44:53
+Epoch: 43 cost time: 290.24777030944824
+Epoch: 43, Steps: 31 | Train Loss: 0.0291859 Vali Loss: 0.0012025 Test Loss: 0.0004359
+Val Financial | IC: 0.011042 RIC: 0.094215 RankIC: 0.009393 Precision@10: 0.518972 SR(top5): 1.076712
+Test Financial | IC: 0.005217 RIC: 0.047894 RankIC: 0.007315 Precision@10: 0.528409 SR(top5): 0.773065
+Train components | MSE: 0.00071670 Rank: 0.00016037 weighted Rank: 0.00001604 MoE: 5.69063462 weighted MoE: 0.02845317
+Updating learning rate to 6.090716206982714e-05
+Epoch  44/100 [####################]  31/31  | used 04:50 | left 00:00 | total 3:39:55 | ETA 4:39:54
+Epoch: 44 cost time: 290.3842170238495
+Epoch: 44, Steps: 31 | Train Loss: 0.0291886 Vali Loss: 0.0011909 Test Loss: 0.0004160
+Val Financial | IC: 0.013992 RIC: 0.120574 RankIC: 0.010319 Precision@10: 0.527668 SR(top5): 0.970546
+Test Financial | IC: 0.002921 RIC: 0.026256 RankIC: 0.004009 Precision@10: 0.520170 SR(top5): 1.086011
+Train components | MSE: 0.00072252 Rank: 0.00015791 weighted Rank: 0.00001579 MoE: 5.69005220 weighted MoE: 0.02845026
+Updating learning rate to 5.9369065729286245e-05
+Epoch  45/100 [####################]  31/31  | used 04:50 | left 00:00 | total 3:44:56 | ETA 4:34:55
+Epoch: 45 cost time: 290.27203011512756
+Epoch: 45, Steps: 31 | Train Loss: 0.0291681 Vali Loss: 0.0011965 Test Loss: 0.0004297
+Val Financial | IC: 0.011854 RIC: 0.102356 RankIC: 0.010762 Precision@10: 0.522925 SR(top5): 1.016446
+Test Financial | IC: 0.001655 RIC: 0.014976 RankIC: 0.003499 Precision@10: 0.522159 SR(top5): 0.929318
+Train components | MSE: 0.00070378 Rank: 0.00015660 weighted Rank: 0.00001566 MoE: 5.68972415 weighted MoE: 0.02844862
+Updating learning rate to 5.782172325201155e-05
+Epoch  46/100 [####################]  31/31  | used 04:49 | left 00:00 | total 3:49:56 | ETA 4:29:56
+Epoch: 46 cost time: 289.883150100708
+Epoch: 46, Steps: 31 | Train Loss: 0.0291567 Vali Loss: 0.0011909 Test Loss: 0.0004149
+Val Financial | IC: 0.011081 RIC: 0.096200 RankIC: 0.008010 Precision@10: 0.524901 SR(top5): 1.054625
+Test Financial | IC: 0.003701 RIC: 0.035151 RankIC: 0.006228 Precision@10: 0.519034 SR(top5): 0.965338
+Train components | MSE: 0.00069109 Rank: 0.00015455 weighted Rank: 0.00001546 MoE: 5.69002251 weighted MoE: 0.02845011
+Updating learning rate to 5.6266661678215216e-05
+Epoch  47/100 [####################]  31/31  | used 04:49 | left 00:00 | total 3:54:56 | ETA 4:24:56
+Epoch: 47 cost time: 289.97629976272583
+Epoch: 47, Steps: 31 | Train Loss: 0.0291637 Vali Loss: 0.0011811 Test Loss: 0.0004091
+Val Financial | IC: 0.013737 RIC: 0.116736 RankIC: 0.012236 Precision@10: 0.516601 SR(top5): 0.883716
+Test Financial | IC: 0.001659 RIC: 0.014987 RankIC: 0.004373 Precision@10: 0.520455 SR(top5): 0.707273
+Train components | MSE: 0.00069694 Rank: 0.00015291 weighted Rank: 0.00001529 MoE: 5.69030274 weighted MoE: 0.02845151
+Validation best: epoch=47, mse=0.00119124; saved best.pth
+Updating learning rate to 5.470541566592573e-05
+Epoch  48/100 [####################]  31/31  | used 04:50 | left 00:00 | total 3:59:57 | ETA 4:19:57
+Epoch: 48 cost time: 290.39388370513916
+Epoch: 48, Steps: 31 | Train Loss: 0.0291698 Vali Loss: 0.0011972 Test Loss: 0.0004316
+Val Financial | IC: 0.012345 RIC: 0.106541 RankIC: 0.012405 Precision@10: 0.516206 SR(top5): 1.137606
+Test Financial | IC: 0.003473 RIC: 0.031693 RankIC: 0.005706 Precision@10: 0.517330 SR(top5): 1.221369
+Train components | MSE: 0.00070256 Rank: 0.00015099 weighted Rank: 0.00001510 MoE: 5.69042003 weighted MoE: 0.02845210
+Updating learning rate to 5.313952597646568e-05
+Epoch  49/100 [####################]  31/31  | used 04:50 | left 00:00 | total 4:04:58 | ETA 4:14:58
+Epoch: 49 cost time: 290.24043107032776
+Epoch: 49, Steps: 31 | Train Loss: 0.0291354 Vali Loss: 0.0011899 Test Loss: 0.0004152
+Val Financial | IC: 0.014211 RIC: 0.127152 RankIC: 0.011358 Precision@10: 0.532411 SR(top5): 1.014980
+Test Financial | IC: 0.001925 RIC: 0.018225 RankIC: 0.002316 Precision@10: 0.522159 SR(top5): 0.609396
+Train components | MSE: 0.00066786 Rank: 0.00015027 weighted Rank: 0.00001503 MoE: 5.69051204 weighted MoE: 0.02845256
+Updating learning rate to 5.157053795390642e-05
+Epoch  50/100 [####################]  31/31  | used 04:50 | left 00:00 | total 4:09:58 | ETA 4:09:58
+Epoch: 50 cost time: 290.3141379356384
+Epoch: 50, Steps: 31 | Train Loss: 0.0291421 Vali Loss: 0.0012062 Test Loss: 0.0004287
+Val Financial | IC: 0.012512 RIC: 0.114038 RankIC: 0.011436 Precision@10: 0.520553 SR(top5): 1.658022
+Test Financial | IC: 0.001823 RIC: 0.018000 RankIC: 0.002586 Precision@10: 0.531250 SR(top5): 1.280289
+Train components | MSE: 0.00067607 Rank: 0.00014865 weighted Rank: 0.00001486 MoE: 5.69024157 weighted MoE: 0.02845121
+Updating learning rate to 5e-05
+Epoch  51/100 [####################]  31/31  | used 04:50 | left 00:00 | total 4:14:58 | ETA 4:04:58
+Epoch: 51 cost time: 290.0266489982605
+Epoch: 51, Steps: 31 | Train Loss: 0.0291445 Vali Loss: 0.0011818 Test Loss: 0.0004130
+Val Financial | IC: 0.011726 RIC: 0.107575 RankIC: 0.012186 Precision@10: 0.518972 SR(top5): 0.607815
+Test Financial | IC: 0.003699 RIC: 0.036817 RankIC: 0.004985 Precision@10: 0.532102 SR(top5): 1.248684
+Train components | MSE: 0.00067952 Rank: 0.00014631 weighted Rank: 0.00001463 MoE: 5.69006617 weighted MoE: 0.02845033
+Updating learning rate to 4.8429462046093585e-05
+Epoch  52/100 [####################]  31/31  | used 04:49 | left 00:00 | total 4:19:58 | ETA 3:59:58
+Epoch: 52 cost time: 289.9007558822632
+Epoch: 52, Steps: 31 | Train Loss: 0.0291056 Vali Loss: 0.0011870 Test Loss: 0.0004135
+Val Financial | IC: 0.013843 RIC: 0.116395 RankIC: 0.013205 Precision@10: 0.509881 SR(top5): 0.799372
+Test Financial | IC: 0.003570 RIC: 0.031328 RankIC: 0.005006 Precision@10: 0.526136 SR(top5): 1.163042
+Train components | MSE: 0.00064215 Rank: 0.00014560 weighted Rank: 0.00001456 MoE: 5.68977170 weighted MoE: 0.02844886
+Updating learning rate to 4.6860474023534335e-05
+Epoch  53/100 [####################]  31/31  | used 04:49 | left 00:00 | total 4:24:58 | ETA 3:54:58
+Epoch: 53 cost time: 289.8180630207062
+Epoch: 53, Steps: 31 | Train Loss: 0.0291149 Vali Loss: 0.0012002 Test Loss: 0.0004357
+Val Financial | IC: 0.013109 RIC: 0.114580 RankIC: 0.013362 Precision@10: 0.518182 SR(top5): 0.888039
+Test Financial | IC: 0.003956 RIC: 0.036968 RankIC: 0.006256 Precision@10: 0.524432 SR(top5): 1.109594
+Train components | MSE: 0.00064497 Rank: 0.00014395 weighted Rank: 0.00001440 MoE: 5.69110000 weighted MoE: 0.02845550
+Updating learning rate to 4.529458433407429e-05
+Epoch  54/100 [####################]  31/31  | used 04:49 | left 00:00 | total 4:29:59 | ETA 3:49:59
+Epoch: 54 cost time: 289.92762756347656
+Epoch: 54, Steps: 31 | Train Loss: 0.0290995 Vali Loss: 0.0012039 Test Loss: 0.0004403
+Val Financial | IC: 0.014162 RIC: 0.124228 RankIC: 0.013674 Precision@10: 0.517787 SR(top5): 0.776255
+Test Financial | IC: 0.003130 RIC: 0.029970 RankIC: 0.003450 Precision@10: 0.526420 SR(top5): 1.217752
+Train components | MSE: 0.00063349 Rank: 0.00014264 weighted Rank: 0.00001426 MoE: 5.69033989 weighted MoE: 0.02845170
+Updating learning rate to 4.373333832178478e-05
+Epoch  55/100 [####################]  31/31  | used 04:50 | left 00:00 | total 4:34:59 | ETA 3:44:59
+Epoch: 55 cost time: 289.99941182136536
+Epoch: 55, Steps: 31 | Train Loss: 0.0290827 Vali Loss: 0.0011800 Test Loss: 0.0004082
+Val Financial | IC: 0.013079 RIC: 0.112848 RankIC: 0.012049 Precision@10: 0.515415 SR(top5): 0.907215
+Test Financial | IC: 0.003780 RIC: 0.034403 RankIC: 0.003848 Precision@10: 0.530114 SR(top5): 1.033955
+Train components | MSE: 0.00061744 Rank: 0.00014214 weighted Rank: 0.00001421 MoE: 5.69021546 weighted MoE: 0.02845108
+Validation best: epoch=55, mse=0.00119019; saved best.pth
+Updating learning rate to 4.2178276747988446e-05
+Epoch  56/100 [####################]  31/31  | used 04:49 | left 00:00 | total 4:40:00 | ETA 3:40:00
+Epoch: 56 cost time: 289.9821231365204
+Epoch: 56, Steps: 31 | Train Loss: 0.0290866 Vali Loss: 0.0011929 Test Loss: 0.0004164
+Val Financial | IC: 0.011474 RIC: 0.099710 RankIC: 0.011145 Precision@10: 0.519763 SR(top5): 1.106605
+Test Financial | IC: 0.006855 RIC: 0.062076 RankIC: 0.007243 Precision@10: 0.535795 SR(top5): 1.494032
+Train components | MSE: 0.00062677 Rank: 0.00014032 weighted Rank: 0.00001403 MoE: 5.68915183 weighted MoE: 0.02844576
+Updating learning rate to 4.063093427071376e-05
+Epoch  57/100 [####################]  31/31  | used 04:49 | left 00:00 | total 4:45:00 | ETA 3:35:00
+Epoch: 57 cost time: 289.96590542793274
+Epoch: 57, Steps: 31 | Train Loss: 0.0290820 Vali Loss: 0.0011837 Test Loss: 0.0004090
+Val Financial | IC: 0.012742 RIC: 0.111419 RankIC: 0.012215 Precision@10: 0.538340 SR(top5): 0.971493
+Test Financial | IC: 0.006668 RIC: 0.061034 RankIC: 0.006960 Precision@10: 0.528693 SR(top5): 0.803854
+Train components | MSE: 0.00061437 Rank: 0.00013927 weighted Rank: 0.00001393 MoE: 5.69074551 weighted MoE: 0.02845373
+Updating learning rate to 3.9092837930172884e-05
+Epoch  58/100 [####################]  31/31  | used 04:49 | left 00:00 | total 4:50:00 | ETA 3:30:00
+Epoch: 58 cost time: 289.8226246833801
+Epoch: 58, Steps: 31 | Train Loss: 0.0290921 Vali Loss: 0.0011885 Test Loss: 0.0004123
+Val Financial | IC: 0.011314 RIC: 0.100135 RankIC: 0.009696 Precision@10: 0.516996 SR(top5): 0.723858
+Test Financial | IC: 0.007295 RIC: 0.069624 RankIC: 0.006346 Precision@10: 0.535227 SR(top5): 0.978685
+Train components | MSE: 0.00062750 Rank: 0.00013822 weighted Rank: 0.00001382 MoE: 5.69015206 weighted MoE: 0.02845076
+Updating learning rate to 3.756550564175727e-05
+Epoch  59/100 [####################]  31/31  | used 04:50 | left 00:00 | total 4:55:01 | ETA 3:25:00
+Epoch: 59 cost time: 290.17722630500793
+Epoch: 59, Steps: 31 | Train Loss: 0.0290621 Vali Loss: 0.0011828 Test Loss: 0.0004126
+Val Financial | IC: 0.012479 RIC: 0.107204 RankIC: 0.011695 Precision@10: 0.516996 SR(top5): 1.248974
+Test Financial | IC: 0.004737 RIC: 0.043444 RankIC: 0.005087 Precision@10: 0.529545 SR(top5): 1.309425
+Train components | MSE: 0.00059807 Rank: 0.00013662 weighted Rank: 0.00001366 MoE: 5.69007072 weighted MoE: 0.02845035
+Updating learning rate to 3.605044469803854e-05
+Epoch  60/100 [####################]  31/31  | used 04:50 | left 00:00 | total 5:00:01 | ETA 3:20:01
+Epoch: 60 cost time: 290.4131512641907
+Epoch: 60, Steps: 31 | Train Loss: 0.0290648 Vali Loss: 0.0011825 Test Loss: 0.0004081
+Val Financial | IC: 0.012670 RIC: 0.111653 RankIC: 0.012290 Precision@10: 0.531225 SR(top5): 0.929376
+Test Financial | IC: 0.004917 RIC: 0.045378 RankIC: 0.006389 Precision@10: 0.529830 SR(top5): 1.089409
+Train components | MSE: 0.00060207 Rank: 0.00013655 weighted Rank: 0.00001366 MoE: 5.68981383 weighted MoE: 0.02844907
+Updating learning rate to 3.4549150281252636e-05
+Epoch  61/100 [####################]  31/31  | used 04:50 | left 00:00 | total 5:05:02 | ETA 3:15:01
+Epoch: 61 cost time: 290.4588940143585
+Epoch: 61, Steps: 31 | Train Loss: 0.0290855 Vali Loss: 0.0011869 Test Loss: 0.0004107
+Val Financial | IC: 0.013207 RIC: 0.112143 RankIC: 0.011073 Precision@10: 0.528854 SR(top5): 1.622607
+Test Financial | IC: 0.003443 RIC: 0.030524 RankIC: 0.003196 Precision@10: 0.524432 SR(top5): 1.179833
+Train components | MSE: 0.00061976 Rank: 0.00013504 weighted Rank: 0.00001350 MoE: 5.69044033 weighted MoE: 0.02845220
+Updating learning rate to 3.3063103987735433e-05
+Epoch  62/100 [####################]  31/31  | used 04:50 | left 00:00 | total 5:10:02 | ETA 3:10:01
+Epoch: 62 cost time: 290.1190097332001
+Epoch: 62, Steps: 31 | Train Loss: 0.0290434 Vali Loss: 0.0011953 Test Loss: 0.0004274
+Val Financial | IC: 0.011552 RIC: 0.099733 RankIC: 0.009396 Precision@10: 0.528458 SR(top5): 0.997254
+Test Financial | IC: 0.002787 RIC: 0.024418 RankIC: 0.002065 Precision@10: 0.531818 SR(top5): 1.202375
+Train components | MSE: 0.00058088 Rank: 0.00013400 weighted Rank: 0.00001340 MoE: 5.68983066 weighted MoE: 0.02844915
+Updating learning rate to 3.1593772365766105e-05
+Epoch  63/100 [####################]  31/31  | used 04:49 | left 00:00 | total 5:15:02 | ETA 3:05:01
+Epoch: 63 cost time: 289.9492735862732
+Epoch: 63, Steps: 31 | Train Loss: 0.0290520 Vali Loss: 0.0011822 Test Loss: 0.0004105
+Val Financial | IC: 0.011923 RIC: 0.103763 RankIC: 0.009810 Precision@10: 0.524506 SR(top5): 0.887396
+Test Financial | IC: 0.003178 RIC: 0.028269 RankIC: 0.001377 Precision@10: 0.519602 SR(top5): 1.012197
+Train components | MSE: 0.00058631 Rank: 0.00013356 weighted Rank: 0.00001336 MoE: 5.69046357 weighted MoE: 0.02845232
+Updating learning rate to 3.0142605468260978e-05
+Epoch  64/100 [####################]  31/31  | used 04:50 | left 00:00 | total 5:20:03 | ETA 3:00:01
+Epoch: 64 cost time: 290.0678722858429
+Epoch: 64, Steps: 31 | Train Loss: 0.0290940 Vali Loss: 0.0011872 Test Loss: 0.0004109
+Val Financial | IC: 0.014694 RIC: 0.122063 RankIC: 0.012102 Precision@10: 0.534783 SR(top5): 1.272780
+Test Financial | IC: 0.002298 RIC: 0.019280 RankIC: 0.001901 Precision@10: 0.526420 SR(top5): 0.799145
+Train components | MSE: 0.00063142 Rank: 0.00013246 weighted Rank: 0.00001325 MoE: 5.68987388 weighted MoE: 0.02844937
+Updating learning rate to 2.8711035421746367e-05
+Epoch  65/100 [####################]  31/31  | used 04:49 | left 00:00 | total 5:25:03 | ETA 2:55:02
+Epoch: 65 cost time: 289.977352142334
+Epoch: 65, Steps: 31 | Train Loss: 0.0290407 Vali Loss: 0.0011954 Test Loss: 0.0004174
+Val Financial | IC: 0.012131 RIC: 0.105774 RankIC: 0.012107 Precision@10: 0.525296 SR(top5): 0.880448
+Test Financial | IC: 0.002833 RIC: 0.025483 RankIC: 0.002288 Precision@10: 0.531818 SR(top5): 1.072969
+Train components | MSE: 0.00057660 Rank: 0.00013131 weighted Rank: 0.00001313 MoE: 5.69019919 weighted MoE: 0.02845100
+Updating learning rate to 2.7300475013022663e-05
+Epoch  66/100 [####################]  31/31  | used 04:50 | left 00:00 | total 5:30:04 | ETA 2:50:02
+Epoch: 66 cost time: 290.28264713287354
+Epoch: 66, Steps: 31 | Train Loss: 0.0290469 Vali Loss: 0.0012193 Test Loss: 0.0004378
+Val Financial | IC: 0.013137 RIC: 0.112486 RankIC: 0.011583 Precision@10: 0.532806 SR(top5): 0.892965
+Test Financial | IC: 0.003352 RIC: 0.029358 RankIC: 0.003796 Precision@10: 0.525568 SR(top5): 1.037205
+Train components | MSE: 0.00058178 Rank: 0.00013063 weighted Rank: 0.00001306 MoE: 5.69041520 weighted MoE: 0.02845208
+Updating learning rate to 2.591231629491423e-05
+Epoch  67/100 [####################]  31/31  | used 04:50 | left 00:00 | total 5:35:04 | ETA 2:45:02
+Epoch: 67 cost time: 290.1009314060211
+Epoch: 67, Steps: 31 | Train Loss: 0.0290299 Vali Loss: 0.0011936 Test Loss: 0.0004255
+Val Financial | IC: 0.012510 RIC: 0.106095 RankIC: 0.012152 Precision@10: 0.528458 SR(top5): 0.946028
+Test Financial | IC: 0.002088 RIC: 0.018278 RankIC: 0.001436 Precision@10: 0.517898 SR(top5): 0.650981
+Train components | MSE: 0.00056560 Rank: 0.00012992 weighted Rank: 0.00001299 MoE: 5.69026612 weighted MoE: 0.02845133
+Updating learning rate to 2.4547929212481435e-05
+Epoch  68/100 [####################]  31/31  | used 04:50 | left 00:00 | total 5:40:05 | ETA 2:40:02
+Epoch: 68 cost time: 290.2497797012329
+Epoch: 68, Steps: 31 | Train Loss: 0.0290292 Vali Loss: 0.0011814 Test Loss: 0.0004103
+Val Financial | IC: 0.013628 RIC: 0.115082 RankIC: 0.014091 Precision@10: 0.526877 SR(top5): 0.969337
+Test Financial | IC: 0.001652 RIC: 0.014285 RankIC: 0.001495 Precision@10: 0.525284 SR(top5): 1.230437
+Train components | MSE: 0.00056905 Rank: 0.00012985 weighted Rank: 0.00001298 MoE: 5.68943667 weighted MoE: 0.02844718
+Updating learning rate to 2.3208660251050158e-05
+Epoch  69/100 [####################]  31/31  | used 04:50 | left 00:00 | total 5:45:05 | ETA 2:35:02
+Epoch: 69 cost time: 290.3434646129608
+Epoch: 69, Steps: 31 | Train Loss: 0.0290211 Vali Loss: 0.0011823 Test Loss: 0.0004114
+Val Financial | IC: 0.014171 RIC: 0.118321 RankIC: 0.012527 Precision@10: 0.531621 SR(top5): 1.058746
+Test Financial | IC: 0.003171 RIC: 0.026717 RankIC: 0.003954 Precision@10: 0.529545 SR(top5): 1.274356
+Train components | MSE: 0.00055554 Rank: 0.00012913 weighted Rank: 0.00001291 MoE: 5.69052616 weighted MoE: 0.02845263
+Updating learning rate to 2.1895831107393484e-05
+Epoch  70/100 [####################]  31/31  | used 04:50 | left 00:00 | total 5:50:06 | ETA 2:30:02
+Epoch: 70 cost time: 290.3274712562561
+Epoch: 70, Steps: 31 | Train Loss: 0.0290328 Vali Loss: 0.0012370 Test Loss: 0.0004741
+Val Financial | IC: 0.013369 RIC: 0.112162 RankIC: 0.012174 Precision@10: 0.528854 SR(top5): 0.882772
+Test Financial | IC: 0.002752 RIC: 0.023513 RankIC: 0.002889 Precision@10: 0.521875 SR(top5): 1.263355
+Train components | MSE: 0.00056771 Rank: 0.00012870 weighted Rank: 0.00001287 MoE: 5.69043899 weighted MoE: 0.02845219
+Updating learning rate to 2.061073738537635e-05
+Epoch  71/100 [####################]  31/31  | used 04:50 | left 00:00 | total 5:55:07 | ETA 2:25:02
+Epoch: 71 cost time: 290.23552894592285
+Epoch: 71, Steps: 31 | Train Loss: 0.0290169 Vali Loss: 0.0011830 Test Loss: 0.0004120
+Val Financial | IC: 0.014188 RIC: 0.119698 RankIC: 0.012810 Precision@10: 0.536364 SR(top5): 1.068874
+Test Financial | IC: 0.003785 RIC: 0.032649 RankIC: 0.004248 Precision@10: 0.522727 SR(top5): 1.088819
+Train components | MSE: 0.00056031 Rank: 0.00012703 weighted Rank: 0.00001270 MoE: 5.68877809 weighted MoE: 0.02844389
+Updating learning rate to 1.9354647317351188e-05
+Epoch  72/100 [####################]  31/31  | used 04:50 | left 00:00 | total 6:00:07 | ETA 2:20:03
+Epoch: 72 cost time: 290.23641633987427
+Epoch: 72, Steps: 31 | Train Loss: 0.0290196 Vali Loss: 0.0011834 Test Loss: 0.0004076
+Val Financial | IC: 0.013956 RIC: 0.116703 RankIC: 0.013244 Precision@10: 0.529249 SR(top5): 0.748776
+Test Financial | IC: 0.002063 RIC: 0.017415 RankIC: 0.002426 Precision@10: 0.525568 SR(top5): 1.359033
+Train components | MSE: 0.00055456 Rank: 0.00012755 weighted Rank: 0.00001276 MoE: 5.69044887 weighted MoE: 0.02845224
+Updating learning rate to 1.8128800512565513e-05
+Epoch  73/100 [####################]  31/31  | used 04:50 | left 00:00 | total 6:05:08 | ETA 2:15:03
+Epoch: 73 cost time: 290.18378019332886
+Epoch: 73, Steps: 31 | Train Loss: 0.0290220 Vali Loss: 0.0011813 Test Loss: 0.0004084
+Val Financial | IC: 0.014388 RIC: 0.120883 RankIC: 0.013522 Precision@10: 0.532411 SR(top5): 1.069784
+Test Financial | IC: 0.003412 RIC: 0.029626 RankIC: 0.003164 Precision@10: 0.526705 SR(top5): 1.262011
+Train components | MSE: 0.00056283 Rank: 0.00012680 weighted Rank: 0.00001268 MoE: 5.68930480 weighted MoE: 0.02844652
+Updating learning rate to 1.6934406733817414e-05
+Epoch  74/100 [####################]  31/31  | used 04:50 | left 00:00 | total 6:10:08 | ETA 2:10:03
+Epoch: 74 cost time: 290.1624937057495
+Epoch: 74, Steps: 31 | Train Loss: 0.0290095 Vali Loss: 0.0012041 Test Loss: 0.0004240
+Val Financial | IC: 0.013920 RIC: 0.117935 RankIC: 0.012400 Precision@10: 0.532411 SR(top5): 1.158326
+Test Financial | IC: 0.002769 RIC: 0.023206 RankIC: 0.002250 Precision@10: 0.531534 SR(top5): 1.299384
+Train components | MSE: 0.00054717 Rank: 0.00012561 weighted Rank: 0.00001256 MoE: 5.68996426 weighted MoE: 0.02844982
+Updating learning rate to 1.5772644703565565e-05
+Epoch  75/100 [####################]  31/31  | used 04:50 | left 00:00 | total 6:15:09 | ETA 2:05:03
+Epoch: 75 cost time: 290.1574625968933
+Epoch: 75, Steps: 31 | Train Loss: 0.0290095 Vali Loss: 0.0011943 Test Loss: 0.0004257
+Val Financial | IC: 0.016341 RIC: 0.133952 RankIC: 0.015752 Precision@10: 0.534387 SR(top5): 1.256639
+Test Financial | IC: 0.002820 RIC: 0.023059 RankIC: 0.002841 Precision@10: 0.526989 SR(top5): 1.131785
+Train components | MSE: 0.00054604 Rank: 0.00012620 weighted Rank: 0.00001262 MoE: 5.69015884 weighted MoE: 0.02845079
+Updating learning rate to 1.4644660940672627e-05
+Epoch  76/100 [####################]  31/31  | used 04:50 | left 00:00 | total 6:20:09 | ETA 2:00:03
+Epoch: 76 cost time: 290.1157076358795
+Epoch: 76, Steps: 31 | Train Loss: 0.0290058 Vali Loss: 0.0011821 Test Loss: 0.0004066
+Val Financial | IC: 0.012387 RIC: 0.103464 RankIC: 0.010844 Precision@10: 0.533202 SR(top5): 1.249730
+Test Financial | IC: 0.003589 RIC: 0.030218 RankIC: 0.002247 Precision@10: 0.528977 SR(top5): 1.444788
+Train components | MSE: 0.00054432 Rank: 0.00012531 weighted Rank: 0.00001253 MoE: 5.68979534 weighted MoE: 0.02844898
+Updating learning rate to 1.3551568628929434e-05
+Epoch  77/100 [####################]  31/31  | used 04:50 | left 00:00 | total 6:25:10 | ETA 1:55:03
+Epoch: 77 cost time: 290.38600039482117
+Epoch: 77, Steps: 31 | Train Loss: 0.0290044 Vali Loss: 0.0012063 Test Loss: 0.0004257
+Val Financial | IC: 0.013378 RIC: 0.115153 RankIC: 0.012684 Precision@10: 0.529644 SR(top5): 1.002181
+Test Financial | IC: 0.003622 RIC: 0.030936 RankIC: 0.002722 Precision@10: 0.538068 SR(top5): 1.362565
+Train components | MSE: 0.00053905 Rank: 0.00012498 weighted Rank: 0.00001250 MoE: 5.69057148 weighted MoE: 0.02845286
+Updating learning rate to 1.2494446518477027e-05
+Epoch  78/100 [####################]  31/31  | used 04:50 | left 00:00 | total 6:30:10 | ETA 1:50:03
+Epoch: 78 cost time: 290.25053215026855
+Epoch: 78, Steps: 31 | Train Loss: 0.0290071 Vali Loss: 0.0011806 Test Loss: 0.0004062
+Val Financial | IC: 0.013098 RIC: 0.110375 RankIC: 0.011875 Precision@10: 0.534783 SR(top5): 0.892198
+Test Financial | IC: 0.004033 RIC: 0.033829 RankIC: 0.002866 Precision@10: 0.530114 SR(top5): 1.377750
+Train components | MSE: 0.00054658 Rank: 0.00012457 weighted Rank: 0.00001246 MoE: 5.68960590 weighted MoE: 0.02844803
+Updating learning rate to 1.1474337861210543e-05
+Epoch  79/100 [####################]  31/31  | used 04:50 | left 00:00 | total 6:35:11 | ETA 1:45:02
+Epoch: 79 cost time: 290.03582096099854
+Epoch: 79, Steps: 31 | Train Loss: 0.0290074 Vali Loss: 0.0011897 Test Loss: 0.0004199
+Val Financial | IC: 0.013817 RIC: 0.115881 RankIC: 0.012582 Precision@10: 0.538340 SR(top5): 1.133681
+Test Financial | IC: 0.003459 RIC: 0.028982 RankIC: 0.003103 Precision@10: 0.528409 SR(top5): 1.211509
+Train components | MSE: 0.00054186 Rank: 0.00012461 weighted Rank: 0.00001246 MoE: 5.69061567 weighted MoE: 0.02845308
+Updating learning rate to 1.049224938121548e-05
+Epoch  80/100 [####################]  31/31  | used 04:49 | left 00:00 | total 6:40:11 | ETA 1:40:02
+Epoch: 80 cost time: 289.96708250045776
+Epoch: 80, Steps: 31 | Train Loss: 0.0289984 Vali Loss: 0.0011824 Test Loss: 0.0004104
+Val Financial | IC: 0.015778 RIC: 0.130849 RankIC: 0.014111 Precision@10: 0.534387 SR(top5): 1.112158
+Test Financial | IC: 0.001959 RIC: 0.015990 RankIC: 0.001625 Precision@10: 0.532102 SR(top5): 1.486211
+Train components | MSE: 0.00053514 Rank: 0.00012395 weighted Rank: 0.00001239 MoE: 5.69017356 weighted MoE: 0.02845087
+Updating learning rate to 9.549150281252633e-06
+Epoch  81/100 [####################]  31/31  | used 04:50 | left 00:00 | total 6:45:11 | ETA 1:35:02
+Epoch: 81 cost time: 290.0840446949005
+Epoch: 81, Steps: 31 | Train Loss: 0.0289984 Vali Loss: 0.0011880 Test Loss: 0.0004178
+Val Financial | IC: 0.014947 RIC: 0.123756 RankIC: 0.013505 Precision@10: 0.534387 SR(top5): 1.052504
+Test Financial | IC: 0.003148 RIC: 0.026046 RankIC: 0.003417 Precision@10: 0.527841 SR(top5): 1.177558
+Train components | MSE: 0.00053329 Rank: 0.00012407 weighted Rank: 0.00001241 MoE: 5.69053505 weighted MoE: 0.02845268
+Updating learning rate to 8.645971286271904e-06
+Epoch  82/100 [####################]  31/31  | used 04:50 | left 00:00 | total 6:50:12 | ETA 1:30:02
+Epoch: 82 cost time: 290.26134848594666
+Epoch: 82, Steps: 31 | Train Loss: 0.0289988 Vali Loss: 0.0011824 Test Loss: 0.0004101
+Val Financial | IC: 0.014727 RIC: 0.122275 RankIC: 0.013270 Precision@10: 0.533202 SR(top5): 1.101331
+Test Financial | IC: 0.003894 RIC: 0.032050 RankIC: 0.003592 Precision@10: 0.531250 SR(top5): 1.113983
+Train components | MSE: 0.00053678 Rank: 0.00012412 weighted Rank: 0.00001241 MoE: 5.68993070 weighted MoE: 0.02844965
+Updating learning rate to 7.783603724899257e-06
+Epoch  83/100 [####################]  31/31  | used 04:50 | left 00:00 | total 6:55:12 | ETA 1:25:02
+Epoch: 83 cost time: 290.0139162540436
+Epoch: 83, Steps: 31 | Train Loss: 0.0289933 Vali Loss: 0.0011857 Test Loss: 0.0004086
+Val Financial | IC: 0.014548 RIC: 0.119851 RankIC: 0.012371 Precision@10: 0.532806 SR(top5): 0.945595
+Test Financial | IC: 0.003417 RIC: 0.028134 RankIC: 0.003021 Precision@10: 0.530966 SR(top5): 1.392243
+Train components | MSE: 0.00053170 Rank: 0.00012340 weighted Rank: 0.00001234 MoE: 5.68985561 weighted MoE: 0.02844928
+Updating learning rate to 6.962898649802823e-06
+Epoch  84/100 [####################]  31/31  | used 04:50 | left 00:00 | total 7:00:13 | ETA 1:20:02
+Epoch: 84 cost time: 290.1006050109863
+Epoch: 84, Steps: 31 | Train Loss: 0.0289946 Vali Loss: 0.0011941 Test Loss: 0.0004152
+Val Financial | IC: 0.014515 RIC: 0.119466 RankIC: 0.012315 Precision@10: 0.534783 SR(top5): 1.149581
+Test Financial | IC: 0.004001 RIC: 0.033028 RankIC: 0.002849 Precision@10: 0.536364 SR(top5): 1.665786
+Train components | MSE: 0.00053094 Rank: 0.00012265 weighted Rank: 0.00001227 MoE: 5.69027527 weighted MoE: 0.02845138
+Updating learning rate to 6.1846659978068265e-06
+Epoch  85/100 [####################]  31/31  | used 04:50 | left 00:00 | total 7:05:14 | ETA 1:15:02
+Epoch: 85 cost time: 290.164541721344
+Epoch: 85, Steps: 31 | Train Loss: 0.0289926 Vali Loss: 0.0011812 Test Loss: 0.0004081
+Val Financial | IC: 0.015007 RIC: 0.123565 RankIC: 0.013515 Precision@10: 0.531225 SR(top5): 1.158933
+Test Financial | IC: 0.002213 RIC: 0.018058 RankIC: 0.002413 Precision@10: 0.531534 SR(top5): 1.267847
+Train components | MSE: 0.00052761 Rank: 0.00012218 weighted Rank: 0.00001222 MoE: 5.69056086 weighted MoE: 0.02845280
+Updating learning rate to 5.449673790581611e-06
+Epoch  86/100 [####################]  31/31  | used 04:50 | left 00:00 | total 7:10:14 | ETA 1:10:02
+Epoch: 86 cost time: 290.3061332702637
+Epoch: 86, Steps: 31 | Train Loss: 0.0289919 Vali Loss: 0.0011835 Test Loss: 0.0004117
+Val Financial | IC: 0.015592 RIC: 0.128092 RankIC: 0.014602 Precision@10: 0.536759 SR(top5): 1.074390
+Test Financial | IC: 0.003618 RIC: 0.029366 RankIC: 0.003876 Precision@10: 0.531250 SR(top5): 1.113248
+Train components | MSE: 0.00052847 Rank: 0.00012294 weighted Rank: 0.00001229 MoE: 5.69022143 weighted MoE: 0.02845111
+Updating learning rate to 4.758647376699032e-06
+Epoch  87/100 [####################]  31/31  | used 04:50 | left 00:00 | total 7:15:15 | ETA 1:05:02
+Epoch: 87 cost time: 290.38938784599304
+Epoch: 87, Steps: 31 | Train Loss: 0.0289890 Vali Loss: 0.0011805 Test Loss: 0.0004063
+Val Financial | IC: 0.015343 RIC: 0.125496 RankIC: 0.013582 Precision@10: 0.533597 SR(top5): 1.185145
+Test Financial | IC: 0.003465 RIC: 0.028063 RankIC: 0.003693 Precision@10: 0.532955 SR(top5): 1.213872
+Train components | MSE: 0.00052700 Rank: 0.00012300 weighted Rank: 0.00001230 MoE: 5.68994493 weighted MoE: 0.02844972
+Updating learning rate to 4.112268715800943e-06
+Epoch  88/100 [####################]  31/31  | used 04:50 | left 00:00 | total 7:20:15 | ETA 1:00:02
+Epoch: 88 cost time: 290.02358746528625
+Epoch: 88, Steps: 31 | Train Loss: 0.0289879 Vali Loss: 0.0011806 Test Loss: 0.0004068
+Val Financial | IC: 0.014770 RIC: 0.121797 RankIC: 0.013338 Precision@10: 0.536364 SR(top5): 0.992108
+Test Financial | IC: 0.002577 RIC: 0.021070 RankIC: 0.001655 Precision@10: 0.533239 SR(top5): 1.275121
+Train components | MSE: 0.00052536 Rank: 0.00012246 weighted Rank: 0.00001225 MoE: 5.69005691 weighted MoE: 0.02845028
+Updating learning rate to 3.511175705587433e-06
+Epoch  89/100 [####################]  31/31  | used 04:50 | left 00:00 | total 7:25:16 | ETA 55:02
+Epoch: 89 cost time: 290.48296666145325
+Epoch: 89, Steps: 31 | Train Loss: 0.0289869 Vali Loss: 0.0011822 Test Loss: 0.0004101
+Val Financial | IC: 0.015086 RIC: 0.123263 RankIC: 0.013645 Precision@10: 0.534387 SR(top5): 1.035830
+Test Financial | IC: 0.002901 RIC: 0.023482 RankIC: 0.002429 Precision@10: 0.531818 SR(top5): 1.418783
+Train components | MSE: 0.00052447 Rank: 0.00012244 weighted Rank: 0.00001224 MoE: 5.69003104 weighted MoE: 0.02845016
+Updating learning rate to 2.9559615522887273e-06
+Epoch  90/100 [####################]  31/31  | used 04:50 | left 00:00 | total 7:30:17 | ETA 50:01
+Epoch: 90 cost time: 290.3454897403717
+Epoch: 90, Steps: 31 | Train Loss: 0.0289927 Vali Loss: 0.0011808 Test Loss: 0.0004077
+Val Financial | IC: 0.015542 RIC: 0.127356 RankIC: 0.013931 Precision@10: 0.534783 SR(top5): 1.207668
+Test Financial | IC: 0.002841 RIC: 0.023057 RankIC: 0.002521 Precision@10: 0.530114 SR(top5): 1.420240
+Train components | MSE: 0.00052686 Rank: 0.00012162 weighted Rank: 0.00001216 MoE: 5.69073276 weighted MoE: 0.02845366
+Updating learning rate to 2.4471741852423237e-06
+Epoch  91/100 [####################]  31/31  | used 04:50 | left 00:00 | total 7:35:17 | ETA 45:01
+Epoch: 91 cost time: 290.48454213142395
+Epoch: 91, Steps: 31 | Train Loss: 0.0289903 Vali Loss: 0.0011809 Test Loss: 0.0004078
+Val Financial | IC: 0.014761 RIC: 0.121285 RankIC: 0.013302 Precision@10: 0.535178 SR(top5): 1.040438
+Test Financial | IC: 0.003678 RIC: 0.030071 RankIC: 0.003533 Precision@10: 0.530966 SR(top5): 1.153480
+Train components | MSE: 0.00052565 Rank: 0.00012256 weighted Rank: 0.00001226 MoE: 5.69048151 weighted MoE: 0.02845241
+Updating learning rate to 1.985315716152847e-06
+Epoch  92/100 [####################]  31/31  | used 04:50 | left 00:00 | total 7:40:18 | ETA 40:01
+Epoch: 92 cost time: 290.09418177604675
+Epoch: 92, Steps: 31 | Train Loss: 0.0289831 Vali Loss: 0.0011804 Test Loss: 0.0004066
+Val Financial | IC: 0.014917 RIC: 0.122515 RankIC: 0.013413 Precision@10: 0.536364 SR(top5): 1.212347
+Test Financial | IC: 0.003716 RIC: 0.030343 RankIC: 0.003513 Precision@10: 0.530114 SR(top5): 1.233582
+Train components | MSE: 0.00052271 Rank: 0.00012190 weighted Rank: 0.00001219 MoE: 5.68964683 weighted MoE: 0.02844823
+Updating learning rate to 1.5708419435684462e-06
+Epoch  93/100 [####################]  31/31  | used 04:47 | left 00:00 | total 7:45:15 | ETA 35:01
+Epoch: 93 cost time: 287.2115867137909
+Epoch: 93, Steps: 31 | Train Loss: 0.0289865 Vali Loss: 0.0011847 Test Loss: 0.0004134
+Val Financial | IC: 0.014949 RIC: 0.122683 RankIC: 0.013728 Precision@10: 0.533597 SR(top5): 1.225144
+Test Financial | IC: 0.003859 RIC: 0.031302 RankIC: 0.003851 Precision@10: 0.533239 SR(top5): 1.148753
+Train components | MSE: 0.00052374 Rank: 0.00012201 weighted Rank: 0.00001220 MoE: 5.69010898 weighted MoE: 0.02845054
+Updating learning rate to 1.2041619030626284e-06
+Epoch  94/100 [####################]  31/31  | used 05:08 | left 00:00 | total 7:50:38 | ETA 30:02
+Epoch: 94 cost time: 308.4051983356476
+Epoch: 94, Steps: 31 | Train Loss: 0.0289841 Vali Loss: 0.0011813 Test Loss: 0.0004085
+Val Financial | IC: 0.014971 RIC: 0.122608 RankIC: 0.013649 Precision@10: 0.539130 SR(top5): 1.204876
+Test Financial | IC: 0.003462 RIC: 0.028059 RankIC: 0.003059 Precision@10: 0.534943 SR(top5): 1.075202
+Train components | MSE: 0.00052277 Rank: 0.00012163 weighted Rank: 0.00001216 MoE: 5.68982533 weighted MoE: 0.02844913
+Updating learning rate to 8.856374635655695e-07
+Epoch  95/100 [####################]  31/31  | used 04:49 | left 00:00 | total 7:55:55 | ETA 25:02
+Epoch: 95 cost time: 289.5559573173523
+Epoch: 95, Steps: 31 | Train Loss: 0.0289864 Vali Loss: 0.0011806 Test Loss: 0.0004072
+Val Financial | IC: 0.015007 RIC: 0.122780 RankIC: 0.013756 Precision@10: 0.537154 SR(top5): 1.211521
+Test Financial | IC: 0.003742 RIC: 0.030330 RankIC: 0.003573 Precision@10: 0.532955 SR(top5): 1.225755
+Train components | MSE: 0.00052133 Rank: 0.00012125 weighted Rank: 0.00001212 MoE: 5.69058435 weighted MoE: 0.02845292
+Updating learning rate to 6.15582970243117e-07
+Epoch  96/100 [####################]  31/31  | used 04:47 | left 00:00 | total 8:00:56 | ETA 20:02
+Epoch: 96 cost time: 287.67156744003296
+Epoch: 96, Steps: 31 | Train Loss: 0.0289855 Vali Loss: 0.0011805 Test Loss: 0.0004063
+Val Financial | IC: 0.014824 RIC: 0.121519 RankIC: 0.013471 Precision@10: 0.537945 SR(top5): 1.210656
+Test Financial | IC: 0.003511 RIC: 0.028584 RankIC: 0.003176 Precision@10: 0.534375 SR(top5): 1.259343
+Train components | MSE: 0.00052341 Rank: 0.00012215 weighted Rank: 0.00001221 MoE: 5.68997861 weighted MoE: 0.02844989
+Updating learning rate to 3.9426493427611177e-07
+Epoch  97/100 [####################]  31/31  | used 04:40 | left 00:00 | total 8:05:50 | ETA 15:01
+Epoch: 97 cost time: 280.94097232818604
+Epoch: 97, Steps: 31 | Train Loss: 0.0289812 Vali Loss: 0.0011808 Test Loss: 0.0004076
+Val Financial | IC: 0.015091 RIC: 0.123554 RankIC: 0.013681 Precision@10: 0.536759 SR(top5): 1.154801
+Test Financial | IC: 0.003481 RIC: 0.028203 RankIC: 0.003238 Precision@10: 0.533239 SR(top5): 1.283883
+Train components | MSE: 0.00052210 Rank: 0.00012142 weighted Rank: 0.00001214 MoE: 5.68939898 weighted MoE: 0.02844699
+Updating learning rate to 2.219017698460002e-07
+Epoch  98/100 [####################]  31/31  | used 04:48 | left 00:00 | total 8:10:52 | ETA 10:01
+Epoch: 98 cost time: 288.8128743171692
+Epoch: 98, Steps: 31 | Train Loss: 0.0289830 Vali Loss: 0.0011804 Test Loss: 0.0004064
+Val Financial | IC: 0.015122 RIC: 0.123958 RankIC: 0.013736 Precision@10: 0.535573 SR(top5): 1.125479
+Test Financial | IC: 0.003671 RIC: 0.029763 RankIC: 0.003560 Precision@10: 0.534659 SR(top5): 1.256832
+Train components | MSE: 0.00052226 Rank: 0.00012208 weighted Rank: 0.00001221 MoE: 5.68969853 weighted MoE: 0.02844849
+Updating learning rate to 9.866357858642205e-08
+Epoch  99/100 [####################]  31/31  | used 04:49 | left 00:00 | total 8:15:54 | ETA 05:00
+Epoch: 99 cost time: 289.3561987876892
+Epoch: 99, Steps: 31 | Train Loss: 0.0289850 Vali Loss: 0.0011806 Test Loss: 0.0004071
+Val Financial | IC: 0.015146 RIC: 0.124064 RankIC: 0.013773 Precision@10: 0.535968 SR(top5): 1.107203
+Test Financial | IC: 0.003617 RIC: 0.029281 RankIC: 0.003555 Precision@10: 0.535795 SR(top5): 1.273327
+Train components | MSE: 0.00052284 Rank: 0.00012206 weighted Rank: 0.00001221 MoE: 5.68998715 weighted MoE: 0.02844994
+Updating learning rate to 2.467198171342e-08
+Epoch 100/100 [####################]  31/31  | used 04:49 | left 00:00 | total 8:20:56 | ETA 00:00
+Epoch: 100 cost time: 289.34298872947693
+Epoch: 100, Steps: 31 | Train Loss: 0.0289837 Vali Loss: 0.0011806 Test Loss: 0.0004071
+Val Financial | IC: 0.015142 RIC: 0.124022 RankIC: 0.013771 Precision@10: 0.535573 SR(top5): 1.121717
+Test Financial | IC: 0.003594 RIC: 0.029090 RankIC: 0.003524 Precision@10: 0.535227 SR(top5): 1.222451
+Train components | MSE: 0.00052232 Rank: 0.00012164 weighted Rank: 0.00001216 MoE: 5.68985278 weighted MoE: 0.02844926
+Updating learning rate to 0.0
+>>>>>>>testing : long_term_forecast_SP500_returns_16_1_TimeFilter_SP500_ftM_sl16_ll0_pl1_dm512_nh4_el2_dl1_df2048_fc1_ebtimeF_dtTrue_test_0<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+test 352
+mse:0.0004082349769305438, mae:0.01431544404476881
+Final Test Financial | IC: 0.003780 RIC: 0.034403 RankIC: 0.003848 Precision@10: 0.530114 SR(top5): 1.033955
+Financial results saved: D:\finance\model\Timefilter\TimeFilter\outputs\SP500_2026_09_28_13_08\results\long_term_forecast_SP500_returns_16_1_TimeFilter_SP500_ftM_sl16_ll0_pl1_dm512_nh4_el2_dl1_df2048_fc1_ebtimeF_dtTrue_test_0\financial

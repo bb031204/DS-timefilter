@@ -14,7 +14,8 @@ EVALUATION_ONLY = {
     'is_training', 'financial_checkpoint', 'financial_checkpoint_root',
     'financial_output_dir', 'financial_config', 'financial_force_rerun',
     'financial_validation_only', 'checkpoints', 'use_gpu', 'gpu',
-    'financial_cpu', 'num_workers',
+    'financial_cpu', 'num_workers', 'gradient_diagnostic_epochs',
+    'gradient_diagnostic_batch_size',
 }
 
 

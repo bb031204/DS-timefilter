@@ -6,6 +6,7 @@ from types import SimpleNamespace
 import unittest
 
 import torch
+import yaml
 
 from models.TimeFilter import Model
 from scripts.run_financial import build_command
@@ -23,7 +24,8 @@ class FinancialStage1Tests(unittest.TestCase):
         command = build_command(cli)
         self.assertEqual(command[command.index('--financial_norm') + 1], '0')
         self.assertEqual(command[command.index('--rank_weight') + 1], '0.1')
-        self.assertEqual(command[command.index('--alpha') + 1], '0.7')
+        configured_alpha = yaml.safe_load((PROJECT_ROOT / 'config.yaml').read_text(encoding='utf-8'))['model']['alpha']
+        self.assertEqual(command[command.index('--alpha') + 1], str(configured_alpha))
         self.assertEqual(command[command.index('--d_model') + 1], '512')
         self.assertEqual(command[command.index('--batch_size') + 1], '32')
 
