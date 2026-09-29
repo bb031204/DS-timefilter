@@ -28,7 +28,7 @@ class FinancialGradientDiagnosticTests(unittest.TestCase):
         command = build_command(cli)
         self.assertEqual(command[command.index('--financial_selection') + 1], 'RankIC')
         self.assertEqual(command[command.index('--gradient_diagnostic_epochs') + 1:
-                                 command.index('--gradient_diagnostic_batch_size')], ['0', '5', '50'])
+                                 command.index('--gradient_diagnostic_batch_size')], ['0', '1', '5'])
         self.assertEqual(command[command.index('--gradient_diagnostic_batch_size') + 1], '8')
 
     def test_one_forward_preserves_parameters_grads_mode_and_rng(self):

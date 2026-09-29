@@ -44,7 +44,7 @@ training:
   rank_weight: 0.1  # 原始无 RankLoss，等价于 0；当前 0.1 为 StockMixer 参考候选
   financial_seed: 2021  # 随机种子；三组使用相同种子，后续复验时再成组更换
   financial_selection: RankIC  # 仅用验证集选 best.pth：RankIC 越高越好；可改回 mse / IC
-  gradient_diagnostic_epochs: [0, 5, 50]  # 0 为训练前；其余为该轮结束后；[] 关闭诊断
+  gradient_diagnostic_epochs: [0, 1, 5]  # 只检查训练早期：训练前、第 1 / 5 轮后；[] 关闭诊断
   gradient_diagnostic_batch_size: 8  # 固定取训练期均匀分布的 8 个日期；显存允许时可改为 32
   batch_size: 32  # 每批历史窗口数；显存不足可减小，但所有对照组需一致
   train_epochs: 100  # 原始默认 10；SP500 基线 100。金融流程跑满后使用验证集最优 best.pth

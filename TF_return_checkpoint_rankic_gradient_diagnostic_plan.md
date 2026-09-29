@@ -109,8 +109,8 @@ L_{MSE}
 
 ```text
 epoch 0：正式训练开始前
+epoch 1：第 1 个 epoch 完成后
 epoch 5：第 5 个 epoch 完成后
-epoch 50：第 50 个 epoch 完成后
 ```
 
 在 `config.yaml` 中增加：
@@ -120,7 +120,7 @@ training:
   # 0 表示训练开始前；
   # N 表示第 N 个 epoch 完成后。
   # 空列表 [] 表示关闭梯度诊断。
-  gradient_diagnostic_epochs: [0, 5, 50]
+  gradient_diagnostic_epochs: [0, 1, 5]
 
   # 固定取覆盖训练期的 8 个日期；可按显存情况调至 32，与训练 batch 对照。
   gradient_diagnostic_batch_size: 8
@@ -138,8 +138,8 @@ training:
 
 ```text
 epoch 0
+epoch 1
 epoch 5
-epoch 50
 ```
 
 全部使用同一份 batch。
@@ -293,18 +293,18 @@ MoE:
   grad/MSE      = ...
 ```
 
-第 5、50 epoch 完成后分别输出：
+第 1、5 epoch 完成后分别输出：
 
 ```text
 stage=post_epoch
-epoch=5
+epoch=1
 ```
 
 和：
 
 ```text
 stage=post_epoch
-epoch=50
+epoch=5
 ```
 
 日志至少记录：
@@ -368,7 +368,7 @@ training:
   # 0 = before training
   # N = after epoch N
   # [] = disabled
-  gradient_diagnostic_epochs: [0, 5, 50]
+  gradient_diagnostic_epochs: [0, 1, 5]
   gradient_diagnostic_batch_size: 8
 
   financial_seed: 2021
