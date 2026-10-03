@@ -1,0 +1,122 @@
+
+====================================================================================================
+Official StockMixer Training
+====================================================================================================
+[RUN   ] time=2026-09-29T21:17:00  output=outputs\20260929_211700_SP500
+[ENV   ] Python=3.10.16  PyTorch=2.13.0+cu130  CUDA=True  GPU=NVIDIA GeForce RTX 5070 Laptop GPU  device=cuda
+[SEED  ] numpy=123456789  torch=12345678
+[DATA  ] market=SP500  dataset=dataset\SP500  stock_num=474  actual_stocks=474  fea_num=5  actual_features=5  trade_dates=1611
+[SPLIT ] train target=0-1005  val target=1006-1258  test target=1259-1610
+[WINDOW] lookback=16  steps=1  train_offsets=990  val_offsets=253  test_offsets=352
+[TRAIN ] epochs=100  lr=0.001  alpha=0.1  market_num=8  scale=3  activation=GELU  selection=val_loss (min)
+[PARAM ] total=9953  trainable=9953
+----------------------------------------------------------------------------------------------------
+BEST MODEL Epoch=001/100 TrainLoss=0.526671 ValLoss=0.169489 ValIC=-.017 ValRIC=-.052 ValPrec@10=.5 ValSR=.89 TestIC=.016 TestRIC=.068 TestSR=.947 Select=val_loss:.169 EpochTime=32s ETA=53m49s BestEpoch=001
+BEST MODEL Epoch=002/100 TrainLoss=0.070825 ValLoss=0.095232 ValIC=-.015 ValRIC=-.042 ValPrec@10=.495 ValSR=1.141 TestIC=.013 TestRIC=.062 TestSR=.413 Select=val_loss:.095 EpochTime=33s ETA=54m01s BestEpoch=002
+BEST MODEL Epoch=003/100 TrainLoss=0.021166 ValLoss=0.074348 ValIC=-.008 ValRIC=-.025 ValPrec@10=.496 ValSR=1.132 TestIC=.013 TestRIC=.071 TestSR=.306 Select=val_loss:.074 EpochTime=32s ETA=53m05s BestEpoch=003
+BEST MODEL Epoch=004/100 TrainLoss=0.024821 ValLoss=0.058282 ValIC=-.004 ValRIC=-.011 ValPrec@10=.499 ValSR=1.108 TestIC=.015 TestRIC=.088 TestSR=.203 Select=val_loss:.058 EpochTime=32s ETA=52m18s BestEpoch=004
+BEST MODEL Epoch=005/100 TrainLoss=0.011762 ValLoss=0.045033 ValIC=-.007 ValRIC=-.022 ValPrec@10=.496 ValSR=1.39 TestIC=.019 TestRIC=.102 TestSR=.259 Select=val_loss:.045 EpochTime=31s ETA=51m28s BestEpoch=005
+BEST MODEL Epoch=006/100 TrainLoss=0.008943 ValLoss=0.032208 ValIC=-.008 ValRIC=-.025 ValPrec@10=.496 ValSR=.846 TestIC=.022 TestRIC=.121 TestSR=.576 Select=val_loss:.032 EpochTime=31s ETA=50m47s BestEpoch=006
+BEST MODEL Epoch=007/100 TrainLoss=0.009566 ValLoss=0.030925 ValIC=.027 ValRIC=.115 ValPrec@10=.508 ValSR=1.187 TestIC=.025 TestRIC=.155 TestSR=1.475 Select=val_loss:.031 EpochTime=32s ETA=50m11s BestEpoch=007
+BEST MODEL Epoch=008/100 TrainLoss=0.005732 ValLoss=0.014777 ValIC=.015 ValRIC=.057 ValPrec@10=.501 ValSR=.758 TestIC=.024 TestRIC=.135 TestSR=.393 Select=val_loss:.015 EpochTime=32s ETA=49m35s BestEpoch=008
+BEST MODEL Epoch=009/100 TrainLoss=0.003044 ValLoss=0.011528 ValIC=.016 ValRIC=.057 ValPrec@10=.504 ValSR=1.113 TestIC=.025 TestRIC=.132 TestSR=.695 Select=val_loss:.012 EpochTime=31s ETA=48m55s BestEpoch=009
+BEST MODEL Epoch=010/100 TrainLoss=0.003676 ValLoss=0.010878 ValIC=.019 ValRIC=.085 ValPrec@10=.515 ValSR=.991 TestIC=.021 TestRIC=.152 TestSR=.924 Select=val_loss:.011 EpochTime=31s ETA=48m20s BestEpoch=010
+BEST MODEL Epoch=011/100 TrainLoss=0.002292 ValLoss=0.009349 ValIC=.019 ValRIC=.081 ValPrec@10=.508 ValSR=.818 TestIC=.023 TestRIC=.158 TestSR=.606 Select=val_loss:.009 EpochTime=32s ETA=47m50s BestEpoch=011
+BEST MODEL Epoch=012/100 TrainLoss=0.002611 ValLoss=0.008432 ValIC=.017 ValRIC=.065 ValPrec@10=.508 ValSR=.96 TestIC=.025 TestRIC=.156 TestSR=.642 Select=val_loss:.008 EpochTime=33s ETA=47m30s BestEpoch=012
+BEST MODEL Epoch=013/100 TrainLoss=0.003495 ValLoss=0.006922 ValIC=.019 ValRIC=.085 ValPrec@10=.508 ValSR=.427 TestIC=.028 TestRIC=.151 TestSR=.614 Select=val_loss:.007 EpochTime=34s ETA=47m09s BestEpoch=013
+           Epoch=014/100 TrainLoss=0.002593 ValLoss=0.007773 ValIC=.024 ValRIC=.114 ValPrec@10=.516 ValSR=.793 TestIC=.024 TestRIC=.147 TestSR=.444 Select=val_loss:.008 EpochTime=33s ETA=46m42s BestEpoch=013
+BEST MODEL Epoch=015/100 TrainLoss=0.001464 ValLoss=0.006174 ValIC=.017 ValRIC=.083 ValPrec@10=.515 ValSR=.657 TestIC=.022 TestRIC=.135 TestSR=.539 Select=val_loss:.006 EpochTime=34s ETA=46m23s BestEpoch=015
+BEST MODEL Epoch=016/100 TrainLoss=0.00155 ValLoss=0.006125 ValIC=.026 ValRIC=.102 ValPrec@10=.513 ValSR=1.09 TestIC=.024 TestRIC=.135 TestSR=.413 Select=val_loss:.006 EpochTime=34s ETA=46m01s BestEpoch=016
+BEST MODEL Epoch=017/100 TrainLoss=0.002152 ValLoss=0.005122 ValIC=.023 ValRIC=.091 ValPrec@10=.509 ValSR=.803 TestIC=.025 TestRIC=.14 TestSR=.467 Select=val_loss:.005 EpochTime=32s ETA=45m28s BestEpoch=017
+BEST MODEL Epoch=018/100 TrainLoss=0.00127 ValLoss=0.004651 ValIC=.013 ValRIC=.065 ValPrec@10=.508 ValSR=.466 TestIC=.022 TestRIC=.141 TestSR=.495 Select=val_loss:.005 EpochTime=34s ETA=45m00s BestEpoch=018
+           Epoch=019/100 TrainLoss=0.003135 ValLoss=0.00498 ValIC=.019 ValRIC=.104 ValPrec@10=.502 ValSR=.325 TestIC=.025 TestRIC=.145 TestSR=1.072 Select=val_loss:.005 EpochTime=33s ETA=44m32s BestEpoch=018
+           Epoch=020/100 TrainLoss=0.001091 ValLoss=0.004932 ValIC=.021 ValRIC=.106 ValPrec@10=.507 ValSR=.135 TestIC=.023 TestRIC=.135 TestSR=1.09 Select=val_loss:.005 EpochTime=33s ETA=44m02s BestEpoch=018
+BEST MODEL Epoch=021/100 TrainLoss=0.001058 ValLoss=0.004351 ValIC=.02 ValRIC=.11 ValPrec@10=.513 ValSR=.13 TestIC=.024 TestRIC=.149 TestSR=1.397 Select=val_loss:.004 EpochTime=33s ETA=43m29s BestEpoch=021
+BEST MODEL Epoch=022/100 TrainLoss=0.001197 ValLoss=0.003778 ValIC=.016 ValRIC=.075 ValPrec@10=.513 ValSR=.303 TestIC=.023 TestRIC=.138 TestSR=1.211 Select=val_loss:.004 EpochTime=34s ETA=43m00s BestEpoch=022
+           Epoch=023/100 TrainLoss=0.001104 ValLoss=0.004192 ValIC=.013 ValRIC=.065 ValPrec@10=.506 ValSR=.27 TestIC=.022 TestRIC=.133 TestSR=.958 Select=val_loss:.004 EpochTime=34s ETA=42m31s BestEpoch=022
+           Epoch=024/100 TrainLoss=0.001396 ValLoss=0.004005 ValIC=.011 ValRIC=.055 ValPrec@10=.507 ValSR=.374 TestIC=.026 TestRIC=.156 TestSR=1.045 Select=val_loss:.004 EpochTime=34s ETA=42m02s BestEpoch=022
+BEST MODEL Epoch=025/100 TrainLoss=0.000863 ValLoss=0.00343 ValIC=.003 ValRIC=.018 ValPrec@10=.505 ValSR=.035 TestIC=.022 TestRIC=.153 TestSR=.964 Select=val_loss:.003 EpochTime=34s ETA=41m32s BestEpoch=025
+BEST MODEL Epoch=026/100 TrainLoss=0.000978 ValLoss=0.003312 ValIC=-.002 ValRIC=-.009 ValPrec@10=.495 ValSR=-.247 TestIC=.026 TestRIC=.18 TestSR=1.616 Select=val_loss:.003 EpochTime=33s ETA=40m58s BestEpoch=026
+           Epoch=027/100 TrainLoss=0.001155 ValLoss=0.003763 ValIC=.013 ValRIC=.056 ValPrec@10=.504 ValSR=.432 TestIC=.025 TestRIC=.155 TestSR=1.05 Select=val_loss:.004 EpochTime=33s ETA=40m25s BestEpoch=026
+BEST MODEL Epoch=028/100 TrainLoss=0.000705 ValLoss=0.003002 ValIC=.006 ValRIC=.03 ValPrec@10=.5 ValSR=.184 TestIC=.024 TestRIC=.163 TestSR=1.51 Select=val_loss:.003 EpochTime=33s ETA=39m52s BestEpoch=028
+BEST MODEL Epoch=029/100 TrainLoss=0.001148 ValLoss=0.002722 ValIC=.01 ValRIC=.048 ValPrec@10=.508 ValSR=.278 TestIC=.024 TestRIC=.149 TestSR=1.433 Select=val_loss:.003 EpochTime=34s ETA=39m21s BestEpoch=029
+           Epoch=030/100 TrainLoss=0.000708 ValLoss=0.00276 ValIC=0 ValRIC=.002 ValPrec@10=.512 ValSR=-.202 TestIC=.022 TestRIC=.158 TestSR=1.856 Select=val_loss:.003 EpochTime=33s ETA=38m48s BestEpoch=029
+BEST MODEL Epoch=031/100 TrainLoss=0.000904 ValLoss=0.002239 ValIC=.003 ValRIC=.014 ValPrec@10=.508 ValSR=.136 TestIC=.025 TestRIC=.17 TestSR=1.788 Select=val_loss:.002 EpochTime=33s ETA=38m15s BestEpoch=031
+           Epoch=032/100 TrainLoss=0.000856 ValLoss=0.002273 ValIC=.001 ValRIC=.007 ValPrec@10=.493 ValSR=.145 TestIC=.025 TestRIC=.173 TestSR=1.994 Select=val_loss:.002 EpochTime=33s ETA=37m43s BestEpoch=031
+           Epoch=033/100 TrainLoss=0.000667 ValLoss=0.002542 ValIC=.013 ValRIC=.063 ValPrec@10=.508 ValSR=.731 TestIC=.027 TestRIC=.161 TestSR=1.745 Select=val_loss:.003 EpochTime=33s ETA=37m11s BestEpoch=031
+BEST MODEL Epoch=034/100 TrainLoss=0.000929 ValLoss=0.002165 ValIC=.005 ValRIC=.025 ValPrec@10=.5 ValSR=-.116 TestIC=.024 TestRIC=.164 TestSR=1.382 Select=val_loss:.002 EpochTime=36s ETA=36m43s BestEpoch=034
+BEST MODEL Epoch=035/100 TrainLoss=0.000784 ValLoss=0.002036 ValIC=.003 ValRIC=.016 ValPrec@10=.494 ValSR=.035 TestIC=.025 TestRIC=.168 TestSR=1.898 Select=val_loss:.002 EpochTime=33s ETA=36m11s BestEpoch=035
+           Epoch=036/100 TrainLoss=0.00099 ValLoss=0.002297 ValIC=.006 ValRIC=.039 ValPrec@10=.503 ValSR=.137 TestIC=.018 TestRIC=.156 TestSR=1.397 Select=val_loss:.002 EpochTime=34s ETA=35m38s BestEpoch=035
+           Epoch=037/100 TrainLoss=0.000596 ValLoss=0.002156 ValIC=0 ValRIC=0 ValPrec@10=.504 ValSR=0 TestIC=.017 TestRIC=.157 TestSR=1.409 Select=val_loss:.002 EpochTime=34s ETA=35m07s BestEpoch=035
+           Epoch=038/100 TrainLoss=0.000728 ValLoss=0.002205 ValIC=-.002 ValRIC=-.013 ValPrec@10=.506 ValSR=.19 TestIC=.016 TestRIC=.155 TestSR=1.495 Select=val_loss:.002 EpochTime=34s ETA=34m36s BestEpoch=035
+           Epoch=039/100 TrainLoss=0.000886 ValLoss=0.002216 ValIC=.005 ValRIC=.027 ValPrec@10=.487 ValSR=.183 TestIC=.02 TestRIC=.168 TestSR=1.363 Select=val_loss:.002 EpochTime=34s ETA=34m04s BestEpoch=035
+BEST MODEL Epoch=040/100 TrainLoss=0.001548 ValLoss=0.002003 ValIC=.009 ValRIC=.048 ValPrec@10=.492 ValSR=.653 TestIC=.02 TestRIC=.164 TestSR=1.458 Select=val_loss:.002 EpochTime=34s ETA=33m31s BestEpoch=040
+BEST MODEL Epoch=041/100 TrainLoss=0.000599 ValLoss=0.001973 ValIC=.002 ValRIC=.01 ValPrec@10=.486 ValSR=.315 TestIC=.019 TestRIC=.162 TestSR=1.329 Select=val_loss:.002 EpochTime=34s ETA=32m59s BestEpoch=041
+BEST MODEL Epoch=042/100 TrainLoss=0.000716 ValLoss=0.001927 ValIC=0 ValRIC=.003 ValPrec@10=.488 ValSR=.332 TestIC=.019 TestRIC=.164 TestSR=1.495 Select=val_loss:.002 EpochTime=34s ETA=32m26s BestEpoch=042
+BEST MODEL Epoch=043/100 TrainLoss=0.000886 ValLoss=0.001833 ValIC=.006 ValRIC=.029 ValPrec@10=.481 ValSR=.511 TestIC=.021 TestRIC=.162 TestSR=1.682 Select=val_loss:.002 EpochTime=32s ETA=31m52s BestEpoch=043
+           Epoch=044/100 TrainLoss=0.000892 ValLoss=0.00192 ValIC=.001 ValRIC=.007 ValPrec@10=.485 ValSR=-.132 TestIC=.02 TestRIC=.158 TestSR=1.329 Select=val_loss:.002 EpochTime=33s ETA=31m18s BestEpoch=043
+           Epoch=045/100 TrainLoss=0.00053 ValLoss=0.001961 ValIC=.006 ValRIC=.029 ValPrec@10=.488 ValSR=.277 TestIC=.019 TestRIC=.159 TestSR=1.512 Select=val_loss:.002 EpochTime=34s ETA=30m46s BestEpoch=043
+           Epoch=046/100 TrainLoss=0.001144 ValLoss=0.001896 ValIC=-.007 ValRIC=-.04 ValPrec@10=.487 ValSR=.033 TestIC=.022 TestRIC=.18 TestSR=2.113 Select=val_loss:.002 EpochTime=34s ETA=30m14s BestEpoch=043
+BEST MODEL Epoch=047/100 TrainLoss=0.000729 ValLoss=0.001824 ValIC=-.003 ValRIC=-.017 ValPrec@10=.489 ValSR=.084 TestIC=.023 TestRIC=.191 TestSR=2.068 Select=val_loss:.002 EpochTime=33s ETA=29m40s BestEpoch=047
+           Epoch=048/100 TrainLoss=0.000699 ValLoss=0.001944 ValIC=-.002 ValRIC=-.015 ValPrec@10=.485 ValSR=.07 TestIC=.02 TestRIC=.189 TestSR=2.371 Select=val_loss:.002 EpochTime=33s ETA=29m07s BestEpoch=047
+           Epoch=049/100 TrainLoss=0.000545 ValLoss=0.001916 ValIC=.004 ValRIC=.025 ValPrec@10=.477 ValSR=.298 TestIC=.021 TestRIC=.178 TestSR=2.341 Select=val_loss:.002 EpochTime=35s ETA=28m35s BestEpoch=047
+           Epoch=050/100 TrainLoss=0.000661 ValLoss=0.001922 ValIC=.013 ValRIC=.059 ValPrec@10=.5 ValSR=1.063 TestIC=.023 TestRIC=.164 TestSR=1.841 Select=val_loss:.002 EpochTime=35s ETA=28m03s BestEpoch=047
+BEST MODEL Epoch=051/100 TrainLoss=0.000753 ValLoss=0.001823 ValIC=0 ValRIC=0 ValPrec@10=.483 ValSR=.303 TestIC=.02 TestRIC=.173 TestSR=1.832 Select=val_loss:.002 EpochTime=34s ETA=27m30s BestEpoch=051
+BEST MODEL Epoch=052/100 TrainLoss=0.000655 ValLoss=0.001602 ValIC=.004 ValRIC=.028 ValPrec@10=.49 ValSR=.331 TestIC=.021 TestRIC=.189 TestSR=2.023 Select=val_loss:.002 EpochTime=34s ETA=26m57s BestEpoch=052
+           Epoch=053/100 TrainLoss=0.000646 ValLoss=0.001754 ValIC=-.002 ValRIC=-.012 ValPrec@10=.485 ValSR=.374 TestIC=.019 TestRIC=.175 TestSR=2.232 Select=val_loss:.002 EpochTime=34s ETA=26m24s BestEpoch=052
+           Epoch=054/100 TrainLoss=0.000729 ValLoss=0.001646 ValIC=.003 ValRIC=.02 ValPrec@10=.491 ValSR=.459 TestIC=.021 TestRIC=.179 TestSR=2.004 Select=val_loss:.002 EpochTime=32s ETA=25m49s BestEpoch=052
+           Epoch=055/100 TrainLoss=0.000799 ValLoss=0.001648 ValIC=-.003 ValRIC=-.02 ValPrec@10=.487 ValSR=.388 TestIC=.019 TestRIC=.171 TestSR=1.69 Select=val_loss:.002 EpochTime=33s ETA=25m15s BestEpoch=052
+           Epoch=056/100 TrainLoss=0.0005 ValLoss=0.001729 ValIC=.004 ValRIC=.022 ValPrec@10=.489 ValSR=.253 TestIC=.021 TestRIC=.189 TestSR=2.199 Select=val_loss:.002 EpochTime=33s ETA=24m41s BestEpoch=052
+           Epoch=057/100 TrainLoss=0.000622 ValLoss=0.001867 ValIC=.003 ValRIC=.018 ValPrec@10=.491 ValSR=.215 TestIC=.019 TestRIC=.185 TestSR=2.231 Select=val_loss:.002 EpochTime=33s ETA=24m08s BestEpoch=052
+           Epoch=058/100 TrainLoss=0.000881 ValLoss=0.001745 ValIC=.003 ValRIC=.014 ValPrec@10=.487 ValSR=.335 TestIC=.02 TestRIC=.167 TestSR=2.509 Select=val_loss:.002 EpochTime=33s ETA=23m34s BestEpoch=052
+           Epoch=059/100 TrainLoss=0.00054 ValLoss=0.001662 ValIC=.014 ValRIC=.066 ValPrec@10=.506 ValSR=1.028 TestIC=.023 TestRIC=.173 TestSR=1.714 Select=val_loss:.002 EpochTime=33s ETA=23m00s BestEpoch=052
+           Epoch=060/100 TrainLoss=0.000789 ValLoss=0.002024 ValIC=.005 ValRIC=.035 ValPrec@10=.49 ValSR=.424 TestIC=.02 TestRIC=.188 TestSR=2.164 Select=val_loss:.002 EpochTime=34s ETA=22m26s BestEpoch=052
+           Epoch=061/100 TrainLoss=0.000485 ValLoss=0.001737 ValIC=.001 ValRIC=.009 ValPrec@10=.486 ValSR=.347 TestIC=.018 TestRIC=.172 TestSR=2.108 Select=val_loss:.002 EpochTime=33s ETA=21m53s BestEpoch=052
+           Epoch=062/100 TrainLoss=0.000592 ValLoss=0.001649 ValIC=.004 ValRIC=.027 ValPrec@10=.484 ValSR=.369 TestIC=.017 TestRIC=.175 TestSR=1.813 Select=val_loss:.002 EpochTime=33s ETA=21m18s BestEpoch=052
+           Epoch=063/100 TrainLoss=0.000529 ValLoss=0.001847 ValIC=.004 ValRIC=.022 ValPrec@10=.485 ValSR=.357 TestIC=.019 TestRIC=.176 TestSR=2.177 Select=val_loss:.002 EpochTime=33s ETA=20m45s BestEpoch=052
+           Epoch=064/100 TrainLoss=0.000793 ValLoss=0.001675 ValIC=.007 ValRIC=.041 ValPrec@10=.489 ValSR=.643 TestIC=.019 TestRIC=.18 TestSR=1.991 Select=val_loss:.002 EpochTime=33s ETA=20m11s BestEpoch=052
+           Epoch=065/100 TrainLoss=0.000613 ValLoss=0.002011 ValIC=-.011 ValRIC=-.084 ValPrec@10=.489 ValSR=-.105 TestIC=.009 TestRIC=.117 TestSR=1.76 Select=val_loss:.002 EpochTime=34s ETA=19m38s BestEpoch=052
+           Epoch=066/100 TrainLoss=0.000662 ValLoss=0.001749 ValIC=.002 ValRIC=.011 ValPrec@10=.478 ValSR=.449 TestIC=.018 TestRIC=.162 TestSR=2.104 Select=val_loss:.002 EpochTime=33s ETA=19m04s BestEpoch=052
+           Epoch=067/100 TrainLoss=0.000568 ValLoss=0.001656 ValIC=.005 ValRIC=.03 ValPrec@10=.489 ValSR=.251 TestIC=.019 TestRIC=.18 TestSR=1.934 Select=val_loss:.002 EpochTime=33s ETA=18m30s BestEpoch=052
+           Epoch=068/100 TrainLoss=0.000591 ValLoss=0.00192 ValIC=-.005 ValRIC=-.037 ValPrec@10=.483 ValSR=.206 TestIC=.015 TestRIC=.17 TestSR=2.287 Select=val_loss:.002 EpochTime=34s ETA=17m57s BestEpoch=052
+BEST MODEL Epoch=069/100 TrainLoss=0.00094 ValLoss=0.001562 ValIC=.003 ValRIC=.02 ValPrec@10=.489 ValSR=.566 TestIC=.018 TestRIC=.166 TestSR=2.03 Select=val_loss:.002 EpochTime=33s ETA=17m23s BestEpoch=069
+           Epoch=070/100 TrainLoss=0.000508 ValLoss=0.001572 ValIC=-.001 ValRIC=-.005 ValPrec@10=.488 ValSR=.337 TestIC=.016 TestRIC=.172 TestSR=2.074 Select=val_loss:.002 EpochTime=32s ETA=16m49s BestEpoch=069
+           Epoch=071/100 TrainLoss=0.000683 ValLoss=0.001654 ValIC=.003 ValRIC=.024 ValPrec@10=.483 ValSR=.33 TestIC=.015 TestRIC=.157 TestSR=1.611 Select=val_loss:.002 EpochTime=33s ETA=16m15s BestEpoch=069
+           Epoch=072/100 TrainLoss=0.000569 ValLoss=0.001641 ValIC=.017 ValRIC=.1 ValPrec@10=.488 ValSR=.511 TestIC=.021 TestRIC=.178 TestSR=1.902 Select=val_loss:.002 EpochTime=33s ETA=15m42s BestEpoch=069
+BEST MODEL Epoch=073/100 TrainLoss=0.000623 ValLoss=0.001463 ValIC=.007 ValRIC=.047 ValPrec@10=.487 ValSR=.489 TestIC=.019 TestRIC=.178 TestSR=2.102 Select=val_loss:.001 EpochTime=33s ETA=15m08s BestEpoch=073
+           Epoch=074/100 TrainLoss=0.000553 ValLoss=0.001571 ValIC=-.002 ValRIC=-.014 ValPrec@10=.485 ValSR=.353 TestIC=.014 TestRIC=.156 TestSR=1.988 Select=val_loss:.002 EpochTime=34s ETA=14m34s BestEpoch=073
+           Epoch=075/100 TrainLoss=0.000553 ValLoss=0.001472 ValIC=.002 ValRIC=.011 ValPrec@10=.484 ValSR=.172 TestIC=.017 TestRIC=.16 TestSR=2.157 Select=val_loss:.001 EpochTime=33s ETA=14m01s BestEpoch=073
+BEST MODEL Epoch=076/100 TrainLoss=0.000775 ValLoss=0.001462 ValIC=.009 ValRIC=.056 ValPrec@10=.487 ValSR=.173 TestIC=.018 TestRIC=.164 TestSR=1.867 Select=val_loss:.001 EpochTime=33s ETA=13m27s BestEpoch=076
+BEST MODEL Epoch=077/100 TrainLoss=0.000517 ValLoss=0.001398 ValIC=.002 ValRIC=.01 ValPrec@10=.478 ValSR=.408 TestIC=.017 TestRIC=.164 TestSR=1.915 Select=val_loss:.001 EpochTime=34s ETA=12m54s BestEpoch=077
+           Epoch=078/100 TrainLoss=0.000598 ValLoss=0.001489 ValIC=.011 ValRIC=.065 ValPrec@10=.503 ValSR=.335 TestIC=.016 TestRIC=.152 TestSR=1.755 Select=val_loss:.001 EpochTime=33s ETA=12m20s BestEpoch=077
+           Epoch=079/100 TrainLoss=0.000442 ValLoss=0.001431 ValIC=.006 ValRIC=.032 ValPrec@10=.485 ValSR=.185 TestIC=.017 TestRIC=.149 TestSR=1.582 Select=val_loss:.001 EpochTime=33s ETA=11m46s BestEpoch=077
+           Epoch=080/100 TrainLoss=0.000588 ValLoss=0.001557 ValIC=.01 ValRIC=.049 ValPrec@10=.495 ValSR=.393 TestIC=.02 TestRIC=.165 TestSR=2.237 Select=val_loss:.002 EpochTime=33s ETA=11m12s BestEpoch=077
+           Epoch=081/100 TrainLoss=0.000607 ValLoss=0.001664 ValIC=-.002 ValRIC=-.012 ValPrec@10=.486 ValSR=.033 TestIC=.013 TestRIC=.136 TestSR=1.855 Select=val_loss:.002 EpochTime=33s ETA=10m39s BestEpoch=077
+           Epoch=082/100 TrainLoss=0.000455 ValLoss=0.001419 ValIC=0 ValRIC=-.001 ValPrec@10=.492 ValSR=.454 TestIC=.015 TestRIC=.148 TestSR=1.827 Select=val_loss:.001 EpochTime=33s ETA=10m05s BestEpoch=077
+           Epoch=083/100 TrainLoss=0.000607 ValLoss=0.001417 ValIC=-.005 ValRIC=-.038 ValPrec@10=.505 ValSR=.527 TestIC=.008 TestRIC=.106 TestSR=2.312 Select=val_loss:.001 EpochTime=33s ETA=9m31s BestEpoch=077
+           Epoch=084/100 TrainLoss=0.00054 ValLoss=0.001711 ValIC=.011 ValRIC=.068 ValPrec@10=.5 ValSR=.213 TestIC=.02 TestRIC=.181 TestSR=2.175 Select=val_loss:.002 EpochTime=33s ETA=8m58s BestEpoch=077
+           Epoch=085/100 TrainLoss=0.000964 ValLoss=0.001624 ValIC=.012 ValRIC=.065 ValPrec@10=.492 ValSR=.266 TestIC=.018 TestRIC=.154 TestSR=1.79 Select=val_loss:.002 EpochTime=33s ETA=8m24s BestEpoch=077
+BEST MODEL Epoch=086/100 TrainLoss=0.000461 ValLoss=0.001372 ValIC=.003 ValRIC=.018 ValPrec@10=.489 ValSR=.287 TestIC=.016 TestRIC=.15 TestSR=1.491 Select=val_loss:.001 EpochTime=34s ETA=7m50s BestEpoch=086
+           Epoch=087/100 TrainLoss=0.000472 ValLoss=0.001539 ValIC=.004 ValRIC=.023 ValPrec@10=.494 ValSR=.08 TestIC=.014 TestRIC=.15 TestSR=1.559 Select=val_loss:.002 EpochTime=33s ETA=7m17s BestEpoch=086
+           Epoch=088/100 TrainLoss=0.000618 ValLoss=0.001401 ValIC=.006 ValRIC=.029 ValPrec@10=.485 ValSR=.142 TestIC=.018 TestRIC=.144 TestSR=1.371 Select=val_loss:.001 EpochTime=33s ETA=6m43s BestEpoch=086
+BEST MODEL Epoch=089/100 TrainLoss=0.000564 ValLoss=0.001367 ValIC=.008 ValRIC=.04 ValPrec@10=.49 ValSR=.288 TestIC=.019 TestRIC=.146 TestSR=1.654 Select=val_loss:.001 EpochTime=33s ETA=6m10s BestEpoch=089
+BEST MODEL Epoch=090/100 TrainLoss=0.000535 ValLoss=0.001345 ValIC=0 ValRIC=-.001 ValPrec@10=.519 ValSR=1.006 TestIC=.007 TestRIC=.084 TestSR=1.287 Select=val_loss:.001 EpochTime=33s ETA=5m36s BestEpoch=090
+           Epoch=091/100 TrainLoss=0.000515 ValLoss=0.001422 ValIC=.004 ValRIC=.023 ValPrec@10=.501 ValSR=.33 TestIC=.016 TestRIC=.163 TestSR=1.386 Select=val_loss:.001 EpochTime=34s ETA=5m02s BestEpoch=090
+           Epoch=092/100 TrainLoss=0.000499 ValLoss=0.001412 ValIC=.019 ValRIC=.096 ValPrec@10=.509 ValSR=.803 TestIC=.018 TestRIC=.154 TestSR=1.71 Select=val_loss:.001 EpochTime=33s ETA=4m29s BestEpoch=090
+           Epoch=093/100 TrainLoss=0.000484 ValLoss=0.001347 ValIC=.007 ValRIC=.046 ValPrec@10=.494 ValSR=.352 TestIC=.014 TestRIC=.129 TestSR=1.403 Select=val_loss:.001 EpochTime=34s ETA=3m55s BestEpoch=090
+           Epoch=094/100 TrainLoss=0.000634 ValLoss=0.001404 ValIC=.012 ValRIC=.068 ValPrec@10=.496 ValSR=.215 TestIC=.016 TestRIC=.133 TestSR=1.605 Select=val_loss:.001 EpochTime=34s ETA=3m21s BestEpoch=090
+           Epoch=095/100 TrainLoss=0.000599 ValLoss=0.001359 ValIC=.01 ValRIC=.059 ValPrec@10=.499 ValSR=.389 TestIC=.014 TestRIC=.137 TestSR=1.733 Select=val_loss:.001 EpochTime=32s ETA=2m48s BestEpoch=090
+           Epoch=096/100 TrainLoss=0.00055 ValLoss=0.001401 ValIC=.001 ValRIC=.006 ValPrec@10=.49 ValSR=.005 TestIC=.015 TestRIC=.131 TestSR=1.032 Select=val_loss:.001 EpochTime=34s ETA=2m14s BestEpoch=090
+           Epoch=097/100 TrainLoss=0.000518 ValLoss=0.001427 ValIC=.014 ValRIC=.071 ValPrec@10=.491 ValSR=-.099 TestIC=.02 TestRIC=.15 TestSR=1.561 Select=val_loss:.001 EpochTime=33s ETA=1m40s BestEpoch=090
+BEST MODEL Epoch=098/100 TrainLoss=0.000554 ValLoss=0.001317 ValIC=.007 ValRIC=.042 ValPrec@10=.492 ValSR=.274 TestIC=.014 TestRIC=.124 TestSR=1.798 Select=val_loss:.001 EpochTime=33s ETA=1m07s BestEpoch=098
+           Epoch=099/100 TrainLoss=0.000523 ValLoss=0.001737 ValIC=.021 ValRIC=.118 ValPrec@10=.512 ValSR=.651 TestIC=.014 TestRIC=.118 TestSR=1.517 Select=val_loss:.002 EpochTime=34s ETA=33s BestEpoch=098
+           Epoch=100/100 TrainLoss=0.000511 ValLoss=0.001393 ValIC=.007 ValRIC=.044 ValPrec@10=.492 ValSR=.262 TestIC=.015 TestRIC=.139 TestSR=1.582 Select=val_loss:.001 EpochTime=33s ETA=0s BestEpoch=098
+----------------------------------------------------------------------------------------------------
+Final Test  best=098 loss=0.000527 mse=0.000522 rank=0.000057
+Metrics     IC=.014 RIC=.124 P10=.517 SR=1.798
+[OUTPUT] total_time=56m09s  avg_epoch=33s
+[FILE  ] best_model=outputs\20260929_211700_SP500\checkpoints\best_model.pt
+[FILE  ] history=outputs\20260929_211700_SP500\tables\history.csv
+[FILE  ] metrics=outputs\20260929_211700_SP500\tables\metrics.json
+[FILE  ] figures=outputs\20260929_211700_SP500\figures
+====================================================================================================

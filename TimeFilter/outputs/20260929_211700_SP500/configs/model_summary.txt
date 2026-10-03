@@ -1,0 +1,88 @@
+StockMixer(
+  (mixer): MultTime2dMixer(
+    (mix_layer): Mixer2dTriU(
+      (LN_1): LayerNorm((16, 5), eps=1e-05, elementwise_affine=True, bias=True)
+      (LN_2): LayerNorm((16, 5), eps=1e-05, elementwise_affine=True, bias=True)
+      (timeMixer): TriU(
+        (triU): ParameterList(
+            (0): Object of type: Linear
+            (1): Object of type: Linear
+            (2): Object of type: Linear
+            (3): Object of type: Linear
+            (4): Object of type: Linear
+            (5): Object of type: Linear
+            (6): Object of type: Linear
+            (7): Object of type: Linear
+            (8): Object of type: Linear
+            (9): Object of type: Linear
+            (10): Object of type: Linear
+            (11): Object of type: Linear
+            (12): Object of type: Linear
+            (13): Object of type: Linear
+            (14): Object of type: Linear
+            (15): Object of type: Linear
+          (0): Linear(in_features=1, out_features=1, bias=True)
+          (1): Linear(in_features=2, out_features=1, bias=True)
+          (2): Linear(in_features=3, out_features=1, bias=True)
+          (3): Linear(in_features=4, out_features=1, bias=True)
+          (4): Linear(in_features=5, out_features=1, bias=True)
+          (5): Linear(in_features=6, out_features=1, bias=True)
+          (6): Linear(in_features=7, out_features=1, bias=True)
+          (7): Linear(in_features=8, out_features=1, bias=True)
+          (8): Linear(in_features=9, out_features=1, bias=True)
+          (9): Linear(in_features=10, out_features=1, bias=True)
+          (10): Linear(in_features=11, out_features=1, bias=True)
+          (11): Linear(in_features=12, out_features=1, bias=True)
+          (12): Linear(in_features=13, out_features=1, bias=True)
+          (13): Linear(in_features=14, out_features=1, bias=True)
+          (14): Linear(in_features=15, out_features=1, bias=True)
+          (15): Linear(in_features=16, out_features=1, bias=True)
+        )
+      )
+      (channelMixer): MixerBlock(
+        (dense_1): Linear(in_features=5, out_features=5, bias=True)
+        (LN): GELU(approximate='none')
+        (dense_2): Linear(in_features=5, out_features=5, bias=True)
+      )
+    )
+    (scale_mix_layer): Mixer2dTriU(
+      (LN_1): LayerNorm((8, 5), eps=1e-05, elementwise_affine=True, bias=True)
+      (LN_2): LayerNorm((8, 5), eps=1e-05, elementwise_affine=True, bias=True)
+      (timeMixer): TriU(
+        (triU): ParameterList(
+            (0): Object of type: Linear
+            (1): Object of type: Linear
+            (2): Object of type: Linear
+            (3): Object of type: Linear
+            (4): Object of type: Linear
+            (5): Object of type: Linear
+            (6): Object of type: Linear
+            (7): Object of type: Linear
+          (0): Linear(in_features=1, out_features=1, bias=True)
+          (1): Linear(in_features=2, out_features=1, bias=True)
+          (2): Linear(in_features=3, out_features=1, bias=True)
+          (3): Linear(in_features=4, out_features=1, bias=True)
+          (4): Linear(in_features=5, out_features=1, bias=True)
+          (5): Linear(in_features=6, out_features=1, bias=True)
+          (6): Linear(in_features=7, out_features=1, bias=True)
+          (7): Linear(in_features=8, out_features=1, bias=True)
+        )
+      )
+      (channelMixer): MixerBlock(
+        (dense_1): Linear(in_features=5, out_features=5, bias=True)
+        (LN): GELU(approximate='none')
+        (dense_2): Linear(in_features=5, out_features=5, bias=True)
+      )
+    )
+  )
+  (channel_fc): Linear(in_features=5, out_features=1, bias=True)
+  (time_fc): Linear(in_features=40, out_features=1, bias=True)
+  (conv): Conv1d(5, 5, kernel_size=(2,), stride=(2,))
+  (stock_mixer): NoGraphMixer(
+    (dense1): Linear(in_features=474, out_features=8, bias=True)
+    (activation): Hardswish()
+    (dense2): Linear(in_features=8, out_features=474, bias=True)
+    (layer_norm_stock): LayerNorm((474,), eps=1e-05, elementwise_affine=True, bias=True)
+  )
+  (time_fc_): Linear(in_features=40, out_features=1, bias=True)
+)

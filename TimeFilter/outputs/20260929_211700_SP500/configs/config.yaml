@@ -1,0 +1,26 @@
+data:
+  market_name: SP500
+  dataset_root: dataset
+  stock_num: 474
+  fea_num: 5
+  lookback_length: 16
+  steps: 1
+  valid_index: 1006
+  test_index: 1259
+model:
+  market_num: 8
+  scale_factor: 3
+  activation: GELU
+training:
+  epochs: 100
+  learning_rate: 0.001
+  alpha: 0.1
+  numpy_seed: 123456789
+  torch_seed: 12345678
+  device: cuda
+  selection_metric: val_loss
+output:
+  save_checkpoints: true
+  save_history: true
+  save_figures: true
+config_path: D:\finance\model\Timefilter\TimeFilter\scripts\stockmixer_sp500_paper.yaml

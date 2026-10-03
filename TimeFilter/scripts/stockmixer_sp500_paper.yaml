@@ -1,0 +1,27 @@
+# 给 D:/finance/model/StockMixer/StockMixer/src/train.py --config 使用。
+# 仅对齐 SP500 论文数据协议；运行前需确认 StockMixer 训练偏移不会跨入验证目标日。
+data:
+  market_name: SP500
+  dataset_root: dataset
+  stock_num: 474
+  fea_num: 5
+  lookback_length: 16
+  steps: 1
+  valid_index: 1006
+  test_index: 1259
+model:
+  market_num: 8
+  scale_factor: 3
+  activation: GELU
+training:
+  epochs: 100
+  learning_rate: 0.001
+  alpha: 0.1
+  numpy_seed: 123456789
+  torch_seed: 12345678
+  device: cuda
+  selection_metric: val_loss  # StockMixer 原始选模口径；严格模型比较需另行统一。
+output:
+  save_checkpoints: true
+  save_history: true
+  save_figures: true

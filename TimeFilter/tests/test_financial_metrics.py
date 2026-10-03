@@ -17,6 +17,7 @@ from utils.stockmixer_metrics import compute_metrics
 
 
 REFERENCE_ROOT = Path(r'D:\finance\model\Signed_StockMixer\src')
+ORIGINAL_STOCKMIXER_ROOT = Path(r'D:\finance\baseline\StockMixer-master\src')
 
 
 class FinancialMetricTests(unittest.TestCase):
@@ -50,10 +51,11 @@ class FinancialMetricTests(unittest.TestCase):
             for key in actual:
                 np.testing.assert_allclose(actual[key], expected[key], rtol=1e-12, atol=1e-12, equal_nan=True)
 
-    @unittest.skipUnless((REFERENCE_ROOT / 'evaluator.py').exists(),
-                         'Local StockMixer evaluator is unavailable')
+    @unittest.skipUnless((ORIGINAL_STOCKMIXER_ROOT / 'evaluator.py').exists(),
+                         'Original StockMixer evaluator is unavailable')
     def test_original_evaluator_parity_for_complete_sp500_mask(self):
-        spec = importlib.util.spec_from_file_location('reference_evaluator', REFERENCE_ROOT / 'evaluator.py')
+        spec = importlib.util.spec_from_file_location(
+            'reference_evaluator', ORIGINAL_STOCKMIXER_ROOT / 'evaluator.py')
         reference = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(reference)
         expected = reference.evaluate(self.pred, self.true, self.mask)

@@ -1,9 +1,11 @@
-"""Financial metrics aligned with the local Signed_StockMixer implementation.
+"""Financial metrics; SP500 reference metrics match original StockMixer.
 
 The four calculation functions below are copied without changes from
 D:/finance/model/Signed_StockMixer/src/train_signed_stockmixer.py.
 Inputs use [stocks, prediction_days], with returns in decimal units.
-RIC follows the reference's ICIR definition; RankIC is Spearman correlation.
+For SP500's all-valid mask, IC/RIC/precision/SR match
+D:/finance/baseline/StockMixer-master/src/evaluator.py.
+RIC is Pearson ICIR in released code; RankIC is mean daily Spearman.
 """
 
 import numpy as np

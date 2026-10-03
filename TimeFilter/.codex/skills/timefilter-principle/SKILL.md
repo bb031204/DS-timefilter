@@ -5,14 +5,16 @@ description: 修改 TimeFilter 项目的模型、金融数据适配、训练、�
 
 # TimeFilter 金融迁移原则
 
-本项目将原始时序预测模型 TimeFilter 迁移到 StockMixer 数据集，目标是利用过去的交易时间步预测下一交易日的股票表现。StockMixer 参考实现位于 `D:\finance\model\StockMixer`。
+本项目将原始时序预测模型 TimeFilter 迁移到 StockMixer 数据集，目标是利用过去的交易时间步预测下一交易日的股票表现。StockMixer 的开源原始仓库位于 `D:\finance\baseline\StockMixer-master`。代码对比分析优先以该仓库为准；`D:\finance\model\StockMixer\StockMixer` 是本地实验封装版，使用其训练结果时应核对并说明与原始仓库的差异。
 
 修改前，先确认需求、当前实现和受影响范围，并遵循以下原则：
 
 1. **保护模型主体。** 保留原始 TimeFilter 的核心计算逻辑和整体结构。优先在数据适配、训练流程、评估、配置或脚本层解决金融任务的问题；不要为了追求指标而暗中改写模型。若确有必要改变模型，先说明原因、预期影响及如何与原版对照。
-2. **参考 StockMixer，保持 TimeFilter 为主体。** 涉及数据含义、预测目标、损失函数、选模或评价指标时，按问题阅读 `D:\finance\model\StockMixer\src` 下相关实现及数据说明。原始 StockMixer 的运行结果图位于 `D:\finance\model\Timefilter\TimeFilter\outputs\stcokmixer结果.png`，分析对照结果时可参考。核对输入、标签时间、缺失值/掩码、数据划分、损失和指标口径；参考其金融实验协议，不照搬 StockMixer 的模型结构，也不假定仅凭结果图就能判断两者可比。
+2. **参考 StockMixer，保持 TimeFilter 为主体。** 涉及数据含义、预测目标、损失函数、选模或评价指标时，按问题优先阅读开源原始仓库 `D:\finance\baseline\StockMixer-master\src` 下的实现及数据说明；如需分析本地封装版的权重或输出，再核对 `D:\finance\model\StockMixer\StockMixer\src` 的改动。原始 StockMixer 的运行结果图位于 `D:\finance\model\Timefilter\TimeFilter\outputs\stcokmixer结果.png`，分析对照结果时可参考。核对输入、标签时间、缺失值/掩码、数据划分、损失和指标口径；参考其金融实验协议，不照搬 StockMixer 的模型结构，也不假定仅凭结果图就能判断两者可比。
 3. **先判断建议是否合理。** 对用户提出的修改先做简短推理。若会引入未来信息泄漏、测试集调参、无关变量变化、指标口径不一致，或破坏原模型逻辑等潜在问题，应明确指出并建议更科学的替代方案；随后在用户已授权的范围内推进。
 4. **清晰且可复现。** 谨慎的修改，只修改相关文件，保持代码和配置易读。影响实验结果时，记录或核对随机种子、实际生效参数、数据划分、代码与数据版本、模型选择指标和权重来源。用验证集选模型，测试集只用于最终评估；对照实验尽量只改变一个因素。
 5. **通过配置调整参数。** 常规金融实验的可调参数在本项目 `config.yaml` 中修改；需要新增参数时，先将其接入配置读取流程，不在模型代码中硬编码，并核对启动命令是否覆盖配置值。
+
+6. **固定 SP500 对照协议与 RIC 口径。** 对照前核对两边使用同一 SP500.npy、相同股票顺序、过去 16 个交易日预测下一交易日收益率，并按目标日核对论文 SP500 的训练/验证/测试边界 1006/1259、测试日 1259..1610；训练窗口的目标日不得越过训练边界。保存预测值、标签、有效掩码及目标日索引，用同一程序复算指标。TimeFilter 的 `RIC` 对应 StockMixer 开源 `evaluator.py`：每日横截面 Pearson IC 的均值除以其标准差（即 ICIR）；`RankIC` 才是每日 Spearman 的均值。StockMixer 论文文字把 RIC 定义为平均 Spearman，但表格数字的实际生成口径尚未核实，不要直接把论文 RIC 数字与本项目 RIC 横比。
 
 修改后进行与变更相称的检查，并简要说明做了什么、如何验证、哪些结论仍受实验条件限制。

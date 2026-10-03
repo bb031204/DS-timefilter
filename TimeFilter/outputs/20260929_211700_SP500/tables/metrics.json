@@ -1,0 +1,33 @@
+{
+  "selection_logic": "stockmixer: record val_perf and test_perf when val_loss improves",
+  "selection_metric": "val_loss",
+  "selection_mode": "min",
+  "selection_description": "Validation total loss",
+  "best_selection_value": 0.0013171256082836471,
+  "best_epoch": 98,
+  "best_validation_loss": 0.0013171256082836471,
+  "best_valid_perf": {
+    "mse": 0.0013027251995861094,
+    "IC": 0.007116353933016888,
+    "RIC": 0.041966003904948604,
+    "sharpe5": 0.2737352817651121,
+    "prec_10": 0.49209486166007904
+  },
+  "best_test_perf": {
+    "mse": 0.0005217025792878151,
+    "IC": 0.014129689826629209,
+    "RIC": 0.12411120840333674,
+    "sharpe5": 1.7984209584613668,
+    "prec_10": 0.5170454545454546
+  },
+  "test_loss": 0.0005274357054490379,
+  "test_mse_loss_component": 0.0005217025526772803,
+  "test_rank_loss_component": 5.7331528394529e-05,
+  "test_metrics": {
+    "mse": 0.0005217025792878151,
+    "IC": 0.014129689826629209,
+    "RIC": 0.12411120840333674,
+    "sharpe5": 1.7984209584613668,
+    "prec_10": 0.5170454545454546
+  }
+}

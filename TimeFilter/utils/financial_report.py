@@ -52,7 +52,7 @@ class FinancialReport:
         config = {
             'mode': mode,
             'args': vars(args),
-            'metric_reference': 'Signed_StockMixer/src/train_signed_stockmixer.py:compute_metrics',
+            'metric_reference': 'D:/finance/baseline/StockMixer-master/src/evaluator.py (SP500 all-valid mask); TimeFilter/utils/stockmixer_metrics.py',
             'RIC_definition': 'mean(daily Pearson IC) / std(daily Pearson IC), ddof=0',
             'RankIC_definition': 'mean(valid daily Spearman correlation), average ranks for ties',
             'precision_n': 10,
@@ -102,11 +102,15 @@ class FinancialReport:
         targets = np.ascontiguousarray(trues[:, 0, :].T)
         if targets.shape[1] != len(dataset):
             raise ValueError('Final financial report requires the complete ordered test set')
-        np.savez_compressed(
-            self.path / 'test_predictions.npz',
-            prediction=predictions, ground_truth=targets,
-            mask=np.ones_like(targets) if masks is None else np.ascontiguousarray(masks[:, 0, :].T),
-            target_index=np.arange(dataset.target_start, dataset.target_end),
-            source_day_index=np.arange(dataset.target_start, dataset.target_end) + dataset.START_DAY,
-        )
+        saved = {
+            'prediction': predictions,
+            'ground_truth': targets,
+            'mask': np.ones_like(targets) if masks is None else np.ascontiguousarray(masks[:, 0, :].T),
+            'target_index': np.arange(dataset.target_start, dataset.target_end),
+            'source_day_index': np.arange(dataset.target_start, dataset.target_end) + dataset.START_DAY,
+        }
+        if hasattr(dataset, 'seq_len') and hasattr(dataset, 'pred_len'):
+            saved['lookback_length'] = np.asarray(dataset.seq_len)
+            saved['horizon'] = np.asarray(dataset.pred_len)
+        np.savez_compressed(self.path / 'test_predictions.npz', **saved)
         print(f'Financial results saved: {self.path.resolve()}')
