@@ -34,6 +34,11 @@ class Dataset_SP500(Dataset):
             raise ValueError("TimeFilter requires seq_len divisible by patch_len")
         if getattr(args, 'augmentation_ratio', 0):
             raise ValueError("SP500 does not implement data augmentation")
+        self.input_features = getattr(args, 'financial_input_features', 'returns')
+        if self.input_features not in ('returns', 'eod5'):
+            raise ValueError("SP500 financial_input_features must be returns or eod5")
+        if self.input_features == 'eod5' and getattr(args, 'financial_norm', 0):
+            raise ValueError("SP500 eod5 input requires financial_norm=0")
 
         path = os.path.join(root_path, data_path)
         raw = np.load(path, mmap_mode='r', allow_pickle=False)
@@ -63,10 +68,19 @@ class Dataset_SP500(Dataset):
         }[flag]
         self.target_start = target_start
         self.target_end = target_end
-        self.data_x = returns[target_start - self.seq_len:target_end]
-        self.data_y = self.data_x
-        # No external scaling: predictions/labels are actual daily returns.
-        # TimeFilter's internal normalization remains completely unchanged.
+        self.data_y = returns[target_start - self.seq_len:target_end]
+        if self.input_features == 'eod5':
+            # Preserve StockMixer's five normalized EOD values and stock order.
+            # __getitem__ ends every input window before its target day.
+            history = raw[:, self.START_DAY + target_start - self.seq_len:
+                          self.START_DAY + target_end, :]
+            self.data_x = np.ascontiguousarray(history.transpose(1, 0, 2), dtype=np.float32)
+            if not np.isfinite(self.data_x).all():
+                raise ValueError("SP500 eod5 input must be finite")
+        else:
+            self.data_x = self.data_y
+        # No external scaling: labels are actual daily returns; eod5 inputs
+        # retain the released StockMixer feature values.
         self.scale = False
         # run.py's forecasting experiment does not consume calendar features.
         self.data_stamp = np.zeros((len(self.data_x), 1), dtype=np.float32)

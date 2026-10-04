@@ -26,7 +26,7 @@ class FinancialGradientDiagnosticTests(unittest.TestCase):
                                  mode=None, checkpoint=None, batch_size=None,
                                  train_epochs=None, learning_rate=None, moe_aux_weight=None)
         command = build_command(cli)
-        self.assertEqual(command[command.index('--financial_selection') + 1], 'RankIC')
+        self.assertEqual(command[command.index('--financial_selection') + 1], 'stockmixer_val_loss')
         self.assertEqual(command[command.index('--gradient_diagnostic_epochs') + 1:
                                  command.index('--gradient_diagnostic_batch_size')], ['0', '1', '5'])
         self.assertEqual(command[command.index('--gradient_diagnostic_batch_size') + 1], '8')

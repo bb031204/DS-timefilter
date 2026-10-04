@@ -10,7 +10,7 @@ import yaml
 
 from models.TimeFilter import Model
 from scripts.run_financial import build_command
-from utils.financial_losses import stockmixer_rank_loss
+from utils.financial_losses import stockmixer_rank_loss, stockmixer_validation_loss
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -24,6 +24,9 @@ class FinancialStage1Tests(unittest.TestCase):
         command = build_command(cli)
         self.assertEqual(command[command.index('--financial_norm') + 1], '0')
         self.assertEqual(command[command.index('--rank_weight') + 1], '0.1')
+        self.assertEqual(command[command.index('--financial_input_features') + 1], 'eod5')
+        self.assertEqual(command[command.index('--financial_selection') + 1], 'stockmixer_val_loss')
+        self.assertEqual(command[command.index('--stockmixer_selection_rank_weight') + 1], '0.1')
         configured_alpha = yaml.safe_load((PROJECT_ROOT / 'config.yaml').read_text(encoding='utf-8'))['model']['alpha']
         self.assertEqual(command[command.index('--alpha') + 1], str(configured_alpha))
         self.assertEqual(command[command.index('--d_model') + 1], '512')
@@ -63,6 +66,27 @@ class FinancialStage1Tests(unittest.TestCase):
         loss.backward()
         self.assertEqual(prediction.grad[0, 0, 2].item(), 0)
         self.assertAlmostEqual(loss.item(), 2 / 9)
+
+    def test_stockmixer_validation_loss_averages_daily_mse_and_rank(self):
+        predicted = torch.tensor([[[1., 0.]], [[0., 1.]]])
+        actual = torch.tensor([[[0., 1.]], [[0., 1.]]])
+        loss = stockmixer_validation_loss(predicted, actual, torch.ones_like(actual), 0.1)
+        self.assertAlmostEqual(loss.item(), 0.525)
+
+    def test_five_feature_patch_forward_and_backward(self):
+        settings = dict(task_name='long_term_forecast', seq_len=4, pred_len=1,
+                        c_out=3, enc_in=3, d_model=8, d_ff=16, patch_len=2,
+                        alpha=0.7, top_p=0.5, pos=0, n_heads=2, e_layers=1,
+                        dropout=0.0, financial_norm=0, financial_input_features='eod5')
+        model = Model(SimpleNamespace(**settings))
+        inputs = torch.randn(2, 4, 3, 5)
+        predictions, moe_loss = model(inputs, None, is_training=True)
+        self.assertEqual(tuple(predictions.shape), (2, 1, 3))
+        self.assertEqual(model.patch_embed.patch_proj.in_features, 10)
+        (predictions.square().mean() + 0.005 * moe_loss).backward()
+        self.assertIsNotNone(model.patch_embed.patch_proj.weight.grad)
+        with self.assertRaisesRegex(ValueError, 'eod5 input'):
+            model(torch.randn(2, 4, 3), None)
 
     def test_small_financial_forward_and_rank_backward(self):
         settings = dict(task_name='long_term_forecast', seq_len=4, pred_len=1,

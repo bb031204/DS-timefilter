@@ -61,7 +61,8 @@ class FinancialReport:
             'sharpe_annualization': 15.87,
             'sharpe_costs_and_risk_free_rate': 0,
             'array_layout': '[stocks, prediction_days]',
-            'data': {'market': args.data, 'input': 'daily returns',
+            'data': {'market': args.data,
+                     'input': 'StockMixer five EOD features' if getattr(args, 'financial_input_features', 'returns') == 'eod5' else 'daily returns',
                      'mask': 'all ones for SP500; valid history and target for NASDAQ/NYSE'},
         }
         self.write_json('config.json', config)

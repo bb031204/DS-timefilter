@@ -2,10 +2,10 @@ from data_provider.data_factory import data_provider
 from exp.exp_basic import Exp_Basic
 from utils.tools import EarlyStopping, adjust_learning_rate, visual
 from utils.metrics import metric
-from utils.financial_selection import FinancialSelection
+from utils.financial_selection import FinancialSelection, best_epoch_for_checkpoint
 from utils.financial_progress import emit_progress
 from utils.financial_gradient_diagnostic import record_gradient_diagnostic
-from utils.financial_losses import stockmixer_rank_loss
+from utils.financial_losses import stockmixer_rank_loss, stockmixer_validation_loss
 from utils.financial_report import FinancialReport, financial_metrics, metric_line
 from data_provider.financial_registry import is_financial_dataset
 import torch
@@ -92,10 +92,12 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                      if rank_weight else prediction_loss.new_zeros(()))
         return prediction_loss, rank_loss
 
-    def vali(self, vali_data, vali_loader, criterion):
+    def vali(self, vali_data, vali_loader, criterion, stockmixer_selection=False):
         total_loss = []
         collect_financial = is_financial_dataset(self.args.data)
         financial_preds, financial_trues, financial_masks = [], [], []
+        selection_loss_sum = 0.0
+        selection_days = 0
         self.model.eval()
         with torch.no_grad():
             for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(vali_loader):
@@ -114,7 +116,14 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 if collect_financial:
                     financial_preds.append(pred.numpy())
                     financial_trues.append(true.numpy())
-                    financial_masks.append(self._financial_mask(batch_y_mark, true).numpy())
+                    financial_mask = self._financial_mask(batch_y_mark, true)
+                    financial_masks.append(financial_mask.numpy())
+                    if stockmixer_selection:
+                        daily_objective = stockmixer_validation_loss(
+                            pred, true, financial_mask,
+                            getattr(self.args, 'stockmixer_selection_rank_weight', 0.1))
+                        selection_loss_sum += daily_objective.item() * pred.shape[0]
+                        selection_days += pred.shape[0]
 
                 loss = self._prediction_loss(pred, true, batch_y_mark, criterion)
 
@@ -126,6 +135,8 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 np.concatenate(financial_trues, axis=0),
                 np.concatenate(financial_masks, axis=0),
             )
+            if stockmixer_selection:
+                self._last_financial_metrics['stockmixer_val_loss'] = selection_loss_sum / selection_days
         self.model.train()
         return total_loss
 
@@ -238,13 +249,17 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
             print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
             train_loss = np.average(train_loss)
-            vali_loss = self.vali(vali_data, vali_loader, criterion)
+            vali_loss = self.vali(
+                vali_data, vali_loader, criterion,
+                stockmixer_selection=(getattr(self.args, 'financial_selection', None) == 'stockmixer_val_loss'))
             if is_financial_dataset(self.args.data):
                 val_financial = self._last_financial_metrics.copy()
             test_loss = float("nan") if validation_only else self.vali(test_data, test_loader, criterion)
 
             message = "Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f}".format(
                 epoch + 1, train_steps, train_loss, vali_loss)
+            if is_financial_dataset(self.args.data) and 'stockmixer_val_loss' in val_financial:
+                message += f" StockMixer Select Loss: {val_financial['stockmixer_val_loss']:.7f}"
             print(message + (' | Test skipped (validation-only)' if validation_only else f' Test Loss: {test_loss:.7f}'))
             if is_financial_dataset(self.args.data):
                 test_financial = {} if validation_only else self._last_financial_metrics.copy()
@@ -367,6 +382,11 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         if is_financial_dataset(self.args.data):
             masks = np.concatenate(financial_masks, axis=0)
             metrics = financial_metrics(preds, trues, masks)
+            best_checkpoint = (checkpoint if test else
+                               os.path.join(self.args.checkpoints, setting, 'best.pth'))
+            best_epoch = best_epoch_for_checkpoint(best_checkpoint)
+            best_epoch_text = str(best_epoch) if best_epoch is not None else 'unknown (selection.json unavailable)'
+            print(f'Final Test | best.pth from epoch {best_epoch_text}')
             print(metric_line('Final Test', metrics))
             if test or not hasattr(self, '_financial_report'):
                 self._financial_report = FinancialReport(setting, self.args, 'evaluation_only')

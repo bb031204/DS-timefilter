@@ -41,13 +41,20 @@ class Model(nn.Module):
         self.patch_len = configs.patch_len
         self.stride = self.patch_len
         self.num_patches = int((self.seq_len - self.patch_len) / self.stride + 1) # L
+        self.financial_input_features = getattr(configs, 'financial_input_features', 'returns')
+        if self.financial_input_features not in ('returns', 'eod5'):
+            raise ValueError('financial_input_features must be returns or eod5')
+        if self.financial_input_features == 'eod5' and getattr(configs, 'financial_norm', 1):
+            raise ValueError('eod5 input requires financial_norm=0')
 
         # Filter
         self.alpha = 0.1 if configs.alpha is None else configs.alpha
         self.top_p = 0.5 if configs.top_p is None else configs.top_p
 
         # embed
-        self.patch_embed = PatchEmbed(self.dim, self.patch_len, self.stride, configs.pos)
+        input_features = 5 if self.financial_input_features == 'eod5' else 1
+        self.patch_embed = PatchEmbed(self.dim, self.patch_len * input_features,
+                                     self.stride * input_features, configs.pos)
 
         # TimeFilter Backbone
         self.backbone = TimeFilter_Backbone(self.dim, self.n_vars, self.d_ff,
@@ -62,12 +69,18 @@ class Model(nn.Module):
                               non_norm=not bool(getattr(configs, 'financial_norm', 1)))
     
     def forward(self, x, masks, is_training=False, target=None):
-        # x: [B, T, C]
-        B, T, C = x.shape
-        # Normalization
-        x = self.norm(x, 'norm')
-        # x: [B, C, T]
-        x = x.permute(0, 2, 1).reshape(-1, C*T) # [B, C*T]
+        if self.financial_input_features == 'eod5':
+            # Finance-only adapter: one token per stock and time patch, with
+            # all five indicators retained inside the patch projection.
+            if x.ndim != 4 or x.shape[2:] != (self.n_vars, 5) or x.shape[1] != self.seq_len:
+                raise ValueError('eod5 input must be [batch, seq_len, stocks, 5]')
+            B, T, C, F = x.shape
+            x = x.permute(0, 2, 1, 3).reshape(B, C * T * F)
+        else:
+            # Original TimeFilter path: [B, T, C].
+            B, T, C = x.shape
+            x = self.norm(x, 'norm')
+            x = x.permute(0, 2, 1).reshape(B, C * T)
         x = self.patch_embed(x) # [B, N, D]  N = [C*T / P]
 
         x, moe_loss = self.backbone(x, masks, self.alpha, is_training)
@@ -76,6 +89,7 @@ class Model(nn.Module):
         x = self.head(x.reshape(-1, self.n_vars, self.num_patches, self.dim).flatten(start_dim=-2)) # [B, C, T]
         x = x.permute(0, 2, 1)
         # De-Normalization
-        x = self.norm(x, 'denorm')
+        if self.financial_input_features != 'eod5':
+            x = self.norm(x, 'denorm')
 
         return x, moe_loss

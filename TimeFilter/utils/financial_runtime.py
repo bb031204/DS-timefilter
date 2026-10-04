@@ -41,7 +41,9 @@ def experiment_key(values, provenance):
     # Configs saved before these options existed retain their original defaults.
     for key, default in (('moe_aux_weight', 0.05), ('rank_weight', 0.0), ('financial_norm', 1),
                          ('financial_seed', 2021),
-                         ('financial_selection', 'mse'), ('financial_validation_only', False)):
+                         ('financial_selection', 'mse'), ('financial_validation_only', False),
+                         ('financial_input_features', 'returns'),
+                         ('stockmixer_selection_rank_weight', 0.1)):
         settings.setdefault(key, default)
     identity = {'settings': settings,
                 'code_sha256': provenance['code_sha256'],

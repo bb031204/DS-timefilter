@@ -9,9 +9,9 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from data_provider.financial_registry import MARKETS, canonical_market
 
 SECTIONS = {
-    'forecast': {'seq_len', 'label_len', 'pred_len'},
+    'forecast': {'seq_len', 'label_len', 'pred_len', 'input_features'},
     'model': {'d_model', 'd_ff', 'n_heads', 'e_layers', 'patch_len', 'alpha', 'top_p', 'dropout', 'pos', 'norm'},
-    'training': {'batch_size', 'train_epochs', 'learning_rate', 'patience', 'lradj', 'itr', 'financial_seed', 'financial_selection', 'moe_aux_weight', 'rank_weight', 'gradient_diagnostic_epochs', 'gradient_diagnostic_batch_size'},
+    'training': {'batch_size', 'train_epochs', 'learning_rate', 'patience', 'lradj', 'itr', 'financial_seed', 'financial_selection', 'stockmixer_selection_rank_weight', 'moe_aux_weight', 'rank_weight', 'gradient_diagnostic_epochs', 'gradient_diagnostic_batch_size'},
     'runtime': {'num_workers', 'gpu', 'cpu'},
 }
 
@@ -33,6 +33,9 @@ def build_command(cli):
                 raise ValueError('model.norm must be YAML true or false')
             values['financial_norm'] = int(entries['norm'])
             entries = {key: value for key, value in entries.items() if key != 'norm'}
+        if section == 'forecast' and 'input_features' in entries:
+            values['financial_input_features'] = entries['input_features']
+            entries = {key: value for key, value in entries.items() if key != 'input_features'}
         values.update(entries)
     for key in ('batch_size', 'train_epochs', 'learning_rate', 'moe_aux_weight'):
         if getattr(cli, key, None) is not None:
@@ -40,6 +43,8 @@ def build_command(cli):
     market = canonical_market(cli.dataset or config.get('dataset', 'SP500'))
     if market not in MARKETS:
         raise ValueError('dataset must be SP500, NASDAQ or NYSE')
+    if values.get('financial_input_features', 'returns') == 'eod5' and market != 'SP500':
+        raise ValueError('Five-feature input is currently supported only for SP500')
     mode = cli.mode or config.get('mode', 'train')
     if mode not in ('train', 'evaluate'):
         raise ValueError('mode must be train or evaluate')
@@ -64,7 +69,8 @@ def build_command(cli):
     root = (PROJECT_ROOT / config.get('data_root', 'stockmixer_dataset') / market).resolve()
     command = [sys.executable, '-u', str(PROJECT_ROOT / 'run.py'),
                '--task_name', 'long_term_forecast', '--is_training', str(int(mode == 'train')),
-               '--model', 'TimeFilter', '--model_id', f'{market}_returns_{seq_len}_1',
+               '--model', 'TimeFilter', '--model_id',
+               f"{market}_{values.get('financial_input_features', 'returns')}_{seq_len}_1",
                '--data', market, '--root_path', str(root),
                '--data_path', 'SP500.npy' if market == 'SP500' else 'gt_data.pkl',
                '--features', 'M', '--freq', 'd', '--financial_config', str(config_path)]

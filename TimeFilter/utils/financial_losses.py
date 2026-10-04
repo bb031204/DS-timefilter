@@ -19,3 +19,15 @@ def stockmixer_rank_loss(prediction, target, mask):
     pair_mask = valid.unsqueeze(-1) * valid.unsqueeze(-2)
     daily_loss = F.relu(predicted_difference * opposite_actual_difference * pair_mask)
     return daily_loss.mean(dim=(-2, -1)).mean()
+
+
+def stockmixer_validation_loss(prediction, target, mask, rank_weight=0.1):
+    """Original StockMixer validation objective on predicted daily returns.
+
+    SP500 uses an all-one mask. The mean over a batch of days equals the mean
+    of StockMixer's one-day MSE + rank losses when batches are day-weighted.
+    """
+    if prediction.shape != target.shape or prediction.shape != mask.shape:
+        raise ValueError('StockMixer validation loss requires matching arrays')
+    mse = F.mse_loss(prediction * mask, target * mask)
+    return mse + rank_weight * stockmixer_rank_loss(prediction, target, mask)

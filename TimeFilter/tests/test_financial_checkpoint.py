@@ -90,6 +90,11 @@ class FinancialCheckpointTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'financial_norm'):
             resolve_financial_checkpoint(self.args, 'setting', self.project)
 
+    def test_checkpoint_rejects_different_financial_input(self):
+        self.args.financial_input_features = 'eod5'
+        with self.assertRaisesRegex(ValueError, 'financial_input_features'):
+            resolve_financial_checkpoint(self.args, 'setting', self.project)
+
     def test_missing_training_config_rejected(self):
         (self.run / 'config.yaml').unlink()
         with self.assertRaisesRegex(ValueError, 'configuration'):

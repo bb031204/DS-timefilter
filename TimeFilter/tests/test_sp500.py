@@ -69,6 +69,26 @@ class SP500InterfaceTests(unittest.TestCase):
         self.assertEqual(y_mark.shape, (9, 1))
         self.assertEqual(len(dataset), 253)
 
+    def test_five_feature_windows_match_stockmixer_data_without_target_day(self):
+        raw = np.load(DATA_ROOT / 'SP500.npy', mmap_mode='r')
+        for flag, start, end in [('train', 16, 1006), ('val', 1006, 1259),
+                                 ('test', 1259, 1611)]:
+            dataset = make_dataset(flag, financial_input_features='eod5', financial_norm=0)
+            for index in (0, len(dataset) - 1):
+                with self.subTest(flag=flag, index=index):
+                    target_day = start + index
+                    x, y, _, _ = dataset[index]
+                    expected = raw[:, 915 + target_day - 16:915 + target_day, :]
+                    np.testing.assert_array_equal(x, expected.transpose(1, 0, 2).astype(np.float32))
+                    np.testing.assert_array_equal(y, self.expected_returns[target_day:target_day + 1])
+                    self.assertEqual(x.shape, (16, 474, 5))
+                    self.assertEqual(y.shape, (1, 474))
+            self.assertEqual(len(dataset), end - start)
+
+    def test_five_feature_input_rejects_window_normalization(self):
+        with self.assertRaisesRegex(ValueError, 'financial_norm=0'):
+            make_dataset(financial_input_features='eod5', financial_norm=1)
+
     def test_no_external_scaling(self):
         dataset = make_dataset()
         self.assertFalse(dataset.scale)

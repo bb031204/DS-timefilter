@@ -43,12 +43,15 @@ def resolve_financial_checkpoint(args, setting, project_root):
     saved.setdefault('moe_aux_weight', 0.05)
     saved.setdefault('rank_weight', 0.0)
     saved.setdefault('financial_norm', 1)
+    saved.setdefault('financial_input_features', 'returns')
+    saved.setdefault('stockmixer_selection_rank_weight', 0.1)
     current = vars(args)
     mismatches = []
     for key, saved_value in saved.items():
         if key in EVALUATION_ONLY:
             continue
-        default = {'moe_aux_weight': 0.05, 'rank_weight': 0.0, 'financial_norm': 1}
+        default = {'moe_aux_weight': 0.05, 'rank_weight': 0.0, 'financial_norm': 1,
+                   'financial_input_features': 'returns', 'stockmixer_selection_rank_weight': 0.1}
         current_value = current.get(key, default.get(key))
         if key == 'data':
             saved_value = canonical_market(saved_value)

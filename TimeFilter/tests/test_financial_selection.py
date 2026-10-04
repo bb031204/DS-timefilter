@@ -1,8 +1,11 @@
+import contextlib
+import io
+import json
 import tempfile
 from pathlib import Path
 import unittest
 import torch
-from utils.financial_selection import FinancialSelection
+from utils.financial_selection import FinancialSelection, best_epoch_for_checkpoint
 from scripts.run_patch_study import choose
 
 
@@ -37,6 +40,41 @@ class SelectionTests(unittest.TestCase):
             selector.update(model, 2, {'RankIC': -.1})
             selector.update(model, 3, {'RankIC': -.2})
             self.assertEqual(selector.best['epoch'], 2)
+
+    def test_stockmixer_validation_loss_selects_lower_value(self):
+        with tempfile.TemporaryDirectory() as root:
+            selector = FinancialSelection(root, Report(), 'stockmixer_val_loss')
+            model = torch.nn.Linear(1, 1)
+            selector.update(model, 1, {'stockmixer_val_loss': 0.2})
+            selector.update(model, 2, {'stockmixer_val_loss': 0.1})
+            selector.update(model, 3, {'stockmixer_val_loss': 0.3})
+            self.assertEqual(selector.best['epoch'], 2)
+
+    def test_new_best_is_green_and_only_printed_on_improvement(self):
+        with tempfile.TemporaryDirectory() as root:
+            selector = FinancialSelection(root, Report(), 'stockmixer_val_loss')
+            model = torch.nn.Linear(1, 1)
+            with contextlib.redirect_stdout(io.StringIO()) as output:
+                selector.update(model, 1, {'stockmixer_val_loss': 0.2})
+                selector.update(model, 2, {'stockmixer_val_loss': 0.3})
+                selector.update(model, 3, {'stockmixer_val_loss': 0.1})
+            message = output.getvalue()
+            self.assertEqual(message.count('New Best'), 2)
+            self.assertIn('\033[32mNew Best | epoch 3', message)
+            self.assertIn('best.pth\033[0m', message)
+
+    def test_final_test_epoch_comes_from_checkpoint_selection_record(self):
+        with tempfile.TemporaryDirectory() as root:
+            run = Path(root)
+            checkpoint = run / 'checkpoints' / 'setting' / 'best.pth'
+            checkpoint.parent.mkdir(parents=True)
+            checkpoint.touch()
+            self.assertIsNone(best_epoch_for_checkpoint(checkpoint))
+            record = run / 'results' / 'setting' / 'financial' / 'selection.json'
+            record.parent.mkdir(parents=True)
+            record.write_text(json.dumps({'best': {'epoch': 7},
+                                          'final_evaluation_checkpoint': 'best.pth'}), encoding='utf-8')
+            self.assertEqual(best_epoch_for_checkpoint(checkpoint), 7)
 
     def test_patch_choice_ignores_test_and_preserves_tie_order(self):
         rows = [{'validation_value': .2, 'test_value': 100, 'patch_len': 16},

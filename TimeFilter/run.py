@@ -143,7 +143,11 @@ if __name__ == '__main__':
     parser.add_argument('--financial_seed', type=int, default=2021)
     parser.add_argument('--financial_norm', type=int, choices=[0, 1], default=1,
                         help='Financial TimeFilter normalization: 1 original behavior, 0 bypass')
-    parser.add_argument('--financial_selection', choices=['mse', 'RankIC', 'IC'], default='mse')
+    parser.add_argument('--financial_input_features', choices=['returns', 'eod5'], default='returns',
+                        help='SP500 input: daily returns or StockMixer five EOD features')
+    parser.add_argument('--financial_selection', choices=['mse', 'RankIC', 'IC', 'stockmixer_val_loss'], default='mse')
+    parser.add_argument('--stockmixer_selection_rank_weight', type=float, default=0.1,
+                        help='Rank weight in StockMixer-style validation loss; independent of training rank_weight')
     parser.add_argument('--gradient_diagnostic_epochs', type=int, nargs='*', default=[],
                         help='Financial gradient checks before training (0) and after selected epochs; empty disables')
     parser.add_argument('--gradient_diagnostic_batch_size', type=int, default=8,
@@ -156,12 +160,21 @@ if __name__ == '__main__':
         parser.error('--moe_aux_weight must be finite and non-negative')
     if not np.isfinite(args.rank_weight) or args.rank_weight < 0:
         parser.error('--rank_weight must be finite and non-negative')
+    if not np.isfinite(args.stockmixer_selection_rank_weight) or args.stockmixer_selection_rank_weight < 0:
+        parser.error('--stockmixer_selection_rank_weight must be finite and non-negative')
     if (any(epoch < 0 for epoch in args.gradient_diagnostic_epochs)
             or args.gradient_diagnostic_epochs != sorted(set(args.gradient_diagnostic_epochs))):
         parser.error('--gradient_diagnostic_epochs must be sorted, distinct and non-negative')
     if args.gradient_diagnostic_batch_size <= 0:
         parser.error('--gradient_diagnostic_batch_size must be positive')
     from data_provider.financial_registry import is_financial_dataset, validate_files
+
+    if args.financial_input_features == 'eod5' and args.data not in ('SP500', 'S&P500'):
+        parser.error('--financial_input_features eod5 only applies to SP500')
+    if args.financial_input_features == 'eod5' and args.financial_norm != 0:
+        parser.error('--financial_input_features eod5 requires --financial_norm 0')
+    if args.financial_selection == 'stockmixer_val_loss' and args.data not in ('SP500', 'S&P500'):
+        parser.error('--financial_selection stockmixer_val_loss only applies to SP500')
     if not is_financial_dataset(args.data) and (args.financial_norm != 1 or args.rank_weight != 0):
         parser.error('--financial_norm and --rank_weight only apply to financial datasets')
     if not is_financial_dataset(args.data) and args.gradient_diagnostic_epochs:
@@ -192,9 +205,11 @@ if __name__ == '__main__':
     print_args(args)
     if is_financial_dataset(args.data):
         print(f'Financial protocol | seed={args.financial_seed} patch_len={args.patch_len} '
-              f'norm={bool(args.financial_norm)} rank_weight={args.rank_weight} '
+              f'input={args.financial_input_features} norm={bool(args.financial_norm)} rank_weight={args.rank_weight} '
               f'alpha={args.alpha} moe_aux_weight={args.moe_aux_weight} '
-              f'selection=validation:{args.financial_selection} validation_only={args.financial_validation_only}')
+              f'selection=validation:{args.financial_selection} '
+              f'selection_rank_weight={args.stockmixer_selection_rank_weight} '
+              f'validation_only={args.financial_validation_only}')
 
     if args.task_name == 'long_term_forecast':
         Exp = Exp_Long_Term_Forecast

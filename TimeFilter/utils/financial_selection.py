@@ -1,7 +1,27 @@
 """Validation-only checkpoint selection for financial experiments."""
+import json
 import math
 from pathlib import Path
 import torch
+
+
+def best_epoch_for_checkpoint(checkpoint):
+    """Read the recorded best epoch for a run's best.pth, if available."""
+    checkpoint = Path(checkpoint).resolve()
+    if checkpoint.name != 'best.pth':
+        return None
+    selection_path = (checkpoint.parents[2] / 'results' / checkpoint.parent.name
+                      / 'financial' / 'selection.json')
+    if not selection_path.is_file():
+        return None
+    try:
+        selection = json.loads(selection_path.read_text(encoding='utf-8'))
+    except (OSError, ValueError):
+        return None
+    if selection.get('final_evaluation_checkpoint') != checkpoint.name:
+        return None
+    epoch = (selection.get('best') or {}).get('epoch')
+    return epoch if type(epoch) is int and epoch > 0 else None
 
 
 class FinancialSelection:
@@ -14,13 +34,15 @@ class FinancialSelection:
     def update(self, model, epoch, metrics):
         value = float(metrics[self.criterion])
         torch.save(model.state_dict(), self.path / 'last.pth')
+        minimize = self.criterion in ('mse', 'stockmixer_val_loss')
         better = math.isfinite(value) and (self.best is None or (
-            value < self.best['value'] if self.criterion == 'mse' else value > self.best['value']))
+            value < self.best['value'] if minimize else value > self.best['value']))
         if better:
             self.best = {'epoch': epoch, 'metric': self.criterion, 'value': value,
                          'validation_metrics': metrics}
             torch.save(model.state_dict(), self.path / 'best.pth')
-            print(f'Validation best: epoch={epoch}, {self.criterion}={value:.8f}; saved best.pth')
+            print(f'\033[32mNew Best | epoch {epoch} | validation {self.criterion}={value:.8f} '
+                  f'| saved best.pth\033[0m', flush=True)
         self.report.write_json('selection.json', {'best': self.best, 'last_epoch': epoch,
                                'final_evaluation_checkpoint': 'best.pth'})
 
