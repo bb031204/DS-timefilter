@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 import torch
 from exp.exp_long_term_forecasting import Exp_Long_Term_Forecast
@@ -6,6 +7,7 @@ from exp.exp_short_term_forecasting import Exp_Short_Term_Forecast
 from utils.print_args import print_args
 import random
 import numpy as np
+from utils.finance_adaptation_config import normalize_finance_adaptation
 
 if __name__ == '__main__':
     fix_seed = 2021
@@ -145,6 +147,8 @@ if __name__ == '__main__':
                         help='Financial TimeFilter normalization: 1 original behavior, 0 bypass')
     parser.add_argument('--financial_input_features', choices=['returns', 'eod5'], default='returns',
                         help='SP500 input: daily returns or StockMixer five EOD features')
+    parser.add_argument('--finance_adaptation', type=json.loads, default=None,
+                        help='Finance-only modular settings, encoded as JSON by scripts/run_financial.py')
     parser.add_argument('--financial_selection', choices=['mse', 'RankIC', 'IC', 'stockmixer_val_loss'], default='mse')
     parser.add_argument('--stockmixer_selection_rank_weight', type=float, default=0.1,
                         help='Rank weight in StockMixer-style validation loss; independent of training rank_weight')
@@ -156,6 +160,10 @@ if __name__ == '__main__':
     parser.add_argument('--financial_force_rerun', action='store_true',
                         help='Repeat completed financial training; concurrent identical training remains blocked')
     args = parser.parse_args()
+    try:
+        args.finance_adaptation = normalize_finance_adaptation(args.finance_adaptation)
+    except ValueError as error:
+        parser.error(str(error))
     if not np.isfinite(args.moe_aux_weight) or args.moe_aux_weight < 0:
         parser.error('--moe_aux_weight must be finite and non-negative')
     if not np.isfinite(args.rank_weight) or args.rank_weight < 0:
@@ -168,6 +176,14 @@ if __name__ == '__main__':
     if args.gradient_diagnostic_batch_size <= 0:
         parser.error('--gradient_diagnostic_batch_size must be positive')
     from data_provider.financial_registry import is_financial_dataset, validate_files
+
+    finance = args.finance_adaptation
+    if finance['enabled'] and not is_financial_dataset(args.data):
+        parser.error('--finance_adaptation only applies to financial datasets')
+    if finance['enabled'] and finance['input_adapter']['enabled'] and args.financial_input_features != 'eod5':
+        parser.error('Finance input adapter requires --financial_input_features eod5')
+    if finance['enabled'] and finance['positional_encoding']['mode'] == 'patch_only' and args.pos != 1:
+        parser.error('Patch-only positional encoding requires --pos 1')
 
     if args.financial_input_features == 'eod5' and args.data not in ('SP500', 'S&P500'):
         parser.error('--financial_input_features eod5 only applies to SP500')
@@ -210,6 +226,8 @@ if __name__ == '__main__':
               f'selection=validation:{args.financial_selection} '
               f'selection_rank_weight={args.stockmixer_selection_rank_weight} '
               f'validation_only={args.financial_validation_only}')
+        if finance['enabled']:
+            print(f'Finance adaptation | {json.dumps(finance, ensure_ascii=False, sort_keys=True)}')
 
     if args.task_name == 'long_term_forecast':
         Exp = Exp_Long_Term_Forecast

@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions.normal import Normal
+from layers.finance.masked_softmax import strict_masked_softmax
 
 class GCN(nn.Module):
     def __init__(self, dim, n_heads):
@@ -192,53 +193,68 @@ def mask_topk(x, alpha=0.5, largest=False):
 
 
 class GraphLearner(nn.Module):
-    def __init__(self, dim, n_vars, top_p=0.5, in_dim=96):
+    def __init__(self, dim, n_vars, top_p=0.5, in_dim=96, strict_masked_softmax=False):
         super().__init__()
         self.dim = dim
         self.proj_1 = nn.Linear(dim, dim)
         self.proj_2 = nn.Linear(dim, dim)
         self.n_vars = n_vars
         self.mask_moe = mask_moe(n_vars, top_p=top_p, in_dim=in_dim)
+        self.strict_masked_softmax = strict_masked_softmax
 
     def forward(self, x, masks=None, alpha=0.5, is_training=False):
         # x: [B, H, L, D]
         adj = F.gelu(torch.einsum('bhid,bhjd->bhij', self.proj_1(x), self.proj_2(x)))
-        adj = adj * mask_topk(adj, alpha)  # KNN
-        mask, loss = self.mask_moe(adj, masks, is_training)
-        adj = adj * mask
-
-        return adj, loss  # [B, H, L, L]
+        topk_mask = mask_topk(adj, alpha)
+        routed_adj = adj * topk_mask  # Original KNN input to MoE routing.
+        mask, loss = self.mask_moe(routed_adj, masks, is_training)
+        if self.strict_masked_softmax:
+            # Carry mask identity separately: a valid edge may have a zero logit.
+            valid = (topk_mask > 0) & (mask > 0)
+            self_loops = torch.eye(adj.shape[-1], dtype=torch.bool, device=adj.device)
+            valid = valid | self_loops[None, None]
+            return adj, loss, valid
+        return routed_adj * mask, loss  # Original TimeFilter behavior.
 
 
 class GraphFilter(nn.Module):
-    def __init__(self, dim, n_vars, n_heads=4, scale=None, top_p=0.5, dropout=0., in_dim=96):
+    def __init__(self, dim, n_vars, n_heads=4, scale=None, top_p=0.5, dropout=0., in_dim=96,
+                 strict_masked_softmax=False):
         super().__init__()
         self.dim = dim
         self.n_heads = n_heads
         self.scale = dim ** (-0.5) if scale is None else scale
         self.dropout = nn.Dropout(dropout)
-        self.graph_learner = GraphLearner(self.dim // self.n_heads, n_vars, top_p, in_dim=in_dim)
+        self.strict_masked_softmax = strict_masked_softmax
+        self.graph_learner = GraphLearner(self.dim // self.n_heads, n_vars, top_p, in_dim=in_dim,
+                                          strict_masked_softmax=strict_masked_softmax)
         self.graph_conv = GCN(self.dim, self.n_heads)
 
     def forward(self, x, masks=None, alpha=0.5, is_training=False):
         # x: [B, L, D]
         B, L, D = x.shape
 
-        adj, loss = self.graph_learner(x.reshape(B, L, self.n_heads, -1).permute(0, 2, 1, 3), masks, 
-                                       alpha, is_training)  # [B, H, L, L]
-
-        adj = torch.softmax(adj, dim=-1)
+        graph = self.graph_learner(x.reshape(B, L, self.n_heads, -1).permute(0, 2, 1, 3), masks,
+                                   alpha, is_training)
+        if self.strict_masked_softmax:
+            adj, loss, valid = graph
+            adj = strict_masked_softmax(adj, valid)
+        else:
+            adj, loss = graph
+            adj = torch.softmax(adj, dim=-1)
         adj = self.dropout(adj)
         out = self.graph_conv(adj, x)
         return out, loss  # [B, L, D]
 
 
 class GraphBlock(nn.Module):
-    def __init__(self, dim, n_vars, d_ff=None, n_heads=4, top_p=0.5, dropout=0., in_dim=96):
+    def __init__(self, dim, n_vars, d_ff=None, n_heads=4, top_p=0.5, dropout=0., in_dim=96,
+                 strict_masked_softmax=False):
         super().__init__()
         self.dim = dim
         self.d_ff = dim * 4 if d_ff is None else d_ff
-        self.gnn = GraphFilter(self.dim, n_vars, n_heads, top_p=top_p, dropout=dropout, in_dim=in_dim)
+        self.gnn = GraphFilter(self.dim, n_vars, n_heads, top_p=top_p, dropout=dropout, in_dim=in_dim,
+                               strict_masked_softmax=strict_masked_softmax)
         self.norm1 = nn.LayerNorm(self.dim)
         self.ffn = nn.Sequential(
             nn.Linear(self.dim, self.d_ff),
@@ -257,13 +273,15 @@ class GraphBlock(nn.Module):
 
 
 class TimeFilter_Backbone(nn.Module):
-    def __init__(self, hidden_dim, n_vars, d_ff=None, n_heads=4, n_blocks=3, top_p=0.5, dropout=0., in_dim=96):
+    def __init__(self, hidden_dim, n_vars, d_ff=None, n_heads=4, n_blocks=3, top_p=0.5, dropout=0., in_dim=96,
+                 strict_masked_softmax=False):
         super().__init__()
         self.dim = hidden_dim
         self.d_ff = self.dim * 2 if d_ff is None else d_ff
         # graph blocks
         self.blocks = nn.ModuleList([
-            GraphBlock(self.dim, n_vars, self.d_ff, n_heads, top_p, dropout, in_dim)
+            GraphBlock(self.dim, n_vars, self.d_ff, n_heads, top_p, dropout, in_dim,
+                       strict_masked_softmax=strict_masked_softmax)
             for _ in range(n_blocks)
         ])
         self.n_blocks = n_blocks

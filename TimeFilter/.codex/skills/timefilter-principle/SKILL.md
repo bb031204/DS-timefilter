@@ -10,7 +10,7 @@ description: 修改 TimeFilter 项目的模型、金融数据适配、训练、�
 修改前，先确认需求、当前实现和受影响范围，并遵循以下原则：
 
 1. **保护模型主体。** 保留原始 TimeFilter 的核心计算逻辑和整体结构。优先在数据适配、训练流程、评估、配置或脚本层解决金融任务的问题；不要为了追求指标而暗中改写模型。若确有必要改变模型，先说明原因、预期影响及如何与原版对照。
-2. **参考 StockMixer，保持 TimeFilter 为主体。** 涉及数据含义、预测目标、损失函数、选模或评价指标时，按问题优先阅读开源原始仓库 `D:\finance\baseline\StockMixer-master\src` 下的实现及数据说明；如需分析本地封装版的权重或输出，再核对 `D:\finance\model\StockMixer\StockMixer\src` 的改动。原始 StockMixer 的运行结果图位于 `D:\finance\model\Timefilter\TimeFilter\outputs\stcokmixer结果.png`，分析对照结果时可参考。核对输入、标签时间、缺失值/掩码、数据划分、损失和指标口径；参考其金融实验协议，不照搬 StockMixer 的模型结构，也不假定仅凭结果图就能判断两者可比。
+2. **优先参考官方开源 StockMixer，保持 TimeFilter 为主体。** `D:\finance\baseline\StockMixer-master\src` 是 StockMixer 官方公开的原始仓库代码。分析 StockMixer 的数据读取、窗口和标签、模型、损失、选模或评价指标时，优先查看这里。`D:\finance\model\StockMixer\StockMixer\src` 是本地经过封装并用于运行实验的版本；只有需要核对本地 StockMixer 的运行结果、权重或运行方式时，再查看该版本，并说明它与官方代码的相关差异。`D:\finance\model\Timefilter\TimeFilter\outputs\stcokmixer结果.png` 是官方论文给出的 StockMixer 在各数据集上的结果图，供参考。参考 StockMixer 的数据和评价协议时，仍以 TimeFilter 为模型主体；比较结果前核对数据日期、标签、掩码和指标口径。
 3. **先判断建议是否合理。** 对用户提出的修改先做简短推理。若会引入未来信息泄漏、测试集调参、无关变量变化、指标口径不一致，或破坏原模型逻辑等潜在问题，应明确指出并建议更科学的替代方案；随后在用户已授权的范围内推进。
 4. **清晰且可复现。** 谨慎的修改，只修改相关文件，保持代码和配置易读。影响实验结果时，记录或核对随机种子、实际生效参数、数据划分、代码与数据版本、模型选择指标和权重来源。用验证集选模型，测试集只用于最终评估；对照实验尽量只改变一个因素。
 5. **通过配置调整参数。** 常规金融实验的可调参数在本项目 `config.yaml` 中修改；需要新增参数时，先将其接入配置读取流程，不在模型代码中硬编码，并核对启动命令是否覆盖配置值。

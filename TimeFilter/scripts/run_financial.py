@@ -1,5 +1,6 @@
 """Launch one of the three financial datasets using the shared YAML config."""
 import argparse
+import json
 from pathlib import Path
 import subprocess
 import sys
@@ -7,6 +8,7 @@ import sys
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 from data_provider.financial_registry import MARKETS, canonical_market
+from utils.finance_adaptation_config import normalize_finance_adaptation
 
 SECTIONS = {
     'forecast': {'seq_len', 'label_len', 'pred_len', 'input_features'},
@@ -20,7 +22,7 @@ def build_command(cli):
     import yaml
     config_path = Path(cli.config).resolve()
     config = yaml.safe_load(config_path.read_text(encoding='utf-8-sig'))
-    allowed = {'dataset', 'data_root', 'mode', 'checkpoint', *SECTIONS}
+    allowed = {'dataset', 'data_root', 'mode', 'checkpoint', 'finance_adaptation', *SECTIONS}
     if not isinstance(config, dict) or set(config) - allowed:
         raise ValueError('Invalid or unknown top-level config.yaml keys')
     values = {}
@@ -37,6 +39,9 @@ def build_command(cli):
             values['financial_input_features'] = entries['input_features']
             entries = {key: value for key, value in entries.items() if key != 'input_features'}
         values.update(entries)
+    if 'finance_adaptation' in config:
+        values['finance_adaptation'] = json.dumps(
+            normalize_finance_adaptation(config['finance_adaptation']), separators=(',', ':'))
     for key in ('batch_size', 'train_epochs', 'learning_rate', 'moe_aux_weight'):
         if getattr(cli, key, None) is not None:
             values[key] = getattr(cli, key)

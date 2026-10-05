@@ -37,6 +37,26 @@ model:
   pos: 1  # 位置编码开关：1 开启，0 关闭
   norm: false  # eod5 必须为 false；输入沿用 StockMixer 已处理的五维数据，输出是收益率
 
+# 可消融的金融适配模块。默认整体关闭，保持现有 EOD5 TimeFilter 实验行为。
+# 先只开启一个子模块比较；确认有效后再逐项叠加。模型容量仍在 model 段修改。
+finance_adaptation:
+  enabled: true
+  input_adapter:
+    enabled: true  # 仅 eod5 输入可用；以下三个子项可分别开关
+    input_layernorm: true  # 对每只股票的当前 16×5 输入窗口做 LayerNorm，不反归一化输出
+    indicator_mixer:
+      enabled: true  # 每个交易日只混合 5 个行情特征，共享小型残差 MLP
+      hidden_dim: 16
+    temporal_mixer:
+      enabled: true  # 每个 8 日 patch 内混合时间维，共享小型残差 MLP
+      hidden_dim: 16
+  positional_encoding:
+    mode: patch_only  # original=原全局位置；patch_only=各股票共享 patch 位置；none=关闭
+  graph:
+    strict_masked_softmax: false  # true：删边在 softmax 前设为 -inf，并保留自环
+  loss:
+    ic_weight: 0.0  # 额外的每日 Pearson IC 损失权重；训练 rank_weight 仍在 training 段
+
 # 训练与验证集选模
 training:
   # 金融总损失 = 预测 MSE + rank_weight × 横截面排序损失 + moe_aux_weight × MoE 辅助损失。

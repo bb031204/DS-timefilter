@@ -5,7 +5,7 @@ from utils.metrics import metric
 from utils.financial_selection import FinancialSelection, best_epoch_for_checkpoint
 from utils.financial_progress import emit_progress
 from utils.financial_gradient_diagnostic import record_gradient_diagnostic
-from utils.financial_losses import stockmixer_rank_loss, stockmixer_validation_loss
+from utils.financial_losses import stockmixer_rank_loss, stockmixer_validation_loss, daily_pearson_ic_loss
 from utils.financial_report import FinancialReport, financial_metrics, metric_line
 from data_provider.financial_registry import is_financial_dataset
 import torch
@@ -160,6 +160,9 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         criterion = self._select_criterion()
         moe_aux_weight = getattr(self.args, 'moe_aux_weight', 0.05)
         rank_weight = getattr(self.args, 'rank_weight', 0.0) if is_financial_dataset(self.args.data) else 0.0
+        finance = getattr(self.args, 'finance_adaptation', {})
+        ic_weight = (finance.get('loss', {}).get('ic_weight', 0.0)
+                     if finance.get('enabled', False) and is_financial_dataset(self.args.data) else 0.0)
 
         if is_financial_dataset(self.args.data):
             self._financial_report = FinancialReport(setting, self.args, 'training')
@@ -187,8 +190,12 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                     target = batch_y[:, -self.args.pred_len:, f_dim:]
                     mse, rank = self._training_loss_components(
                         outputs, target, batch_y_mark, criterion, rank_weight)
-                    return {'MSE': (mse, 1.0), 'Rank': (rank, rank_weight),
-                            'MoE': (moe_loss, moe_aux_weight)}
+                    components = {'MSE': (mse, 1.0), 'Rank': (rank, rank_weight),
+                                  'MoE': (moe_loss, moe_aux_weight)}
+                    if ic_weight:
+                        components['IC'] = (daily_pearson_ic_loss(
+                            outputs, target, self._financial_mask(batch_y_mark, outputs)), ic_weight)
+                    return components
 
                 record_gradient_diagnostic(self.model, diagnostic_batch, train_indices,
                                            losses_for_batch, self._financial_report.path, epoch)
@@ -199,7 +206,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         for epoch in range(self.args.train_epochs):
             iter_count = 0
             train_loss = []
-            train_mse, train_rank, train_moe = [], [], []
+            train_mse, train_rank, train_moe, train_ic = [], [], [], []
             if is_financial_dataset(self.args.data):
                 emit_progress(epoch + 1, self.args.train_epochs, 0, train_steps)
             if is_financial_dataset(self.args.data) and self.device.type == 'cuda':
@@ -222,6 +229,11 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 prediction_loss, rank_loss = self._training_loss_components(
                     outputs, batch_y, batch_y_mark, criterion, rank_weight)
                 loss = prediction_loss + rank_weight * rank_loss
+                if ic_weight:
+                    ic_loss = daily_pearson_ic_loss(
+                        outputs, batch_y, self._financial_mask(batch_y_mark, outputs))
+                    loss = loss + ic_weight * ic_loss
+                    train_ic.append(ic_loss.item())
                 if moe_aux_weight:
                     loss = loss + moe_aux_weight * moe_loss
                 train_mse.append(prediction_loss.item())
@@ -273,11 +285,18 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                               'rank_weight': rank_weight,
                               'moe_aux_weight': moe_aux_weight,
                               'learning_rate': model_optim.param_groups[0]['lr']}
+                if ic_weight:
+                    components.update(train_ic=float(np.mean(train_ic)),
+                                      train_ic_weighted=float(ic_weight * np.mean(train_ic)),
+                                      ic_weight=ic_weight)
                 components['peak_cuda_allocated_mb'] = (torch.cuda.max_memory_allocated(self.device) / 2**20
                                                        if self.device.type == 'cuda' else 0.0)
                 print(f"Train components | MSE: {components['train_mse']:.8f} "
                       f"Rank: {components['train_rank']:.8f} weighted Rank: {components['train_rank_weighted']:.8f} "
                       f"MoE: {components['train_moe']:.8f} weighted MoE: {components['train_moe_weighted']:.8f}")
+                if ic_weight:
+                    print(f"Train IC loss: {components['train_ic']:.8f} "
+                          f"weighted IC loss: {components['train_ic_weighted']:.8f}")
                 self._financial_report.epoch(
                     epoch + 1, train_loss, vali_loss, test_loss,
                     val_financial, test_financial, components,

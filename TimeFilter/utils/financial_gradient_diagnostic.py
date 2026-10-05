@@ -16,6 +16,8 @@ FIELDS = ('epoch', 'stage', 'batch_size', 'train_indices', 'component', 'group',
 
 def _parameter_group(name):
     name = name.removeprefix('module.')
+    if name.startswith('finance_input_adapter.'):
+        return 'finance_adapter'
     if name.startswith('patch_embed.'):
         return 'patch_embed'
     if name.startswith('head.'):
@@ -25,10 +27,10 @@ def _parameter_group(name):
     return 'backbone'
 
 
-def _gradient_summary(parameters, gradients):
-    squared = dict.fromkeys(GROUPS, 0.0)
-    active = dict.fromkeys(GROUPS, 0)
-    total = dict.fromkeys(GROUPS, 0)
+def _gradient_summary(parameters, gradients, groups):
+    squared = dict.fromkeys(groups, 0.0)
+    active = dict.fromkeys(groups, 0)
+    total = dict.fromkeys(groups, 0)
     for (name, _), gradient in zip(parameters, gradients):
         group = _parameter_group(name)
         total['all'] += 1
@@ -40,7 +42,7 @@ def _gradient_summary(parameters, gradients):
         squared[group] += length_squared
         active['all'] += 1
         active[group] += 1
-    return {group: (math.sqrt(squared[group]), active[group], total[group]) for group in GROUPS}
+    return {group: (math.sqrt(squared[group]), active[group], total[group]) for group in groups}
 
 
 def record_gradient_diagnostic(model, batch, train_indices, loss_fn, report_path, epoch):
@@ -55,6 +57,8 @@ def record_gradient_diagnostic(model, batch, train_indices, loss_fn, report_path
                          if hasattr(normalizer, name)} if normalizer is not None else {})
     parameters = [(name, parameter) for name, parameter in model.named_parameters()
                   if parameter.requires_grad]
+    groups = (GROUPS + ('finance_adapter',) if any(
+        _parameter_group(name) == 'finance_adapter' for name, _ in parameters) else GROUPS)
     try:
         model.train()
         with torch.enable_grad():
@@ -68,10 +72,10 @@ def record_gradient_diagnostic(model, batch, train_indices, loss_fn, report_path
                 gradients = torch.autograd.grad(
                     weighted[name], [parameter for _, parameter in parameters],
                     retain_graph=position + 1 < len(differentiable), allow_unused=True)
-                summaries[name] = _gradient_summary(parameters, gradients)
+                summaries[name] = _gradient_summary(parameters, gradients, groups)
             for name in raw_losses:
                 if name not in summaries:
-                    summaries[name] = _gradient_summary(parameters, (None,) * len(parameters))
+                    summaries[name] = _gradient_summary(parameters, (None,) * len(parameters), groups)
             values = {name: (float(raw.detach()) if torch.is_tensor(raw) else float(raw), weight)
                       for name, (raw, weight) in raw_losses.items()}
     finally:
@@ -96,7 +100,7 @@ def record_gradient_diagnostic(model, batch, train_indices, loss_fn, report_path
           f'batch_size={len(train_indices)} train_indices={index_text}')
     for name, (raw, weight) in values.items():
         print(f'  {name}: raw={raw:.8g} weight={weight:.6g} weighted={raw * weight:.8g}')
-        for group in GROUPS:
+        for group in groups:
             norm, active, total = summaries[name][group]
             mse_norm = summaries['MSE'][group][0]
             ratio = norm / mse_norm if mse_norm > 1e-12 else None

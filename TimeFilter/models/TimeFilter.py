@@ -6,15 +6,20 @@ import math
 from layers.Embed import PositionalEmbedding
 from layers.StandardNorm import Normalize
 from layers.TimeFilter_layers import TimeFilter_Backbone
+from layers.finance.input_adapter import FinanceInputAdapter
+from layers.finance.positional_encoding import shared_patch_positions
+from utils.finance_adaptation_config import normalize_finance_adaptation
 
 
 class PatchEmbed(nn.Module):
-    def __init__(self, dim, patch_len, stride=None, pos=True):
+    def __init__(self, dim, patch_len, stride=None, pos=True, position_mode='original', patches_per_variable=None):
         super().__init__()
         self.patch_len = patch_len
         self.stride = patch_len if stride is None else stride
         self.patch_proj = nn.Linear(self.patch_len, dim)
         self.pos = pos
+        self.position_mode = position_mode
+        self.patches_per_variable = patches_per_variable
         if self.pos:
             pos_emb_theta = 10000
             self.pe = PositionalEmbedding(dim, pos_emb_theta)
@@ -25,7 +30,10 @@ class PatchEmbed(nn.Module):
         # x: [B, N*L, P]
         x = self.patch_proj(x) # [B, N*L, D]
         if self.pos:
-            x += self.pe(x)
+            if self.position_mode == 'patch_only':
+                x += shared_patch_positions(self.pe.pe, x.shape[1], self.patches_per_variable)
+            else:
+                x += self.pe(x)
         return x
 
 class Model(nn.Module):
@@ -42,10 +50,16 @@ class Model(nn.Module):
         self.stride = self.patch_len
         self.num_patches = int((self.seq_len - self.patch_len) / self.stride + 1) # L
         self.financial_input_features = getattr(configs, 'financial_input_features', 'returns')
+        finance = normalize_finance_adaptation(getattr(configs, 'finance_adaptation', None))
+        self.finance_adaptation = finance
         if self.financial_input_features not in ('returns', 'eod5'):
             raise ValueError('financial_input_features must be returns or eod5')
         if self.financial_input_features == 'eod5' and getattr(configs, 'financial_norm', 1):
             raise ValueError('eod5 input requires financial_norm=0')
+        if finance['enabled'] and finance['input_adapter']['enabled'] and self.financial_input_features != 'eod5':
+            raise ValueError('Finance input adapter requires eod5 input')
+        self.finance_input_adapter = (FinanceInputAdapter(self.seq_len, self.patch_len, finance['input_adapter'])
+                                      if finance['enabled'] and finance['input_adapter']['enabled'] else None)
 
         # Filter
         self.alpha = 0.1 if configs.alpha is None else configs.alpha
@@ -53,12 +67,18 @@ class Model(nn.Module):
 
         # embed
         input_features = 5 if self.financial_input_features == 'eod5' else 1
+        position_mode = finance['positional_encoding']['mode'] if finance['enabled'] else 'original'
+        if position_mode == 'patch_only' and not configs.pos:
+            raise ValueError('Patch-only positional encoding requires pos=1')
         self.patch_embed = PatchEmbed(self.dim, self.patch_len * input_features,
-                                     self.stride * input_features, configs.pos)
+                                     self.stride * input_features, bool(configs.pos) and position_mode != 'none',
+                                     position_mode, self.num_patches)
 
         # TimeFilter Backbone
         self.backbone = TimeFilter_Backbone(self.dim, self.n_vars, self.d_ff,
-                                  configs.n_heads, configs.e_layers, self.top_p, configs.dropout, self.seq_len * self.n_vars // self.patch_len)
+                                  configs.n_heads, configs.e_layers, self.top_p, configs.dropout,
+                                  self.seq_len * self.n_vars // self.patch_len,
+                                  strict_masked_softmax=finance['enabled'] and finance['graph']['strict_masked_softmax'])
         
         # head
         self.head = nn.Linear(self.dim * self.num_patches, self.pred_len)
@@ -74,6 +94,8 @@ class Model(nn.Module):
             # all five indicators retained inside the patch projection.
             if x.ndim != 4 or x.shape[2:] != (self.n_vars, 5) or x.shape[1] != self.seq_len:
                 raise ValueError('eod5 input must be [batch, seq_len, stocks, 5]')
+            if self.finance_input_adapter is not None:
+                x = self.finance_input_adapter(x)
             B, T, C, F = x.shape
             x = x.permute(0, 2, 1, 3).reshape(B, C * T * F)
         else:
