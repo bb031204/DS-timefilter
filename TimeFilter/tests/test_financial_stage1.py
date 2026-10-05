@@ -17,17 +17,18 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 class FinancialStage1Tests(unittest.TestCase):
-    def test_config_exposes_only_requested_stage1_changes(self):
+    def test_config_exposes_current_financial_training_options(self):
         cli = argparse.Namespace(config=str(PROJECT_ROOT / 'config.yaml'), dataset=None,
                                  mode=None, checkpoint=None, batch_size=None,
                                  train_epochs=None, learning_rate=None, moe_aux_weight=None)
         command = build_command(cli)
         self.assertEqual(command[command.index('--financial_norm') + 1], '0')
-        self.assertEqual(command[command.index('--rank_weight') + 1], '0.1')
+        config = yaml.safe_load((PROJECT_ROOT / 'config.yaml').read_text(encoding='utf-8'))
+        self.assertEqual(command[command.index('--rank_weight') + 1], str(config['training']['rank_weight']))
         self.assertEqual(command[command.index('--financial_input_features') + 1], 'eod5')
         self.assertEqual(command[command.index('--financial_selection') + 1], 'stockmixer_val_loss')
         self.assertEqual(command[command.index('--stockmixer_selection_rank_weight') + 1], '0.1')
-        configured_alpha = yaml.safe_load((PROJECT_ROOT / 'config.yaml').read_text(encoding='utf-8'))['model']['alpha']
+        configured_alpha = config['model']['alpha']
         self.assertEqual(command[command.index('--alpha') + 1], str(configured_alpha))
         self.assertEqual(command[command.index('--d_model') + 1], '512')
         self.assertEqual(command[command.index('--batch_size') + 1], '32')

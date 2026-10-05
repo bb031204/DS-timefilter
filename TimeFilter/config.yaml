@@ -37,8 +37,8 @@ model:
   pos: 1  # 位置编码开关：1 开启，0 关闭
   norm: false  # eod5 必须为 false；输入沿用 StockMixer 已处理的五维数据，输出是收益率
 
-# 可消融的金融适配模块。默认整体关闭，保持现有 EOD5 TimeFilter 实验行为。
-# 先只开启一个子模块比较；确认有效后再逐项叠加。模型容量仍在 model 段修改。
+# 可消融的金融适配模块。以下为金融候选配置；TimeFilter 图网络主干保留。
+# 2026-10-05 的已完成实验使用 rank_weight=0.1、strict_masked_softmax=false；当前两项尚未单独验证。
 finance_adaptation:
   enabled: true
   input_adapter:
@@ -53,7 +53,7 @@ finance_adaptation:
   positional_encoding:
     mode: patch_only  # original=原全局位置；patch_only=各股票共享 patch 位置；none=关闭
   graph:
-    strict_masked_softmax: false  # true：删边在 softmax 前设为 -inf，并保留自环
+    strict_masked_softmax: true  # true：删边在 softmax 前设为 -inf，并保留自环
   loss:
     ic_weight: 0.0  # 额外的每日 Pearson IC 损失权重；训练 rank_weight 仍在 training 段
 
@@ -62,15 +62,19 @@ training:
   # 金融总损失 = 预测 MSE + rank_weight × 横截面排序损失 + moe_aux_weight × MoE 辅助损失。
   # 设为 0 仍保留 MoE 路由和模型结构；不同权重实验不要按总 Train Loss 大小评优。
   moe_aux_weight: 0.005  # 原始默认及 SP500 基线 0.05；当前为 0.005
-  rank_weight: 0.1  # 原始无 RankLoss，等价于 0；当前 0.1 为 StockMixer 参考候选
+  rank_weight: 5  # 当前待验证候选；已完成实验为 0.1。训练权重与下方选模权重相互独立
   financial_seed: 2021  # 随机种子；三组使用相同种子，后续复验时再成组更换
   financial_selection: stockmixer_val_loss  # 与本次 StockMixer 一致：验证集 MSE + 0.1×排序损失，越低越好
+  test_each_epoch: true  # true：每轮后评估并记录 Test，对齐 StockMixer；false：只在 best.pth 加载后最终测试
   stockmixer_selection_rank_weight: 0.1  # 固定选模口径；独立于训练用的 rank_weight
   gradient_diagnostic_epochs: [0, 1, 5]  # 只检查训练早期：训练前、第 1 / 5 轮后；[] 关闭诊断
   gradient_diagnostic_batch_size: 8  # 固定取训练期均匀分布的 8 个日期；显存允许时可改为 32
   batch_size: 32  # 每批历史窗口数；显存不足可减小，但所有对照组需一致
   train_epochs: 100  # 原始默认 10；SP500 基线 100。金融流程跑满后使用验证集最优 best.pth
-  learning_rate: 0.0001  # Adam 初始学习率
+  learning_rate: 0.0001  # 优化器初始学习率
+  optimizer: adamw  # 金融候选：adamw 或原始 adam；非金融数据仍使用原始 Adam
+  weight_decay: 0.0001  # 仅 AdamW 生效；抑制权重过大，0 为关闭
+  grad_clip_norm: 1.0  # 金融训练全局梯度范数上限；0 为关闭，裁剪比例记入逐轮指标
   patience: 3  # 原框架早停参数；当前金融流程不启用早停，此值不影响训练轮数
   lradj: cosine  # 学习率调度：cosine（当前）、type1、type2
   itr: 1  # 单次启动的训练次数；建议保持 1，多种子实验应显式更换 financial_seed

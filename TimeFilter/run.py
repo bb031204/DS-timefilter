@@ -97,6 +97,12 @@ if __name__ == '__main__':
                         help='MoE auxiliary loss weight for long-term forecasting; 0 disables the auxiliary objective')
     parser.add_argument('--rank_weight', type=float, default=0.0,
                         help='Financial cross-sectional ranking loss weight; 0 preserves original loss')
+    parser.add_argument('--financial_optimizer', choices=['adam', 'adamw'], default='adam',
+                        help='Financial optimizer; non-financial tasks keep the original Adam')
+    parser.add_argument('--financial_weight_decay', type=float, default=0.0,
+                        help='AdamW weight decay for financial training')
+    parser.add_argument('--financial_grad_clip_norm', type=float, default=0.0,
+                        help='Financial global gradient norm limit; 0 disables clipping')
     parser.add_argument('--des', type=str, default='test', help='exp description')
     parser.add_argument('--loss', type=str, default='MSE', help='loss function')
     parser.add_argument('--lradj', type=str, default='cosine', help='adjust learning rate')
@@ -150,6 +156,8 @@ if __name__ == '__main__':
     parser.add_argument('--finance_adaptation', type=json.loads, default=None,
                         help='Finance-only modular settings, encoded as JSON by scripts/run_financial.py')
     parser.add_argument('--financial_selection', choices=['mse', 'RankIC', 'IC', 'stockmixer_val_loss'], default='mse')
+    parser.add_argument('--financial_test_each_epoch', type=int, choices=[0, 1], default=1,
+                        help='Evaluate financial test set after each epoch; 0 defers testing until final best.pth')
     parser.add_argument('--stockmixer_selection_rank_weight', type=float, default=0.1,
                         help='Rank weight in StockMixer-style validation loss; independent of training rank_weight')
     parser.add_argument('--gradient_diagnostic_epochs', type=int, nargs='*', default=[],
@@ -168,6 +176,12 @@ if __name__ == '__main__':
         parser.error('--moe_aux_weight must be finite and non-negative')
     if not np.isfinite(args.rank_weight) or args.rank_weight < 0:
         parser.error('--rank_weight must be finite and non-negative')
+    if not np.isfinite(args.financial_weight_decay) or args.financial_weight_decay < 0:
+        parser.error('--financial_weight_decay must be finite and non-negative')
+    if not np.isfinite(args.financial_grad_clip_norm) or args.financial_grad_clip_norm < 0:
+        parser.error('--financial_grad_clip_norm must be finite and non-negative')
+    if args.financial_optimizer == 'adam' and args.financial_weight_decay:
+        parser.error('--financial_weight_decay requires --financial_optimizer adamw')
     if not np.isfinite(args.stockmixer_selection_rank_weight) or args.stockmixer_selection_rank_weight < 0:
         parser.error('--stockmixer_selection_rank_weight must be finite and non-negative')
     if (any(epoch < 0 for epoch in args.gradient_diagnostic_epochs)
@@ -225,6 +239,9 @@ if __name__ == '__main__':
               f'alpha={args.alpha} moe_aux_weight={args.moe_aux_weight} '
               f'selection=validation:{args.financial_selection} '
               f'selection_rank_weight={args.stockmixer_selection_rank_weight} '
+              f'optimizer={args.financial_optimizer} weight_decay={args.financial_weight_decay} '
+              f'grad_clip_norm={args.financial_grad_clip_norm} '
+              f'test_each_epoch={bool(args.financial_test_each_epoch)} '
               f'validation_only={args.financial_validation_only}')
         if finance['enabled']:
             print(f'Finance adaptation | {json.dumps(finance, ensure_ascii=False, sort_keys=True)}')

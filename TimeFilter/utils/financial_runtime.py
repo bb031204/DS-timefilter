@@ -42,7 +42,10 @@ def experiment_key(values, provenance):
     for key, default in (('moe_aux_weight', 0.05), ('rank_weight', 0.0), ('financial_norm', 1),
                          ('financial_seed', 2021),
                          ('financial_selection', 'mse'), ('financial_validation_only', False),
+                         ('financial_test_each_epoch', 1),
                          ('financial_input_features', 'returns'),
+                         ('financial_optimizer', 'adam'), ('financial_weight_decay', 0.0),
+                         ('financial_grad_clip_norm', 0.0),
                          ('stockmixer_selection_rank_weight', 0.1)):
         settings.setdefault(key, default)
     identity = {'settings': settings,

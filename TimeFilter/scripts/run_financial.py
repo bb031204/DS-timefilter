@@ -13,7 +13,7 @@ from utils.finance_adaptation_config import normalize_finance_adaptation
 SECTIONS = {
     'forecast': {'seq_len', 'label_len', 'pred_len', 'input_features'},
     'model': {'d_model', 'd_ff', 'n_heads', 'e_layers', 'patch_len', 'alpha', 'top_p', 'dropout', 'pos', 'norm'},
-    'training': {'batch_size', 'train_epochs', 'learning_rate', 'patience', 'lradj', 'itr', 'financial_seed', 'financial_selection', 'stockmixer_selection_rank_weight', 'moe_aux_weight', 'rank_weight', 'gradient_diagnostic_epochs', 'gradient_diagnostic_batch_size'},
+    'training': {'batch_size', 'train_epochs', 'learning_rate', 'patience', 'lradj', 'itr', 'financial_seed', 'financial_selection', 'test_each_epoch', 'stockmixer_selection_rank_weight', 'moe_aux_weight', 'rank_weight', 'gradient_diagnostic_epochs', 'gradient_diagnostic_batch_size', 'optimizer', 'weight_decay', 'grad_clip_norm'},
     'runtime': {'num_workers', 'gpu', 'cpu'},
 }
 
@@ -38,6 +38,16 @@ def build_command(cli):
         if section == 'forecast' and 'input_features' in entries:
             values['financial_input_features'] = entries['input_features']
             entries = {key: value for key, value in entries.items() if key != 'input_features'}
+        if section == 'training':
+            if 'test_each_epoch' in entries:
+                if type(entries['test_each_epoch']) is not bool:
+                    raise ValueError('training.test_each_epoch must be YAML true or false')
+                values['financial_test_each_epoch'] = int(entries['test_each_epoch'])
+            for key in ('optimizer', 'weight_decay', 'grad_clip_norm'):
+                if key in entries:
+                    values['financial_' + key] = entries[key]
+            entries = {key: value for key, value in entries.items()
+                       if key not in ('test_each_epoch', 'optimizer', 'weight_decay', 'grad_clip_norm')}
         values.update(entries)
     if 'finance_adaptation' in config:
         values['finance_adaptation'] = json.dumps(
@@ -64,6 +74,14 @@ def build_command(cli):
     for key in ('batch_size', 'train_epochs', 'learning_rate', 'itr'):
         if key in values and values[key] <= 0:
             raise ValueError(f'{key} must be positive')
+    if values.get('financial_optimizer', 'adam') not in ('adam', 'adamw'):
+        raise ValueError('training.optimizer must be adam or adamw')
+    for key in ('financial_weight_decay', 'financial_grad_clip_norm'):
+        if key in values and (type(values[key]) not in (int, float) or
+                              not 0 <= values[key] < float('inf')):
+            raise ValueError(f'training.{key.removeprefix("financial_")} must be finite and non-negative')
+    if values.get('financial_optimizer', 'adam') == 'adam' and values.get('financial_weight_decay', 0):
+        raise ValueError('training.weight_decay requires training.optimizer: adamw')
     epochs = values.get('gradient_diagnostic_epochs', [])
     if (not isinstance(epochs, list) or any(type(epoch) is not int or epoch < 0 for epoch in epochs)
             or epochs != sorted(set(epochs))):

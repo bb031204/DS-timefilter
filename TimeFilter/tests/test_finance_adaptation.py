@@ -7,6 +7,7 @@ from types import SimpleNamespace
 import unittest
 
 import torch
+import yaml
 
 from layers.TimeFilter_layers import GraphFilter
 from models.TimeFilter import Model, PatchEmbed
@@ -28,14 +29,15 @@ def settings(**overrides):
 
 
 class FinanceAdaptationTests(unittest.TestCase):
-    def test_config_and_command_keep_default_disabled(self):
+    def test_config_and_command_keep_switches_and_default_is_disabled(self):
         cli = argparse.Namespace(config=str(ROOT / 'config.yaml'), dataset=None,
                                  mode=None, checkpoint=None, batch_size=None,
                                  train_epochs=None, learning_rate=None, moe_aux_weight=None)
         command = build_command(cli)
         parsed = json.loads(command[command.index('--finance_adaptation') + 1])
-        self.assertFalse(parsed['enabled'])
-        self.assertEqual(parsed['positional_encoding']['mode'], 'original')
+        configured = yaml.safe_load((ROOT / 'config.yaml').read_text(encoding='utf-8'))
+        self.assertEqual(parsed, normalize_finance_adaptation(configured['finance_adaptation']))
+        self.assertFalse(normalize_finance_adaptation(None)['enabled'])
         with self.assertRaisesRegex(ValueError, 'mapping'):
             normalize_finance_adaptation([])
         with self.assertRaisesRegex(ValueError, 'unknown keys'):

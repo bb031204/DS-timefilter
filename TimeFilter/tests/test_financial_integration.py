@@ -1,6 +1,8 @@
 """Financial routing, exchange masks, configuration and run isolation."""
 import argparse
+import csv
 from datetime import datetime
+import json
 from pathlib import Path
 import pickle
 import tempfile
@@ -43,6 +45,10 @@ class FinancialIntegrationTests(unittest.TestCase):
                 self.assertEqual(command[command.index('--c_out') + 1], str(channels))
                 self.assertEqual(command[command.index('--batch_size') + 1], '4')
                 self.assertEqual(command[command.index('--d_model') + 1], '512')
+                self.assertEqual(command[command.index('--financial_optimizer') + 1], 'adamw')
+                self.assertEqual(command[command.index('--financial_weight_decay') + 1], '0.0001')
+                self.assertEqual(command[command.index('--financial_grad_clip_norm') + 1], '1.0')
+                self.assertEqual(command[command.index('--financial_test_each_epoch') + 1], '1')
                 self.assertTrue(Path(command[command.index('--root_path') + 1]).is_absolute())
 
     def test_five_feature_config_cannot_be_used_for_another_market(self):
@@ -51,6 +57,22 @@ class FinancialIntegrationTests(unittest.TestCase):
                                  learning_rate=None)
         with self.assertRaisesRegex(ValueError, 'only for SP500'):
             build_command(cli)
+
+    def test_test_each_epoch_config_switch_accepts_only_yaml_boolean(self):
+        with tempfile.TemporaryDirectory() as root:
+            config = yaml.safe_load((PROJECT_ROOT / 'config.yaml').read_text(encoding='utf-8'))
+            path = Path(root) / 'switch.yaml'
+            cli = argparse.Namespace(config=str(path), dataset='SP500', mode=None,
+                                     checkpoint=None, batch_size=None, train_epochs=None,
+                                     learning_rate=None, moe_aux_weight=None)
+            config['training']['test_each_epoch'] = False
+            path.write_text(yaml.safe_dump(config), encoding='utf-8')
+            command = build_command(cli)
+            self.assertEqual(command[command.index('--financial_test_each_epoch') + 1], '0')
+            config['training']['test_each_epoch'] = 'false'
+            path.write_text(yaml.safe_dump(config), encoding='utf-8')
+            with self.assertRaisesRegex(ValueError, 'must be YAML true or false'):
+                build_command(cli)
 
     def test_same_minute_isolation(self):
         with tempfile.TemporaryDirectory() as root:
@@ -132,6 +154,72 @@ class FinancialIntegrationTests(unittest.TestCase):
             for i in range(3)
         ])
         self.assertAlmostEqual(experiment._last_financial_metrics['stockmixer_val_loss'], expected)
+
+    def test_financial_optimizer_excludes_norm_and_bias_from_weight_decay(self):
+        experiment = object.__new__(Exp_Long_Term_Forecast)
+        experiment.model = torch.nn.Sequential(torch.nn.Linear(3, 3), torch.nn.LayerNorm(3))
+        experiment.args = SimpleNamespace(data='SP500', learning_rate=1e-4,
+                                          financial_optimizer='adamw', financial_weight_decay=1e-4)
+        optimizer = experiment._select_optimizer()
+        self.assertIsInstance(optimizer, torch.optim.AdamW)
+        self.assertEqual([group['weight_decay'] for group in optimizer.param_groups], [1e-4, 0.0])
+        self.assertEqual(len(optimizer.param_groups[0]['params']), 1)
+        self.assertEqual(len(optimizer.param_groups[1]['params']), 3)
+        experiment.args.data = 'ETTh1'
+        self.assertIsInstance(experiment._select_optimizer(), torch.optim.Adam)
+
+    def test_financial_test_epoch_switch_preserves_validation_selection(self):
+        class TinyModel(torch.nn.Module):
+            def __init__(self):
+                super().__init__()
+                self.scale = torch.nn.Parameter(torch.tensor(1.0))
+
+            def forward(self, x, masks, is_training=False):
+                return x[:, -1:, :] * self.scale, x.new_zeros(())
+
+        rng = np.random.default_rng(19)
+        x = torch.tensor(rng.normal(0, 0.01, (4, 16, 12)), dtype=torch.float32)
+        y = torch.tensor(rng.normal(0, 0.01, (4, 1, 12)), dtype=torch.float32)
+        marks = torch.zeros((4, 1, 1))
+        batch = (x, y, marks, marks)
+        test_batch = (x, y + 0.5, marks, marks)
+
+        for validation_only, test_each_epoch in ((False, True), (False, False), (True, True)):
+            with self.subTest(validation_only=validation_only, test_each_epoch=test_each_epoch), \
+                    tempfile.TemporaryDirectory() as root:
+                requested = []
+
+                def get_data(flag):
+                    requested.append(flag)
+                    return range(4), [test_batch if flag == 'test' else batch]
+
+                experiment = object.__new__(Exp_Long_Term_Forecast)
+                experiment.args = SimpleNamespace(
+                    data='SP500', features='M', pred_len=1, checkpoints=str(Path(root) / 'checkpoints'),
+                    financial_output_dir=str(Path(root) / 'output'), learning_rate=1e-4,
+                    financial_optimizer='adamw', financial_weight_decay=1e-4,
+                    financial_grad_clip_norm=1.0, train_epochs=1, patience=3,
+                    moe_aux_weight=0.0, rank_weight=0.0, finance_adaptation={'enabled': False},
+                    financial_selection='mse', financial_validation_only=validation_only,
+                    financial_test_each_epoch=int(test_each_epoch),
+                    gradient_diagnostic_epochs=[], use_amp=False, lradj='cosine', c_out=12)
+                experiment.device = torch.device('cpu')
+                experiment.model = TinyModel()
+                experiment.masks = None
+                experiment._get_data = get_data
+                experiment.train('tiny')
+                evaluate_each_epoch = test_each_epoch and not validation_only
+                self.assertEqual(requested, ['train', 'val'] + (['test'] if evaluate_each_epoch else []))
+                self.assertTrue((Path(root) / 'checkpoints' / 'tiny' / 'best.pth').is_file())
+                report_dir = Path(root) / 'output' / 'results' / 'tiny' / 'financial'
+                with (report_dir / 'epoch_metrics.csv').open(newline='', encoding='utf-8') as stream:
+                    epoch = next(csv.DictReader(stream))
+                selected = json.loads((report_dir / 'selection.json').read_text(encoding='utf-8'))
+                self.assertIn('grad_clip_fraction', epoch)
+                self.assertEqual('test_IC' in epoch, evaluate_each_epoch)
+                if evaluate_each_epoch:
+                    self.assertGreater(float(epoch['test_mse']), float(epoch['val_mse']))
+                self.assertAlmostEqual(selected['best']['value'], float(epoch['val_mse']))
 
 
 if __name__ == '__main__':

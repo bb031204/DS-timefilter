@@ -37,7 +37,23 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         return data_set, data_loader
 
     def _select_optimizer(self):
-        model_optim = optim.Adam(self.model.parameters(), lr=self.args.learning_rate)
+        if is_financial_dataset(self.args.data) and getattr(self.args, 'financial_optimizer', 'adam') == 'adamw':
+            weight_decay = getattr(self.args, 'financial_weight_decay', 0.0)
+            if weight_decay:
+                decay, no_decay = [], []
+                for name, parameter in self.model.named_parameters():
+                    if not parameter.requires_grad:
+                        continue
+                    group = (no_decay if parameter.ndim < 2 or 'norm' in name.lower()
+                             else decay)
+                    group.append(parameter)
+                parameters = [{'params': decay, 'weight_decay': weight_decay},
+                              {'params': no_decay, 'weight_decay': 0.0}]
+            else:
+                parameters = self.model.parameters()
+            model_optim = optim.AdamW(parameters, lr=self.args.learning_rate)
+        else:
+            model_optim = optim.Adam(self.model.parameters(), lr=self.args.learning_rate)
         return model_optim
 
     def _select_criterion(self):
@@ -94,6 +110,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
     def vali(self, vali_data, vali_loader, criterion, stockmixer_selection=False):
         total_loss = []
+        batch_sizes = []
         collect_financial = is_financial_dataset(self.args.data)
         financial_preds, financial_trues, financial_masks = [], [], []
         selection_loss_sum = 0.0
@@ -128,7 +145,9 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 loss = self._prediction_loss(pred, true, batch_y_mark, criterion)
 
                 total_loss.append(loss)
-        total_loss = np.average(total_loss)
+                if collect_financial:
+                    batch_sizes.append(pred.shape[0])
+        total_loss = np.average(total_loss, weights=batch_sizes if collect_financial else None)
         if collect_financial:
             self._last_financial_metrics = financial_metrics(
                 np.concatenate(financial_preds, axis=0),
@@ -143,8 +162,11 @@ class Exp_Long_Term_Forecast(Exp_Basic):
     def train(self, setting):
         train_data, train_loader = self._get_data(flag='train')
         vali_data, vali_loader = self._get_data(flag='val')
-        validation_only = is_financial_dataset(self.args.data) and getattr(self.args, 'financial_validation_only', False)
-        if not validation_only:
+        financial = is_financial_dataset(self.args.data)
+        validation_only = financial and getattr(self.args, 'financial_validation_only', False)
+        test_each_epoch = not validation_only and (
+            not financial or bool(getattr(self.args, 'financial_test_each_epoch', 1)))
+        if test_each_epoch:
             test_data, test_loader = self._get_data(flag='test')
 
         path = os.path.join(self.args.checkpoints, setting)
@@ -160,6 +182,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         criterion = self._select_criterion()
         moe_aux_weight = getattr(self.args, 'moe_aux_weight', 0.05)
         rank_weight = getattr(self.args, 'rank_weight', 0.0) if is_financial_dataset(self.args.data) else 0.0
+        grad_clip_norm = (getattr(self.args, 'financial_grad_clip_norm', 0.0) if financial else 0.0)
         finance = getattr(self.args, 'finance_adaptation', {})
         ic_weight = (finance.get('loss', {}).get('ic_weight', 0.0)
                      if finance.get('enabled', False) and is_financial_dataset(self.args.data) else 0.0)
@@ -207,6 +230,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
             iter_count = 0
             train_loss = []
             train_mse, train_rank, train_moe, train_ic = [], [], [], []
+            clipped_steps = 0
             if is_financial_dataset(self.args.data):
                 emit_progress(epoch + 1, self.args.train_epochs, 0, train_steps)
             if is_financial_dataset(self.args.data) and self.device.type == 'cuda':
@@ -251,10 +275,17 @@ class Exp_Long_Term_Forecast(Exp_Basic):
 
                 if self.args.use_amp:
                     scaler.scale(loss).backward()
+                    if grad_clip_norm:
+                        scaler.unscale_(model_optim)
+                        gradient_norm = nn.utils.clip_grad_norm_(self.model.parameters(), grad_clip_norm)
+                        clipped_steps += int(gradient_norm > grad_clip_norm)
                     scaler.step(model_optim)
                     scaler.update()
                 else:
                     loss.backward()
+                    if grad_clip_norm:
+                        gradient_norm = nn.utils.clip_grad_norm_(self.model.parameters(), grad_clip_norm)
+                        clipped_steps += int(gradient_norm > grad_clip_norm)
                     model_optim.step()
                 if is_financial_dataset(self.args.data):
                     emit_progress(epoch + 1, self.args.train_epochs, i + 1, train_steps)
@@ -266,17 +297,24 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 stockmixer_selection=(getattr(self.args, 'financial_selection', None) == 'stockmixer_val_loss'))
             if is_financial_dataset(self.args.data):
                 val_financial = self._last_financial_metrics.copy()
-            test_loss = float("nan") if validation_only else self.vali(test_data, test_loader, criterion)
+            # Optional StockMixer-style test reporting; checkpoint selection remains validation-only.
+            test_loss = self.vali(test_data, test_loader, criterion) if test_each_epoch else float("nan")
 
             message = "Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f}".format(
                 epoch + 1, train_steps, train_loss, vali_loss)
             if is_financial_dataset(self.args.data) and 'stockmixer_val_loss' in val_financial:
                 message += f" StockMixer Select Loss: {val_financial['stockmixer_val_loss']:.7f}"
-            print(message + (' | Test skipped (validation-only)' if validation_only else f' Test Loss: {test_loss:.7f}'))
+            if validation_only:
+                message += ' | Test skipped (validation-only)'
+            elif test_each_epoch:
+                message += f' Test Loss: {test_loss:.7f}'
+            else:
+                message += ' | Test deferred to final best.pth'
+            print(message)
             if is_financial_dataset(self.args.data):
-                test_financial = {} if validation_only else self._last_financial_metrics.copy()
+                test_financial = self._last_financial_metrics.copy() if test_each_epoch else {}
                 print(metric_line('Val', val_financial))
-                if not validation_only:
+                if test_each_epoch:
                     print(metric_line('Test', test_financial))
                 components = {'train_mse': float(np.mean(train_mse)), 'train_moe': float(np.mean(train_moe)),
                               'train_moe_weighted': float(moe_aux_weight * np.mean(train_moe)) if moe_aux_weight else 0.0,
@@ -285,6 +323,9 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                               'rank_weight': rank_weight,
                               'moe_aux_weight': moe_aux_weight,
                               'learning_rate': model_optim.param_groups[0]['lr']}
+                if grad_clip_norm:
+                    components.update(grad_clip_norm=grad_clip_norm,
+                                      grad_clip_fraction=clipped_steps / train_steps)
                 if ic_weight:
                     components.update(train_ic=float(np.mean(train_ic)),
                                       train_ic_weighted=float(ic_weight * np.mean(train_ic)),
