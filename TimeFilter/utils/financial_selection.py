@@ -8,19 +8,26 @@ import torch
 def best_epoch_for_checkpoint(checkpoint):
     """Read the recorded best epoch for a run's best.pth, if available."""
     checkpoint = Path(checkpoint).resolve()
-    if checkpoint.name != 'best.pth':
+    candidate = {'best.pth': None, 'best_stockmixer_loss.pth': 'A',
+                 'best_rankic.pth': 'B'}.get(checkpoint.name, 'unknown')
+    if candidate == 'unknown':
         return None
-    selection_path = (checkpoint.parents[2] / 'results' / checkpoint.parent.name
-                      / 'financial' / 'selection.json')
+    selection_path = (checkpoint.parents[2] / 'results' / checkpoint.parent.name / 'financial'
+                      / ('selection.json' if candidate is None else 'selection_summary.json'))
     if not selection_path.is_file():
         return None
     try:
         selection = json.loads(selection_path.read_text(encoding='utf-8'))
     except (OSError, ValueError):
         return None
-    if selection.get('final_evaluation_checkpoint') != checkpoint.name:
-        return None
-    epoch = (selection.get('best') or {}).get('epoch')
+    if candidate is None:
+        if selection.get('final_evaluation_checkpoint') != checkpoint.name:
+            return None
+        epoch = (selection.get('best') or {}).get('epoch')
+    else:
+        if selection.get(f'{candidate}_checkpoint') != checkpoint.name:
+            return None
+        epoch = (selection.get(candidate) or {}).get('epoch')
     return epoch if type(epoch) is int and epoch > 0 else None
 
 

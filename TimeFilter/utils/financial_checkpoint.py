@@ -27,9 +27,10 @@ def resolve_financial_checkpoint(args, setting, project_root):
     else:
         root = Path(getattr(args, 'financial_checkpoint_root', None) or args.checkpoints)
         checkpoint = (root / setting / 'best.pth').resolve()
-    if checkpoint.name != 'best.pth' or not checkpoint.is_file():
-        raise ValueError(f'Financial evaluation requires an existing best.pth: {checkpoint}. '
-                         'Pass --checkpoint with the full path to the training run\'s best.pth.')
+    if checkpoint.name not in ('best.pth', 'best_stockmixer_loss.pth', 'best_rankic.pth'):
+        raise ValueError('Financial evaluation requires best.pth or a recorded walk-forward candidate')
+    if not checkpoint.is_file():
+        raise ValueError(f'Financial evaluation requires an existing checkpoint: {checkpoint}.')
     if checkpoint.parent.name != setting or checkpoint.parent.parent.name != 'checkpoints':
         raise ValueError('Checkpoint does not match this model setting. '
                          'Use the training run\'s best.pth and matching configuration.')
@@ -41,6 +42,10 @@ def resolve_financial_checkpoint(args, setting, project_root):
     saved = yaml.safe_load(config_path.read_text(encoding='utf-8-sig'))
     if not isinstance(saved, dict) or saved.get('is_training') != 1:
         raise ValueError(f'Invalid training configuration beside checkpoint: {config_path}')
+    if checkpoint.name != 'best.pth':
+        from utils.financial_selection import best_epoch_for_checkpoint
+        if not saved.get('financial_walkforward') or best_epoch_for_checkpoint(checkpoint) is None:
+            raise ValueError('Walk-forward candidate is missing its validated selection record')
     saved.setdefault('moe_aux_weight', 0.05)
     saved.setdefault('rank_weight', 0.0)
     saved.setdefault('financial_norm', 1)

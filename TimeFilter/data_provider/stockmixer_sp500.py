@@ -22,8 +22,12 @@ class Dataset_SP500(Dataset):
         self.seq_len, self.label_len, self.pred_len = (
             [16, 0, 1] if size is None else size
         )
+        split = getattr(args, 'financial_split', None)
+        self.TRAIN_END = self.TRAIN_END if split is None else split['train_end']
+        self.VALID_END = self.VALID_END if split is None else split['valid_end']
+        self.FUTURE_END = self.TOTAL_DAYS if split is None else split['future_end']
         if self.seq_len < 1 or self.seq_len >= self.TRAIN_END:
-            raise ValueError("SP500 seq_len must be between 1 and 1005")
+            raise ValueError("SP500 seq_len must be positive and shorter than train_end")
         if not 0 <= self.label_len <= self.seq_len:
             raise ValueError("SP500 requires 0 <= label_len <= seq_len")
         if self.pred_len != 1:
@@ -64,7 +68,7 @@ class Dataset_SP500(Dataset):
         target_start, target_end = {
             'train': (self.seq_len, self.TRAIN_END),
             'val': (self.TRAIN_END, self.VALID_END),
-            'test': (self.VALID_END, self.TOTAL_DAYS),
+            'test': (self.VALID_END, self.FUTURE_END),
         }[flag]
         self.target_start = target_start
         self.target_end = target_end

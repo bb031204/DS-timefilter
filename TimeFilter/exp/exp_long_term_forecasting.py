@@ -7,11 +7,13 @@ from utils.financial_progress import emit_progress
 from utils.financial_gradient_diagnostic import record_gradient_diagnostic
 from utils.financial_losses import stockmixer_rank_loss, stockmixer_validation_loss, daily_pearson_ic_loss
 from utils.financial_report import FinancialReport, financial_metrics, metric_line
+from utils.walkforward_selection import WalkforwardRankCheckpoint, epoch_correlations
 from data_provider.financial_registry import is_financial_dataset
 import torch
 import torch.nn as nn
 from torch import optim
 import os
+import json
 import time
 import warnings
 import numpy as np
@@ -149,13 +151,21 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                     batch_sizes.append(pred.shape[0])
         total_loss = np.average(total_loss, weights=batch_sizes if collect_financial else None)
         if collect_financial:
+            predictions = np.concatenate(financial_preds, axis=0)
+            targets = np.concatenate(financial_trues, axis=0)
+            masks = np.concatenate(financial_masks, axis=0)
             self._last_financial_metrics = financial_metrics(
-                np.concatenate(financial_preds, axis=0),
-                np.concatenate(financial_trues, axis=0),
-                np.concatenate(financial_masks, axis=0),
+                predictions, targets, masks,
             )
             if stockmixer_selection:
                 self._last_financial_metrics['stockmixer_val_loss'] = selection_loss_sum / selection_days
+                if getattr(self.args, 'financial_walkforward', False):
+                    midpoint = len(predictions) // 2
+                    for name, window in (('early', slice(None, midpoint)),
+                                         ('late', slice(midpoint, None))):
+                        part = financial_metrics(predictions[window], targets[window], masks[window])
+                        self._last_financial_metrics[f'IC_{name}'] = part['IC']
+                        self._last_financial_metrics[f'RankIC_{name}'] = part['RankIC']
         self.model.train()
         return total_loss
 
@@ -187,9 +197,12 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         ic_weight = (finance.get('loss', {}).get('ic_weight', 0.0)
                      if finance.get('enabled', False) and is_financial_dataset(self.args.data) else 0.0)
 
+        rank_candidate = None
         if is_financial_dataset(self.args.data):
             self._financial_report = FinancialReport(setting, self.args, 'training')
             selection = FinancialSelection(path, self._financial_report, getattr(self.args, 'financial_selection', 'mse'))
+            rank_candidate = (WalkforwardRankCheckpoint(path, self._financial_report)
+                              if getattr(self.args, 'financial_walkforward', False) else None)
 
         if self.args.use_amp:
             scaler = torch.cuda.amp.GradScaler()
@@ -343,6 +356,8 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                     val_financial, test_financial, components,
                 )
                 selection.update(self.model, epoch + 1, val_financial)
+                if rank_candidate is not None:
+                    rank_candidate.update(self.model, epoch + 1, val_financial)
             else:
                 early_stopping(vali_loss, self.model, path)
             if early_stopping.early_stop:
@@ -354,9 +369,51 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 run_diagnostic(epoch + 1)
 
         best_model_path = selection.finish() if is_financial_dataset(self.args.data) else path + '/' + 'checkpoint.pth'
+        if rank_candidate is not None:
+            rank_candidate.finish(selection.best)
         self.model.load_state_dict(torch.load(best_model_path))
 
         return self.model
+
+    def walkforward_evaluate(self, setting):
+        """Compare the two frozen validation choices on the later historical block."""
+        from pathlib import Path
+        import shutil
+
+        report = self._financial_report
+        folder = report.path
+        shutil.copy2(folder / 'test_metrics.json', folder / 'future_metrics_A.json')
+        shutil.copy2(folder / 'test_predictions.npz', folder / 'future_predictions_A.npz')
+
+        checkpoint = Path(self.args.checkpoints) / setting / 'best_rankic.pth'
+        self.model.load_state_dict(torch.load(checkpoint, map_location=self.device, weights_only=True))
+        dataset, loader = self._get_data(flag='test')
+        predictions, targets, masks = [], [], []
+        self.model.eval()
+        with torch.no_grad():
+            for batch_x, batch_y, _, batch_y_mark in loader:
+                outputs, _ = self.model(batch_x.float().to(self.device), self.masks, is_training=False)
+                pred = outputs[:, -self.args.pred_len:, :].detach().cpu()
+                true = batch_y[:, -self.args.pred_len:, :].float()
+                predictions.append(pred.numpy())
+                targets.append(true.numpy())
+                masks.append(self._financial_mask(batch_y_mark, true).numpy())
+        pred = np.concatenate(predictions, axis=0)
+        true = np.concatenate(targets, axis=0)
+        mask = np.concatenate(masks, axis=0)
+        metrics = financial_metrics(pred, true, mask)
+        report.write_json('future_metrics_B.json', metrics)
+        np.savez_compressed(folder / 'future_predictions_B.npz',
+                            prediction=np.ascontiguousarray(pred[:, 0, :].T),
+                            ground_truth=np.ascontiguousarray(true[:, 0, :].T),
+                            mask=np.ascontiguousarray(mask[:, 0, :].T),
+                            target_index=np.arange(dataset.target_start, dataset.target_end),
+                            source_day_index=np.arange(dataset.target_start, dataset.target_end) + dataset.START_DAY,
+                            lookback_length=np.asarray(dataset.seq_len), horizon=np.asarray(dataset.pred_len))
+        report.write_json('selection_future_correlation.json', epoch_correlations(folder))
+        print(metric_line('Future A (validation loss)',
+                          json.loads((folder / 'future_metrics_A.json').read_text(encoding='utf-8'))))
+        print(metric_line('Future B (validation RankIC)', metrics))
 
     def test(self, setting, test=0):
         checkpoint = None
@@ -446,7 +503,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                                os.path.join(self.args.checkpoints, setting, 'best.pth'))
             best_epoch = best_epoch_for_checkpoint(best_checkpoint)
             best_epoch_text = str(best_epoch) if best_epoch is not None else 'unknown (selection.json unavailable)'
-            print(f'Final Test | best.pth from epoch {best_epoch_text}')
+            print(f'Final Test | {os.path.basename(best_checkpoint)} from epoch {best_epoch_text}')
             print(metric_line('Final Test', metrics))
             if test or not hasattr(self, '_financial_report'):
                 self._financial_report = FinancialReport(setting, self.args, 'evaluation_only')

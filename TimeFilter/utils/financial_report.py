@@ -95,6 +95,7 @@ class FinancialReport:
             'source_start_day': dataset.START_DAY,
             'train_end': getattr(dataset, 'TRAIN_END', None),
             'valid_end': getattr(dataset, 'VALID_END', None),
+            'future_end': getattr(dataset, 'FUTURE_END', None),
             'test_target_start': dataset.target_start,
             'test_target_end_exclusive': dataset.target_end,
             'test_days': len(dataset),

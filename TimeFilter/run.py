@@ -158,6 +158,10 @@ if __name__ == '__main__':
     parser.add_argument('--financial_selection', choices=['mse', 'RankIC', 'IC', 'stockmixer_val_loss'], default='mse')
     parser.add_argument('--financial_test_each_epoch', type=int, choices=[0, 1], default=1,
                         help='Evaluate financial test set after each epoch; 0 defers testing until final best.pth')
+    parser.add_argument('--financial_walkforward', action='store_true',
+                        help='Run the SP500 historical A/B checkpoint-selection audit')
+    parser.add_argument('--financial_split', type=json.loads, default=None,
+                        help='Historical SP500 split JSON: train_end, valid_end, future_end')
     parser.add_argument('--stockmixer_selection_rank_weight', type=float, default=0.1,
                         help='Rank weight in StockMixer-style validation loss; independent of training rank_weight')
     parser.add_argument('--gradient_diagnostic_epochs', type=int, nargs='*', default=[],
@@ -203,6 +207,18 @@ if __name__ == '__main__':
         parser.error('--financial_input_features eod5 only applies to SP500')
     if args.financial_input_features == 'eod5' and args.financial_norm != 0:
         parser.error('--financial_input_features eod5 requires --financial_norm 0')
+    if args.financial_walkforward:
+        if args.data not in ('SP500', 'S&P500') or args.itr != 1:
+            parser.error('--financial_walkforward requires one SP500 run')
+        if args.financial_selection != 'stockmixer_val_loss':
+            parser.error('--financial_walkforward requires StockMixer validation-loss selection for A')
+        split = args.financial_split
+        if (not isinstance(split, dict) or set(split) != {'train_end', 'valid_end', 'future_end'}
+                or any(type(value) is not int for value in split.values())
+                or not args.seq_len < split['train_end'] < split['valid_end'] < split['future_end'] <= 1259):
+            parser.error('walk-forward split must satisfy seq_len < train_end < valid_end < future_end <= 1259')
+    elif args.financial_split is not None:
+        parser.error('--financial_split is reserved for --financial_walkforward')
     if args.financial_selection == 'stockmixer_val_loss' and args.data not in ('SP500', 'S&P500'):
         parser.error('--financial_selection stockmixer_val_loss only applies to SP500')
     if not is_financial_dataset(args.data) and (args.financial_norm != 1 or args.rank_weight != 0):
@@ -230,6 +246,12 @@ if __name__ == '__main__':
         device_ids = args.devices.split(',')
         args.device_ids = [int(id_) for id_ in device_ids]
         args.gpu = args.device_ids[0]
+
+    if args.financial_walkforward and args.is_training and args.financial_output_dir:
+        from pathlib import Path
+        import yaml
+        Path(args.financial_output_dir, 'config.yaml').write_text(
+            yaml.safe_dump(vars(args), allow_unicode=True, sort_keys=False), encoding='utf-8')
 
     print('Args in experiment:')
     print_args(args)
@@ -282,6 +304,8 @@ if __name__ == '__main__':
             if not (is_financial_dataset(args.data) and args.financial_validation_only):
                 print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
                 exp.test(setting)
+                if args.financial_walkforward:
+                    exp.walkforward_evaluate(setting)
             torch.cuda.empty_cache()
     else:
         ii = 0

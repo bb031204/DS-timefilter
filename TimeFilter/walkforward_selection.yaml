@@ -1,0 +1,12 @@
+# 选模规则诊断：训练配置固定为 15_49 实验快照，不读取当前 config.yaml。
+base_config: outputs/SP500_2026_10_05_15_49/source_config.yaml
+output_root: outputs/walkforward_selection_analysis
+seeds: [2021]  # 首轮单种子；观察到一致方向后再增加种子复验
+future_each_epoch: true  # 只用于事后相关性诊断；A/B 权重仅由 Selection 选出
+
+# 目标日为裁剪 SP500 数据后的索引，区间采用左闭右开；正式测试从 1259 开始。
+# 每折 Selection 为 253 天，Future 为 126 天，均不触及正式测试期。
+folds:
+  - {name: fold_1, train_end: 628, valid_end: 881, future_end: 1007}
+  - {name: fold_2, train_end: 754, valid_end: 1007, future_end: 1133}
+  - {name: fold_3, train_end: 880, valid_end: 1133, future_end: 1259}
