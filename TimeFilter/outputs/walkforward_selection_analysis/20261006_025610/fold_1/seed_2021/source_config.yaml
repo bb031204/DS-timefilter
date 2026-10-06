@@ -1,0 +1,86 @@
+# TimeFilter 金融实验配置：修改后运行 python scripts/run_financial.py 即可。
+# 路径相对于 TimeFilter 项目目录；命令行同名参数会覆盖本文件。
+# SP500 五特征实验：只扩展金融输入投影，保留 TimeFilter 图网络主干。
+# 同参数、同代码、同数据的已完成实验会复用结果；旧实验无版本指纹，首次重新运行不会复用。
+# 原始 TimeFilter 参数（本仓库 run.py 默认值，不代表论文对所有数据集的最优配置）：
+#   预测：seq_len=96，label_len=48，pred_len=96。
+#   模型：d_model=512，d_ff=2048，n_heads=4，e_layers=2，patch_len=16，
+#         alpha=0.1，top_p=0.5，dropout=0.1，pos=1，归一化开启。
+#   训练：batch_size=32，train_epochs=10，learning_rate=0.0001，patience=3，
+#         lradj=cosine，itr=1，moe_aux_weight=0.05；原始模型无 RankLoss（等价 rank_weight=0）。
+#   运行：num_workers=1，gpu=0。金融专用项 financial_seed=2021（原脚本也固定种子 2021）、
+#         financial_selection=mse、cpu=false 是适配配置，不能视为原模型超参数。
+# 最早 SP500 金融基线另使用：seq_len=16，label_len=0，pred_len=1，train_epochs=100，num_workers=0；
+# 其余上述模型/训练参数与原始默认一致，金融归一化仍开启，排序损失未启用。
+dataset: SP500  # 市场：SP500（也接受 S&P500）、NASDAQ、NYSE
+data_root: stockmixer_dataset  # 数据父目录，其下应有对应市场的子目录
+mode: train  # train：从头训练并测试最佳权重；evaluate：只测试已有权重
+checkpoint: null  # evaluate 时填写训练输出目录内的 best.pth；会核对原实验配置
+
+# 预测任务
+forecast:
+  seq_len: 16  # 原始默认 96；当前输入 16 个交易日，须能被 patch_len 整除
+  label_len: 0  # 原始默认 48；当前金融任务不使用解码器历史标签
+  pred_len: 1  # 原始默认 96；当前金融任务预测下一交易日
+  input_features: eod5  # returns=旧单收益率输入；eod5=每只股票每日原始数据的 5 维行情
+
+# 模型超参数
+model:
+  d_model: 512  # 隐藏特征维度，需能被 n_heads 整除；越大通常越占显存
+  d_ff: 2048  # 前馈网络中间维度
+  n_heads: 4  # 图关系学习的头数
+  e_layers: 2  # 图网络层数
+  patch_len: 8  # 原始默认及 SP500 基线 16；当前 8，每股 2 个 patch
+  alpha: 0.2  # 原始默认及 SP500 基线 0.1；当前候选值仍需验证集对照
+  top_p: 0.5  # MoE 路由累计概率阈值；本次保持不变，不用它关闭辅助损失
+  dropout: 0.1  # Dropout 概率，用于正则化
+  pos: 1  # 位置编码开关：1 开启，0 关闭
+  norm: false  # eod5 必须为 false；输入沿用 StockMixer 已处理的五维数据，输出是收益率
+
+# 可消融的金融适配模块。以下为金融候选配置；TimeFilter 图网络主干保留。
+# 2026-10-05 的已完成实验使用 rank_weight=0.1、strict_masked_softmax=false；当前两项尚未单独验证。
+finance_adaptation:
+  enabled: true
+  input_adapter:
+    enabled: true  # 仅 eod5 输入可用；以下三个子项可分别开关
+    input_layernorm: true  # 对每只股票的当前 16×5 输入窗口做 LayerNorm，不反归一化输出
+    indicator_mixer:
+      enabled: true  # 每个交易日只混合 5 个行情特征，共享小型残差 MLP
+      hidden_dim: 16
+    temporal_mixer:
+      enabled: true  # 每个 8 日 patch 内混合时间维，共享小型残差 MLP
+      hidden_dim: 16
+  positional_encoding:
+    mode: patch_only  # original=原全局位置；patch_only=各股票共享 patch 位置；none=关闭
+  graph:
+    strict_masked_softmax: true  # true：删边在 softmax 前设为 -inf，并保留自环
+  loss:
+    ic_weight: 0.0  # 额外的每日 Pearson IC 损失权重；训练 rank_weight 仍在 training 段
+
+# 训练与验证集选模
+training:
+  # 金融总损失 = 预测 MSE + rank_weight × 横截面排序损失 + moe_aux_weight × MoE 辅助损失。
+  # 设为 0 仍保留 MoE 路由和模型结构；不同权重实验不要按总 Train Loss 大小评优。
+  moe_aux_weight: 0.005  # 原始默认及 SP500 基线 0.05；当前为 0.005
+  rank_weight: 5  # 当前待验证候选；已完成实验为 0.1。训练权重与下方选模权重相互独立
+  financial_seed: 2021  # 随机种子；三组使用相同种子，后续复验时再成组更换
+  financial_selection: stockmixer_val_loss  # 与本次 StockMixer 一致：验证集 MSE + 0.1×排序损失，越低越好
+  test_each_epoch: true  # true：每轮后评估并记录 Test，对齐 StockMixer；false：只在 best.pth 加载后最终测试
+  stockmixer_selection_rank_weight: 0.1  # 固定选模口径；独立于训练用的 rank_weight
+  gradient_diagnostic_epochs: [0, 1, 5]  # 只检查训练早期：训练前、第 1 / 5 轮后；[] 关闭诊断
+  gradient_diagnostic_batch_size: 8  # 固定取训练期均匀分布的 8 个日期；显存允许时可改为 32
+  batch_size: 32  # 每批历史窗口数；显存不足可减小，但所有对照组需一致
+  train_epochs: 100  # 原始默认 10；SP500 基线 100。金融流程跑满后使用验证集最优 best.pth
+  learning_rate: 0.0001  # 优化器初始学习率
+  optimizer: adamw  # 金融候选：adamw 或原始 adam；非金融数据仍使用原始 Adam
+  weight_decay: 0.0001  # 仅 AdamW 生效；抑制权重过大，0 为关闭
+  grad_clip_norm: 1.0  # 金融训练全局梯度范数上限；0 为关闭，裁剪比例记入逐轮指标
+  patience: 3  # 原框架早停参数；当前金融流程不启用早停，此值不影响训练轮数
+  lradj: cosine  # 学习率调度：cosine（当前）、type1、type2
+  itr: 1  # 单次启动的训练次数；建议保持 1，多种子实验应显式更换 financial_seed
+
+# 运行设备
+runtime:
+  num_workers: 0  # 原始默认 1；SP500 基线 0。Windows 建议保持 0
+  gpu: 0  # 使用的 GPU 编号，从 0 开始
+  cpu: false  # true 强制使用 CPU；false 在 CUDA 可用时使用 GPU

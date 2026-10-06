@@ -1,0 +1,8 @@
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Training checkpoints
+TimeFilter/outputs/walkforward_selection_analysis/**/checkpoints/
+TimeFilter/outputs/walkforward_selection_analysis/**/results/

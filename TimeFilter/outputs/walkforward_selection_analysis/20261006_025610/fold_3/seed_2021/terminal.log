@@ -1,0 +1,837 @@
+Args in experiment:
+Basic Config
+  Task Name:          long_term_forecast  Is Training:        1                   
+  Model ID:           SP500_eod5_16_1     Model:              TimeFilter          
+
+Data Loader
+  Data:               SP500               Root Path:          D:\finance\model\Timefilter\TimeFilter\stockmixer_dataset\SP500
+  Data Path:          SP500.npy           Features:           M                   
+  Target:             OT                  Freq:               d                   
+  Checkpoints:        D:\finance\model\Timefilter\TimeFilter\outputs\walkforward_selection_analysis\20261006_025610\fold_3\seed_2021\checkpoints
+
+Forecasting Task
+  Seq Len:            16                  Label Len:          0                   
+  Pred Len:           1                   Seasonal Patterns:  Monthly             
+  Inverse:            0                   
+
+Model Parameters
+  Top k:              5                   Num Kernels:        6                   
+  Enc In:             474                 Dec In:             474                 
+  C Out:              474                 d model:            512                 
+  n heads:            4                   e layers:           2                   
+  d layers:           1                   d FF:               2048                
+  Moving Avg:         25                  Factor:             1                   
+  Distil:             1                   Dropout:            0.1                 
+  Embed:              timeF               Activation:         gelu                
+  Output Attention:   0                   
+
+Run Parameters
+  Num Workers:        0                   Itr:                1                   
+  Train Epochs:       100                 Batch Size:         32                  
+  Patience:           3                   Learning Rate:      0.0001              
+  Des:                test                Loss:               MSE                 
+  Lradj:              cosine              Use Amp:            0                   
+
+GPU
+  Use GPU:            1                   GPU:                0                   
+  Use Multi GPU:      0                   Devices:            0,1,2,3             
+
+De-stationary Projector Params
+  P Hidden Dims:      128, 128            P Hidden Layers:    2                   
+
+Financial protocol | seed=2021 patch_len=8 input=eod5 norm=False rank_weight=5.0 alpha=0.2 moe_aux_weight=0.005 selection=validation:stockmixer_val_loss selection_rank_weight=0.1 optimizer=adamw weight_decay=0.0001 grad_clip_norm=1.0 test_each_epoch=True validation_only=False
+Finance adaptation | {"enabled": true, "graph": {"strict_masked_softmax": true}, "input_adapter": {"enabled": true, "indicator_mixer": {"enabled": true, "hidden_dim": 16}, "input_layernorm": true, "temporal_mixer": {"enabled": true, "hidden_dim": 16}}, "loss": {"ic_weight": 0.0}, "positional_encoding": {"mode": "patch_only"}}
+Use GPU: cuda:0
+>>>>>>>start training : long_term_forecast_SP500_eod5_16_1_TimeFilter_SP500_ftM_sl16_ll0_pl1_dm512_nh4_el2_dl1_df2048_fc1_ebtimeF_dtTrue_test_0>>>>>>>>>>>>>>>>>>>>>>>>>>
+train 864
+val 253
+test 126
+Financial reports: D:\finance\model\Timefilter\TimeFilter\outputs\walkforward_selection_analysis\20261006_025610\fold_3\seed_2021\results\long_term_forecast_SP500_eod5_16_1_TimeFilter_SP500_ftM_sl16_ll0_pl1_dm512_nh4_el2_dl1_df2048_fc1_ebtimeF_dtTrue_test_0\financial
+[Gradient Diagnostic] stage=pretrain epoch=0 batch_size=8 train_indices=0|123|246|369|493|616|739|863
+  MSE: raw=0.043178707 weight=1 weighted=0.043178707
+    all: grad_norm=13.6152 ratio_to_mse=1 active_tensors=46/50
+    patch_embed: grad_norm=1.60729 ratio_to_mse=1 active_tensors=2/2
+    backbone: grad_norm=6.82628 ratio_to_mse=1 active_tensors=28/28
+    moe_gate: grad_norm=0 ratio_to_mse=n/a active_tensors=0/4
+    head: grad_norm=11.6476 ratio_to_mse=1 active_tensors=2/2
+    finance_adapter: grad_norm=0.725432 ratio_to_mse=1 active_tensors=14/14
+  Rank: raw=0.0011586733 weight=5 weighted=0.0057933666
+    all: grad_norm=0.0634673 ratio_to_mse=0.004662 active_tensors=46/50
+    patch_embed: grad_norm=0.0115498 ratio_to_mse=0.007186 active_tensors=2/2
+    backbone: grad_norm=0.0393671 ratio_to_mse=0.005767 active_tensors=28/28
+    moe_gate: grad_norm=0 ratio_to_mse=n/a active_tensors=0/4
+    head: grad_norm=0.0472775 ratio_to_mse=0.004059 active_tensors=2/2
+    finance_adapter: grad_norm=0.0104771 ratio_to_mse=0.01444 active_tensors=14/14
+  MoE: raw=30.433723 weight=0.005 weighted=0.15216862
+    all: grad_norm=0.271385 ratio_to_mse=0.01993 active_tensors=40/50
+    patch_embed: grad_norm=0.0885751 ratio_to_mse=0.05511 active_tensors=2/2
+    backbone: grad_norm=0.226397 ratio_to_mse=0.03317 active_tensors=20/28
+    moe_gate: grad_norm=0.110645 ratio_to_mse=n/a active_tensors=4/4
+    head: grad_norm=0 ratio_to_mse=0 active_tensors=0/2
+    finance_adapter: grad_norm=0.0480233 ratio_to_mse=0.0662 active_tensors=14/14
+  Saved: D:\finance\model\Timefilter\TimeFilter\outputs\walkforward_selection_analysis\20261006_025610\fold_3\seed_2021\results\long_term_forecast_SP500_eod5_16_1_TimeFilter_SP500_ftM_sl16_ll0_pl1_dm512_nh4_el2_dl1_df2048_fc1_ebtimeF_dtTrue_test_0\financial\gradient_diagnostics.csv
+Epoch   1/100 [####################]  27/27  | used 03:01 | left 00:00 | total 03:01 | ETA 4:59:22
+Epoch: 1 cost time: 181.44353699684143
+Epoch: 1, Steps: 27 | Train Loss: 0.5848543 Vali Loss: 0.1129596 StockMixer Select Loss: 0.1130354 Test Loss: 0.1207211
+Val Financial | IC: -0.004319 RIC: -0.026993 RankIC: 0.012057 Precision@10: 0.529249 SR(top5): -0.003789
+Test Financial | IC: -0.009122 RIC: -0.062975 RankIC: -0.008020 Precision@10: 0.490476 SR(top5): 1.384340
+Train components | MSE: 0.49397369 Rank: 0.00077122 weighted Rank: 0.00385608 MoE: 17.40490656 weighted MoE: 0.08702453
+New Best | epoch 1 | validation stockmixer_val_loss=0.11303540 | saved best.pth
+Updating learning rate to 9.997532801828658e-05
+[Gradient Diagnostic] stage=post_epoch epoch=1 batch_size=8 train_indices=0|123|246|369|493|616|739|863
+  MSE: raw=0.10998899 weight=1 weighted=0.10998899
+    all: grad_norm=28.1475 ratio_to_mse=1 active_tensors=46/50
+    patch_embed: grad_norm=2.63752 ratio_to_mse=1 active_tensors=2/2
+    backbone: grad_norm=11.6832 ratio_to_mse=1 active_tensors=28/28
+    moe_gate: grad_norm=0 ratio_to_mse=n/a active_tensors=0/4
+    head: grad_norm=25.4549 ratio_to_mse=1 active_tensors=2/2
+    finance_adapter: grad_norm=0.935369 ratio_to_mse=1 active_tensors=14/14
+  Rank: raw=0.00075853476 weight=5 weighted=0.0037926738
+    all: grad_norm=0.1862 ratio_to_mse=0.006615 active_tensors=46/50
+    patch_embed: grad_norm=0.0243457 ratio_to_mse=0.009231 active_tensors=2/2
+    backbone: grad_norm=0.0981867 ratio_to_mse=0.008404 active_tensors=28/28
+    moe_gate: grad_norm=0 ratio_to_mse=n/a active_tensors=0/4
+    head: grad_norm=0.156137 ratio_to_mse=0.006134 active_tensors=2/2
+    finance_adapter: grad_norm=0.00764569 ratio_to_mse=0.008174 active_tensors=14/14
+  MoE: raw=7.4956102 weight=0.005 weighted=0.037478051
+    all: grad_norm=0.200774 ratio_to_mse=0.007133 active_tensors=40/50
+    patch_embed: grad_norm=0.036619 ratio_to_mse=0.01388 active_tensors=2/2
+    backbone: grad_norm=0.153835 ratio_to_mse=0.01317 active_tensors=20/28
+    moe_gate: grad_norm=0.121757 ratio_to_mse=n/a active_tensors=4/4
+    head: grad_norm=0 ratio_to_mse=0 active_tensors=0/2
+    finance_adapter: grad_norm=0.0218965 ratio_to_mse=0.02341 active_tensors=14/14
+  Saved: D:\finance\model\Timefilter\TimeFilter\outputs\walkforward_selection_analysis\20261006_025610\fold_3\seed_2021\results\long_term_forecast_SP500_eod5_16_1_TimeFilter_SP500_ftM_sl16_ll0_pl1_dm512_nh4_el2_dl1_df2048_fc1_ebtimeF_dtTrue_test_0\financial\gradient_diagnostics.csv
+Epoch   2/100 [####################]  27/27  | used 03:01 | left 00:00 | total 06:06 | ETA 4:59:14
+Epoch: 2 cost time: 181.21635794639587
+Epoch: 2, Steps: 27 | Train Loss: 0.1317466 Vali Loss: 0.0072206 StockMixer Select Loss: 0.0072651 Test Loss: 0.0136803
+Val Financial | IC: 0.003278 RIC: 0.021687 RankIC: 0.006575 Precision@10: 0.528458 SR(top5): 0.193627
+Test Financial | IC: -0.007681 RIC: -0.048516 RankIC: -0.000190 Precision@10: 0.493651 SR(top5): 1.230137
+Train components | MSE: 0.09960013 Rank: 0.00046247 weighted Rank: 0.00231234 MoE: 5.96683493 weighted MoE: 0.02983417
+New Best | epoch 2 | validation stockmixer_val_loss=0.00726513 | saved best.pth
+Updating learning rate to 9.990133642141359e-05
+Epoch   3/100 [####################]  27/27  | used 03:01 | left 00:00 | total 09:11 | ETA 4:57:07
+Epoch: 3 cost time: 181.3564624786377
+Epoch: 3, Steps: 27 | Train Loss: 0.0734027 Vali Loss: 0.0318067 StockMixer Select Loss: 0.0318434 Test Loss: 0.0333891
+Val Financial | IC: 0.015534 RIC: 0.121091 RankIC: 0.011753 Precision@10: 0.529249 SR(top5): 1.231419
+Test Financial | IC: -0.003613 RIC: -0.025847 RankIC: 0.001276 Precision@10: 0.493651 SR(top5): 1.477611
+Train components | MSE: 0.04827318 Rank: 0.00039394 weighted Rank: 0.00196970 MoE: 4.63196712 weighted MoE: 0.02315984
+Updating learning rate to 9.977809823015401e-05
+Epoch   4/100 [####################]  27/27  | used 03:01 | left 00:00 | total 12:16 | ETA 4:54:25
+Epoch: 4 cost time: 181.2058174610138
+Epoch: 4, Steps: 27 | Train Loss: 0.0587388 Vali Loss: 0.0063522 StockMixer Select Loss: 0.0063843 Test Loss: 0.0045085
+Val Financial | IC: -0.000021 RIC: -0.000148 RankIC: 0.007865 Precision@10: 0.532411 SR(top5): 0.134893
+Test Financial | IC: 0.001659 RIC: 0.012162 RankIC: 0.004679 Precision@10: 0.486508 SR(top5): 1.765925
+Train components | MSE: 0.04690098 Rank: 0.00033466 weighted Rank: 0.00167331 MoE: 2.03290478 weighted MoE: 0.01016452
+New Best | epoch 4 | validation stockmixer_val_loss=0.00638428 | saved best.pth
+Updating learning rate to 9.96057350657239e-05
+Epoch   5/100 [####################]  27/27  | used 03:01 | left 00:00 | total 15:20 | ETA 4:51:35
+Epoch: 5 cost time: 181.24254298210144
+Epoch: 5, Steps: 27 | Train Loss: 0.0324345 Vali Loss: 0.0018023 StockMixer Select Loss: 0.0018266 Test Loss: 0.0011848
+Val Financial | IC: 0.004161 RIC: 0.031186 RankIC: 0.011537 Precision@10: 0.525296 SR(top5): -0.230185
+Test Financial | IC: 0.001582 RIC: 0.011662 RankIC: 0.003741 Precision@10: 0.489683 SR(top5): 1.533583
+Train components | MSE: 0.02089828 Rank: 0.00028150 weighted Rank: 0.00140752 MoE: 2.02574259 weighted MoE: 0.01012871
+New Best | epoch 5 | validation stockmixer_val_loss=0.00182659 | saved best.pth
+Updating learning rate to 9.938441702975689e-05
+[Gradient Diagnostic] stage=post_epoch epoch=5 batch_size=8 train_indices=0|123|246|369|493|616|739|863
+  MSE: raw=0.0018198747 weight=1 weighted=0.0018198747
+    all: grad_norm=0.167597 ratio_to_mse=1 active_tensors=46/50
+    patch_embed: grad_norm=0.0180916 ratio_to_mse=1 active_tensors=2/2
+    backbone: grad_norm=0.0699235 ratio_to_mse=1 active_tensors=28/28
+    moe_gate: grad_norm=0 ratio_to_mse=n/a active_tensors=0/4
+    head: grad_norm=0.151012 ratio_to_mse=1 active_tensors=2/2
+    finance_adapter: grad_norm=0.00820166 ratio_to_mse=1 active_tensors=14/14
+  Rank: raw=0.00029224431 weight=5 weighted=0.0014612215
+    all: grad_norm=0.0808415 ratio_to_mse=0.4824 active_tensors=46/50
+    patch_embed: grad_norm=0.00984031 ratio_to_mse=0.5439 active_tensors=2/2
+    backbone: grad_norm=0.0307889 ratio_to_mse=0.4403 active_tensors=28/28
+    moe_gate: grad_norm=0 ratio_to_mse=n/a active_tensors=0/4
+    head: grad_norm=0.074051 ratio_to_mse=0.4904 active_tensors=2/2
+    finance_adapter: grad_norm=0.00264733 ratio_to_mse=0.3228 active_tensors=14/14
+  MoE: raw=2.0207171 weight=0.005 weighted=0.010103586
+    all: grad_norm=0.00384644 ratio_to_mse=0.02295 active_tensors=40/50
+    patch_embed: grad_norm=0.00152291 ratio_to_mse=0.08418 active_tensors=2/2
+    backbone: grad_norm=0.00342073 ratio_to_mse=0.04892 active_tensors=20/28
+    moe_gate: grad_norm=0.000583546 ratio_to_mse=n/a active_tensors=4/4
+    head: grad_norm=0 ratio_to_mse=0 active_tensors=0/2
+    finance_adapter: grad_norm=0.000658695 ratio_to_mse=0.08031 active_tensors=14/14
+  Saved: D:\finance\model\Timefilter\TimeFilter\outputs\walkforward_selection_analysis\20261006_025610\fold_3\seed_2021\results\long_term_forecast_SP500_eod5_16_1_TimeFilter_SP500_ftM_sl16_ll0_pl1_dm512_nh4_el2_dl1_df2048_fc1_ebtimeF_dtTrue_test_0\financial\gradient_diagnostics.csv
+Epoch   6/100 [####################]  27/27  | used 03:01 | left 00:00 | total 18:25 | ETA 4:48:45
+Epoch: 6 cost time: 181.31620121002197
+Epoch: 6, Steps: 27 | Train Loss: 0.0262773 Vali Loss: 0.0024483 StockMixer Select Loss: 0.0024692 Test Loss: 0.0020041
+Val Financial | IC: 0.016985 RIC: 0.139074 RankIC: 0.010059 Precision@10: 0.523715 SR(top5): 1.115200
+Test Financial | IC: -0.000912 RIC: -0.006946 RankIC: 0.001196 Precision@10: 0.509524 SR(top5): 1.934465
+Train components | MSE: 0.01498786 Rank: 0.00024088 weighted Rank: 0.00120439 MoE: 2.01700947 weighted MoE: 0.01008505
+Updating learning rate to 9.911436253643445e-05
+Epoch   7/100 [####################]  27/27  | used 03:01 | left 00:00 | total 21:30 | ETA 4:45:49
+Epoch: 7 cost time: 181.4106044769287
+Epoch: 7, Steps: 27 | Train Loss: 0.0261385 Vali Loss: 0.0091673 StockMixer Select Loss: 0.0091865 Test Loss: 0.0082572
+Val Financial | IC: -0.001023 RIC: -0.007792 RankIC: 0.004438 Precision@10: 0.520553 SR(top5): 0.561777
+Test Financial | IC: -0.000871 RIC: -0.006278 RankIC: 0.006837 Precision@10: 0.503175 SR(top5): 1.848944
+Train components | MSE: 0.01498665 Rank: 0.00021948 weighted Rank: 0.00109741 MoE: 2.01089390 weighted MoE: 0.01005447
+Updating learning rate to 9.879583809693738e-05
+Epoch   8/100 [####################]  27/27  | used 03:01 | left 00:00 | total 24:35 | ETA 4:42:48
+Epoch: 8 cost time: 181.23078060150146
+Epoch: 8, Steps: 27 | Train Loss: 0.0261098 Vali Loss: 0.0206160 StockMixer Select Loss: 0.0206363 Test Loss: 0.0202692
+Val Financial | IC: 0.007148 RIC: 0.057243 RankIC: -0.003663 Precision@10: 0.524506 SR(top5): 1.543025
+Test Financial | IC: -0.006120 RIC: -0.045951 RankIC: -0.004473 Precision@10: 0.494444 SR(top5): 1.502120
+Train components | MSE: 0.01503342 Rank: 0.00020680 weighted Rank: 0.00103399 MoE: 2.00848427 weighted MoE: 0.01004242
+Updating learning rate to 9.842915805643155e-05
+Epoch   9/100 [####################]  27/27  | used 03:01 | left 00:00 | total 27:40 | ETA 4:39:48
+Epoch: 9 cost time: 181.3558850288391
+Epoch: 9, Steps: 27 | Train Loss: 0.0267324 Vali Loss: 0.0044960 StockMixer Select Loss: 0.0045149 Test Loss: 0.0036190
+Val Financial | IC: -0.001126 RIC: -0.007794 RankIC: 0.001015 Precision@10: 0.511858 SR(top5): 0.357848
+Test Financial | IC: -0.008540 RIC: -0.057259 RankIC: -0.003556 Precision@10: 0.494444 SR(top5): 1.898929
+Train components | MSE: 0.01572872 Rank: 0.00019346 weighted Rank: 0.00096731 MoE: 2.00726484 weighted MoE: 0.01003632
+Updating learning rate to 9.801468428384716e-05
+Epoch  10/100 [####################]  27/27  | used 03:01 | left 00:00 | total 30:45 | ETA 4:36:45
+Epoch: 10 cost time: 181.17719626426697
+Epoch: 10, Steps: 27 | Train Loss: 0.0232630 Vali Loss: 0.0179246 StockMixer Select Loss: 0.0179416 Test Loss: 0.0180352
+Val Financial | IC: 0.014918 RIC: 0.118324 RankIC: 0.004100 Precision@10: 0.522134 SR(top5): 1.392991
+Test Financial | IC: -0.004489 RIC: -0.030738 RankIC: -0.004911 Precision@10: 0.503175 SR(top5): 2.068330
+Train components | MSE: 0.01229801 Rank: 0.00018710 weighted Rank: 0.00093550 MoE: 2.00588999 weighted MoE: 0.01002945
+Updating learning rate to 9.755282581475769e-05
+Epoch  11/100 [####################]  27/27  | used 03:01 | left 00:00 | total 33:49 | ETA 4:33:42
+Epoch: 11 cost time: 181.1951551437378
+Epoch: 11, Steps: 27 | Train Loss: 0.0228258 Vali Loss: 0.0082212 StockMixer Select Loss: 0.0082389 Test Loss: 0.0074997
+Val Financial | IC: -0.014068 RIC: -0.102137 RankIC: -0.009498 Precision@10: 0.524111 SR(top5): 0.135266
+Test Financial | IC: -0.013155 RIC: -0.096181 RankIC: -0.009209 Precision@10: 0.485714 SR(top5): 1.594554
+Train components | MSE: 0.01183650 Rank: 0.00019304 weighted Rank: 0.00096522 MoE: 2.00481420 weighted MoE: 0.01002407
+Updating learning rate to 9.704403844771128e-05
+Epoch  12/100 [####################]  27/27  | used 03:01 | left 00:00 | total 36:54 | ETA 4:30:40
+Epoch: 12 cost time: 181.3963258266449
+Epoch: 12, Steps: 27 | Train Loss: 0.0200661 Vali Loss: 0.0078350 StockMixer Select Loss: 0.0078506 Test Loss: 0.0076467
+Val Financial | IC: 0.009979 RIC: 0.076499 RankIC: 0.004707 Precision@10: 0.524111 SR(top5): 1.359196
+Test Financial | IC: 0.007232 RIC: 0.048835 RankIC: 0.010327 Precision@10: 0.503968 SR(top5): 2.569911
+Train components | MSE: 0.00918679 Rank: 0.00017184 weighted Rank: 0.00085921 MoE: 2.00401881 weighted MoE: 0.01002009
+Updating learning rate to 9.648882429441257e-05
+Epoch  13/100 [####################]  27/27  | used 03:01 | left 00:00 | total 39:59 | ETA 4:27:38
+Epoch: 13 cost time: 181.41324925422668
+Epoch: 13, Steps: 27 | Train Loss: 0.0192259 Vali Loss: 0.0081375 StockMixer Select Loss: 0.0081556 Test Loss: 0.0067606
+Val Financial | IC: -0.010589 RIC: -0.071583 RankIC: -0.008360 Precision@10: 0.511462 SR(top5): -0.160238
+Test Financial | IC: -0.006722 RIC: -0.045453 RankIC: -0.006897 Precision@10: 0.500000 SR(top5): 2.187585
+Train components | MSE: 0.00840679 Rank: 0.00016040 weighted Rank: 0.00080202 MoE: 2.00340999 weighted MoE: 0.01001705
+Updating learning rate to 9.588773128419906e-05
+Epoch  14/100 [####################]  27/27  | used 03:01 | left 00:00 | total 43:04 | ETA 4:24:36
+Epoch: 14 cost time: 181.47100853919983
+Epoch: 14, Steps: 27 | Train Loss: 0.0184862 Vali Loss: 0.0054458 StockMixer Select Loss: 0.0054614 Test Loss: 0.0051121
+Val Financial | IC: 0.019558 RIC: 0.134101 RankIC: 0.008905 Precision@10: 0.527273 SR(top5): 2.234836
+Test Financial | IC: 0.004107 RIC: 0.025924 RankIC: 0.003897 Precision@10: 0.511111 SR(top5): 2.162448
+Train components | MSE: 0.00767675 Rank: 0.00015891 weighted Rank: 0.00079453 MoE: 2.00298844 weighted MoE: 0.01001494
+Updating learning rate to 9.524135262330098e-05
+Epoch  15/100 [####################]  27/27  | used 03:01 | left 00:00 | total 46:09 | ETA 4:21:33
+Epoch: 15 cost time: 181.29570984840393
+Epoch: 15, Steps: 27 | Train Loss: 0.0177433 Vali Loss: 0.0081066 StockMixer Select Loss: 0.0081259 Test Loss: 0.0072550
+Val Financial | IC: -0.003960 RIC: -0.024651 RankIC: 0.012450 Precision@10: 0.525692 SR(top5): 0.174481
+Test Financial | IC: -0.004953 RIC: -0.032884 RankIC: 0.004278 Precision@10: 0.498413 SR(top5): 1.921107
+Train components | MSE: 0.00696494 Rank: 0.00015312 weighted Rank: 0.00076562 MoE: 2.00254333 weighted MoE: 0.01001272
+Updating learning rate to 9.45503262094184e-05
+Epoch  16/100 [####################]  27/27  | used 03:01 | left 00:00 | total 49:14 | ETA 4:18:30
+Epoch: 16 cost time: 181.42638731002808
+Epoch: 16, Steps: 27 | Train Loss: 0.0173340 Vali Loss: 0.0080127 StockMixer Select Loss: 0.0080295 Test Loss: 0.0076354
+Val Financial | IC: 0.012035 RIC: 0.087303 RankIC: -0.000815 Precision@10: 0.516601 SR(top5): 1.759480
+Test Financial | IC: -0.004566 RIC: -0.031408 RankIC: -0.003319 Precision@10: 0.509524 SR(top5): 1.302623
+Train components | MSE: 0.00657374 Rank: 0.00014989 weighted Rank: 0.00074944 MoE: 2.00217330 weighted MoE: 0.01001087
+Updating learning rate to 9.381533400219318e-05
+Epoch  17/100 [####################]  27/27  | used 03:01 | left 00:00 | total 52:19 | ETA 4:15:26
+Epoch: 17 cost time: 181.33383679389954
+Epoch: 17, Steps: 27 | Train Loss: 0.0173253 Vali Loss: 0.0047542 StockMixer Select Loss: 0.0047670 Test Loss: 0.0039367
+Val Financial | IC: 0.000234 RIC: 0.001706 RankIC: 0.001434 Precision@10: 0.523320 SR(top5): 0.740659
+Test Financial | IC: -0.007549 RIC: -0.053552 RankIC: -0.004478 Precision@10: 0.517460 SR(top5): 1.516761
+Train components | MSE: 0.00660327 Rank: 0.00014263 weighted Rank: 0.00071317 MoE: 2.00177131 weighted MoE: 0.01000886
+Updating learning rate to 9.30371013501972e-05
+Epoch  18/100 [####################]  27/27  | used 03:01 | left 00:00 | total 55:24 | ETA 4:12:23
+Epoch: 18 cost time: 181.40937066078186
+Epoch: 18, Steps: 27 | Train Loss: 0.0158989 Vali Loss: 0.0057890 StockMixer Select Loss: 0.0058017 Test Loss: 0.0050674
+Val Financial | IC: 0.014638 RIC: 0.109473 RankIC: 0.007586 Precision@10: 0.529249 SR(top5): 1.439144
+Test Financial | IC: -0.001035 RIC: -0.007112 RankIC: 0.003092 Precision@10: 0.495238 SR(top5): 1.536121
+Train components | MSE: 0.00521436 Rank: 0.00013531 weighted Rank: 0.00067656 MoE: 2.00160073 weighted MoE: 0.01000800
+Updating learning rate to 9.221639627510076e-05
+Epoch  19/100 [####################]  27/27  | used 03:01 | left 00:00 | total 58:28 | ETA 4:09:19
+Epoch: 19 cost time: 181.27363109588623
+Epoch: 19, Steps: 27 | Train Loss: 0.0157003 Vali Loss: 0.0039026 StockMixer Select Loss: 0.0039165 Test Loss: 0.0032083
+Val Financial | IC: 0.003038 RIC: 0.020498 RankIC: 0.010784 Precision@10: 0.526482 SR(top5): 0.824682
+Test Financial | IC: -0.008348 RIC: -0.056519 RankIC: 0.000706 Precision@10: 0.476984 SR(top5): 1.174939
+Train components | MSE: 0.00503398 Rank: 0.00013184 weighted Rank: 0.00065922 MoE: 2.00141455 weighted MoE: 0.01000707
+Updating learning rate to 9.135402871372808e-05
+Epoch  20/100 [####################]  27/27  | used 03:01 | left 00:00 | total 1:01:33 | ETA 4:06:14
+Epoch: 20 cost time: 181.1947956085205
+Epoch: 20, Steps: 27 | Train Loss: 0.0150311 Vali Loss: 0.0051647 StockMixer Select Loss: 0.0051766 Test Loss: 0.0046580
+Val Financial | IC: 0.008991 RIC: 0.077823 RankIC: -0.004661 Precision@10: 0.522134 SR(top5): 1.252884
+Test Financial | IC: -0.011250 RIC: -0.077207 RankIC: -0.006994 Precision@10: 0.503175 SR(top5): 1.403537
+Train components | MSE: 0.00438858 Rank: 0.00012716 weighted Rank: 0.00063580 MoE: 2.00134215 weighted MoE: 0.01000671
+Updating learning rate to 9.045084971874738e-05
+Epoch  21/100 [####################]  27/27  | used 03:01 | left 00:00 | total 1:04:38 | ETA 4:03:10
+Epoch: 21 cost time: 181.33330631256104
+Epoch: 21, Steps: 27 | Train Loss: 0.0148844 Vali Loss: 0.0029909 StockMixer Select Loss: 0.0030069 Test Loss: 0.0021400
+Val Financial | IC: -0.006732 RIC: -0.043020 RankIC: 0.006282 Precision@10: 0.524111 SR(top5): 0.303392
+Test Financial | IC: -0.007472 RIC: -0.048851 RankIC: -0.002377 Precision@10: 0.493651 SR(top5): 1.233485
+Train components | MSE: 0.00426256 Rank: 0.00012314 weighted Rank: 0.00061569 MoE: 2.00123055 weighted MoE: 0.01000615
+Updating learning rate to 8.950775061878453e-05
+Epoch  22/100 [####################]  27/27  | used 03:01 | left 00:00 | total 1:07:43 | ETA 4:00:06
+Epoch: 22 cost time: 181.27537369728088
+Epoch: 22, Steps: 27 | Train Loss: 0.0143899 Vali Loss: 0.0050385 StockMixer Select Loss: 0.0050503 Test Loss: 0.0045716
+Val Financial | IC: 0.001378 RIC: 0.009317 RankIC: -0.002168 Precision@10: 0.523715 SR(top5): 0.887919
+Test Financial | IC: -0.010279 RIC: -0.068834 RankIC: -0.007683 Precision@10: 0.493651 SR(top5): 2.053796
+Train components | MSE: 0.00377694 Rank: 0.00012144 weighted Rank: 0.00060719 MoE: 2.00115911 weighted MoE: 0.01000580
+Updating learning rate to 8.852566213878947e-05
+Epoch  23/100 [####################]  27/27  | used 03:01 | left 00:00 | total 1:10:48 | ETA 3:57:02
+Epoch: 23 cost time: 181.27509331703186
+Epoch: 23, Steps: 27 | Train Loss: 0.0143498 Vali Loss: 0.0027503 StockMixer Select Loss: 0.0027628 Test Loss: 0.0020354
+Val Financial | IC: 0.000951 RIC: 0.006632 RankIC: 0.008425 Precision@10: 0.524506 SR(top5): 0.735786
+Test Financial | IC: -0.016825 RIC: -0.121354 RankIC: -0.017567 Precision@10: 0.511111 SR(top5): 0.617901
+Train components | MSE: 0.00375410 Rank: 0.00011805 weighted Rank: 0.00059027 MoE: 2.00109318 weighted MoE: 0.01000547
+Updating learning rate to 8.750555348152298e-05
+Epoch  24/100 [####################]  27/27  | used 03:01 | left 00:00 | total 1:13:52 | ETA 3:53:57
+Epoch: 24 cost time: 181.30356669425964
+Epoch: 24, Steps: 27 | Train Loss: 0.0137696 Vali Loss: 0.0040782 StockMixer Select Loss: 0.0040893 Test Loss: 0.0036502
+Val Financial | IC: 0.005577 RIC: 0.047877 RankIC: -0.006458 Precision@10: 0.529644 SR(top5): 1.231723
+Test Financial | IC: -0.010919 RIC: -0.084861 RankIC: -0.010198 Precision@10: 0.485714 SR(top5): 1.222936
+Train components | MSE: 0.00319440 Rank: 0.00011403 weighted Rank: 0.00057014 MoE: 2.00102126 weighted MoE: 0.01000511
+Updating learning rate to 8.644843137107059e-05
+Epoch  25/100 [####################]  27/27  | used 03:01 | left 00:00 | total 1:16:57 | ETA 3:50:53
+Epoch: 25 cost time: 181.38997173309326
+Epoch: 25, Steps: 27 | Train Loss: 0.0137213 Vali Loss: 0.0025367 StockMixer Select Loss: 0.0025489 Test Loss: 0.0016240
+Val Financial | IC: -0.010425 RIC: -0.067456 RankIC: -0.001055 Precision@10: 0.520158 SR(top5): 0.489257
+Test Financial | IC: -0.001483 RIC: -0.009872 RankIC: 0.007626 Precision@10: 0.510317 SR(top5): 0.920467
+Train components | MSE: 0.00315197 Rank: 0.00011290 weighted Rank: 0.00056452 MoE: 2.00097163 weighted MoE: 0.01000486
+Updating learning rate to 8.535533905932738e-05
+Epoch  26/100 [####################]  27/27  | used 03:01 | left 00:00 | total 1:20:02 | ETA 3:47:49
+Epoch: 26 cost time: 181.4564666748047
+Epoch: 26, Steps: 27 | Train Loss: 0.0133107 Vali Loss: 0.0038909 StockMixer Select Loss: 0.0039022 Test Loss: 0.0034329
+Val Financial | IC: 0.019850 RIC: 0.151318 RankIC: 0.002045 Precision@10: 0.525296 SR(top5): 1.882100
+Test Financial | IC: 0.001662 RIC: 0.011502 RankIC: 0.001387 Precision@10: 0.498413 SR(top5): 1.549444
+Train components | MSE: 0.00275936 Rank: 0.00010933 weighted Rank: 0.00054667 MoE: 2.00092394 weighted MoE: 0.01000462
+Updating learning rate to 8.422735529643444e-05
+Epoch  27/100 [####################]  27/27  | used 03:01 | left 00:00 | total 1:23:07 | ETA 3:44:45
+Epoch: 27 cost time: 181.29749655723572
+Epoch: 27, Steps: 27 | Train Loss: 0.0132718 Vali Loss: 0.0023489 StockMixer Select Loss: 0.0023626 Test Loss: 0.0016863
+Val Financial | IC: -0.011792 RIC: -0.075990 RankIC: -0.000027 Precision@10: 0.528458 SR(top5): 0.513374
+Test Financial | IC: -0.005367 RIC: -0.035912 RankIC: -0.005717 Precision@10: 0.515079 SR(top5): 1.362007
+Train components | MSE: 0.00272614 Rank: 0.00010823 weighted Rank: 0.00054113 MoE: 2.00091598 weighted MoE: 0.01000458
+Updating learning rate to 8.306559326618259e-05
+Epoch  28/100 [####################]  27/27  | used 03:01 | left 00:00 | total 1:26:12 | ETA 3:41:40
+Epoch: 28 cost time: 181.28932905197144
+Epoch: 28, Steps: 27 | Train Loss: 0.0128898 Vali Loss: 0.0027916 StockMixer Select Loss: 0.0028041 Test Loss: 0.0023291
+Val Financial | IC: 0.013222 RIC: 0.087506 RankIC: -0.003490 Precision@10: 0.527668 SR(top5): 1.540206
+Test Financial | IC: -0.019646 RIC: -0.114799 RankIC: -0.027859 Precision@10: 0.507143 SR(top5): 1.401007
+Train components | MSE: 0.00235173 Rank: 0.00010673 weighted Rank: 0.00053365 MoE: 2.00088863 weighted MoE: 0.01000444
+Updating learning rate to 8.18711994874345e-05
+Epoch  29/100 [####################]  27/27  | used 03:01 | left 00:00 | total 1:29:17 | ETA 3:38:35
+Epoch: 29 cost time: 181.204674243927
+Epoch: 29, Steps: 27 | Train Loss: 0.0127687 Vali Loss: 0.0029603 StockMixer Select Loss: 0.0029702 Test Loss: 0.0020406
+Val Financial | IC: 0.001305 RIC: 0.010852 RankIC: -0.004426 Precision@10: 0.526877 SR(top5): 1.656557
+Test Financial | IC: -0.008768 RIC: -0.063955 RankIC: -0.011886 Precision@10: 0.499206 SR(top5): 0.841940
+Train components | MSE: 0.00223861 Rank: 0.00010517 weighted Rank: 0.00052584 MoE: 2.00085832 weighted MoE: 0.01000429
+Updating learning rate to 8.064535268264883e-05
+Epoch  30/100 [####################]  27/27  | used 03:00 | left 00:00 | total 1:32:21 | ETA 3:35:30
+Epoch: 30 cost time: 180.83266258239746
+Epoch: 30, Steps: 27 | Train Loss: 0.0125477 Vali Loss: 0.0023456 StockMixer Select Loss: 0.0023558 Test Loss: 0.0019069
+Val Financial | IC: 0.010248 RIC: 0.085728 RankIC: -0.007731 Precision@10: 0.528458 SR(top5): 1.996413
+Test Financial | IC: -0.017001 RIC: -0.115316 RankIC: -0.016815 Precision@10: 0.502381 SR(top5): 1.272161
+Train components | MSE: 0.00204279 Rank: 0.00010014 weighted Rank: 0.00050071 MoE: 2.00084338 weighted MoE: 0.01000422
+Updating learning rate to 7.938926261462366e-05
+Epoch  31/100 [####################]  27/27  | used 05:28 | left 00:00 | total 1:37:53 | ETA 3:37:53
+Epoch: 31 cost time: 328.5342161655426
+Epoch: 31, Steps: 27 | Train Loss: 0.0123928 Vali Loss: 0.0023083 StockMixer Select Loss: 0.0023194 Test Loss: 0.0016334
+Val Financial | IC: 0.006557 RIC: 0.043326 RankIC: 0.009227 Precision@10: 0.504743 SR(top5): 0.878128
+Test Financial | IC: -0.005650 RIC: -0.036698 RankIC: -0.011165 Precision@10: 0.496032 SR(top5): 1.862973
+Train components | MSE: 0.00189646 Rank: 0.00009842 weighted Rank: 0.00049210 MoE: 2.00083843 weighted MoE: 0.01000419
+Updating learning rate to 7.810416889260653e-05
+Epoch  32/100 [####################]  27/27  | used 03:02 | left 00:00 | total 1:41:00 | ETA 3:34:38
+Epoch: 32 cost time: 182.5561351776123
+Epoch: 32, Steps: 27 | Train Loss: 0.0122308 Vali Loss: 0.0025439 StockMixer Select Loss: 0.0025554 Test Loss: 0.0019864
+Val Financial | IC: 0.016937 RIC: 0.109741 RankIC: 0.002610 Precision@10: 0.526087 SR(top5): 2.128878
+Test Financial | IC: -0.011348 RIC: -0.063710 RankIC: -0.009182 Precision@10: 0.490476 SR(top5): 1.223457
+Train components | MSE: 0.00173602 Rank: 0.00009815 weighted Rank: 0.00049077 MoE: 2.00081293 weighted MoE: 0.01000406
+Updating learning rate to 7.679133974894983e-05
+Epoch  33/100 [####################]  27/27  | used 03:02 | left 00:00 | total 1:44:06 | ETA 3:31:22
+Epoch: 33 cost time: 182.22062921524048
+Epoch: 33, Steps: 27 | Train Loss: 0.0116323 Vali Loss: 0.0014661 StockMixer Select Loss: 0.0014757 Test Loss: 0.0009567
+Val Financial | IC: -0.004079 RIC: -0.031370 RankIC: -0.006940 Precision@10: 0.526087 SR(top5): 1.438186
+Test Financial | IC: -0.020636 RIC: -0.160957 RankIC: -0.022788 Precision@10: 0.495238 SR(top5): 1.120211
+Train components | MSE: 0.00113013 Rank: 0.00009963 weighted Rank: 0.00049814 MoE: 2.00080249 weighted MoE: 0.01000401
+New Best | epoch 33 | validation stockmixer_val_loss=0.00147571 | saved best.pth
+Updating learning rate to 7.545207078751857e-05
+Epoch  34/100 [####################]  27/27  | used 03:02 | left 00:00 | total 1:47:12 | ETA 3:28:06
+Epoch: 34 cost time: 182.30729508399963
+Epoch: 34, Steps: 27 | Train Loss: 0.0109968 Vali Loss: 0.0011482 StockMixer Select Loss: 0.0011567 Test Loss: 0.0005619
+Val Financial | IC: 0.016125 RIC: 0.124600 RankIC: 0.008381 Precision@10: 0.521344 SR(top5): 1.175123
+Test Financial | IC: -0.008539 RIC: -0.061337 RankIC: -0.010117 Precision@10: 0.488889 SR(top5): 0.943697
+Train components | MSE: 0.00054828 Rank: 0.00008891 weighted Rank: 0.00044456 MoE: 2.00078343 weighted MoE: 0.01000392
+New Best | epoch 34 | validation stockmixer_val_loss=0.00115666 | saved best.pth
+Updating learning rate to 7.408768370508576e-05
+Epoch  35/100 [####################]  27/27  | used 03:02 | left 00:00 | total 1:50:18 | ETA 3:24:51
+Epoch: 35 cost time: 182.08437752723694
+Epoch: 35, Steps: 27 | Train Loss: 0.0108396 Vali Loss: 0.0012661 StockMixer Select Loss: 0.0012740 Test Loss: 0.0007342
+Val Financial | IC: 0.000413 RIC: 0.003107 RankIC: 0.000097 Precision@10: 0.520553 SR(top5): 1.283015
+Test Financial | IC: -0.013269 RIC: -0.091025 RankIC: -0.010230 Precision@10: 0.496825 SR(top5): 0.849734
+Train components | MSE: 0.00042591 Rank: 0.00008195 weighted Rank: 0.00040976 MoE: 2.00078410 weighted MoE: 0.01000392
+Updating learning rate to 7.269952498697734e-05
+Epoch  36/100 [####################]  27/27  | used 03:02 | left 00:00 | total 1:53:23 | ETA 3:21:35
+Epoch: 36 cost time: 182.11010718345642
+Epoch: 36, Steps: 27 | Train Loss: 0.0108963 Vali Loss: 0.0012015 StockMixer Select Loss: 0.0012101 Test Loss: 0.0005955
+Val Financial | IC: -0.010930 RIC: -0.071636 RankIC: 0.003722 Precision@10: 0.528063 SR(top5): 1.090811
+Test Financial | IC: -0.013465 RIC: -0.086523 RankIC: -0.009035 Precision@10: 0.499206 SR(top5): 0.906947
+Train components | MSE: 0.00049571 Rank: 0.00007935 weighted Rank: 0.00039676 MoE: 2.00077277 weighted MoE: 0.01000386
+Updating learning rate to 7.128896457825364e-05
+Epoch  37/100 [####################]  27/27  | used 03:02 | left 00:00 | total 1:56:29 | ETA 3:18:20
+Epoch: 37 cost time: 182.11534929275513
+Epoch: 37, Steps: 27 | Train Loss: 0.0107677 Vali Loss: 0.0012507 StockMixer Select Loss: 0.0012582 Test Loss: 0.0006785
+Val Financial | IC: -0.001130 RIC: -0.009021 RankIC: -0.000544 Precision@10: 0.508300 SR(top5): 1.127015
+Test Financial | IC: -0.007064 RIC: -0.053728 RankIC: -0.009094 Precision@10: 0.505556 SR(top5): 1.650937
+Train components | MSE: 0.00038695 Rank: 0.00007538 weighted Rank: 0.00037689 MoE: 2.00076960 weighted MoE: 0.01000385
+Updating learning rate to 6.985739453173903e-05
+Epoch  38/100 [####################]  27/27  | used 03:02 | left 00:00 | total 1:59:34 | ETA 3:15:06
+Epoch: 38 cost time: 182.1155128479004
+Epoch: 38, Steps: 27 | Train Loss: 0.0108373 Vali Loss: 0.0011487 StockMixer Select Loss: 0.0011565 Test Loss: 0.0005704
+Val Financial | IC: 0.020842 RIC: 0.156658 RankIC: 0.003232 Precision@10: 0.535573 SR(top5): 1.518398
+Test Financial | IC: 0.000526 RIC: 0.003712 RankIC: -0.011069 Precision@10: 0.495238 SR(top5): 1.724347
+Train components | MSE: 0.00045362 Rank: 0.00007599 weighted Rank: 0.00037995 MoE: 2.00075273 weighted MoE: 0.01000376
+New Best | epoch 38 | validation stockmixer_val_loss=0.00115652 | saved best.pth
+Updating learning rate to 6.840622763423391e-05
+Epoch  39/100 [####################]  27/27  | used 03:02 | left 00:00 | total 2:02:40 | ETA 3:11:52
+Epoch: 39 cost time: 182.1223659515381
+Epoch: 39, Steps: 27 | Train Loss: 0.0107450 Vali Loss: 0.0012864 StockMixer Select Loss: 0.0012929 Test Loss: 0.0006450
+Val Financial | IC: 0.011051 RIC: 0.101580 RankIC: 0.000812 Precision@10: 0.525296 SR(top5): 1.117892
+Test Financial | IC: -0.014147 RIC: -0.102753 RankIC: -0.014533 Precision@10: 0.497619 SR(top5): 1.018737
+Train components | MSE: 0.00038682 Rank: 0.00007088 weighted Rank: 0.00035442 MoE: 2.00076011 weighted MoE: 0.01000380
+Updating learning rate to 6.693689601226458e-05
+Epoch  40/100 [####################]  27/27  | used 03:02 | left 00:00 | total 2:05:46 | ETA 3:08:39
+Epoch: 40 cost time: 182.11140131950378
+Epoch: 40, Steps: 27 | Train Loss: 0.0107437 Vali Loss: 0.0012485 StockMixer Select Loss: 0.0012564 Test Loss: 0.0006077
+Val Financial | IC: -0.012638 RIC: -0.088805 RankIC: 0.000416 Precision@10: 0.522925 SR(top5): 0.354590
+Test Financial | IC: -0.013432 RIC: -0.091931 RankIC: -0.014554 Precision@10: 0.486508 SR(top5): 0.673141
+Train components | MSE: 0.00039710 Rank: 0.00006856 weighted Rank: 0.00034278 MoE: 2.00075506 weighted MoE: 0.01000378
+Updating learning rate to 6.545084971874738e-05
+Epoch  41/100 [####################]  27/27  | used 03:02 | left 00:00 | total 2:08:51 | ETA 3:05:26
+Epoch: 41 cost time: 182.07291078567505
+Epoch: 41, Steps: 27 | Train Loss: 0.0107269 Vali Loss: 0.0011611 StockMixer Select Loss: 0.0011676 Test Loss: 0.0005938
+Val Financial | IC: 0.018110 RIC: 0.152079 RankIC: 0.003085 Precision@10: 0.532806 SR(top5): 1.512640
+Test Financial | IC: -0.005284 RIC: -0.038105 RankIC: -0.005197 Precision@10: 0.491270 SR(top5): 1.514918
+Train components | MSE: 0.00038559 Rank: 0.00006754 weighted Rank: 0.00033768 MoE: 2.00073521 weighted MoE: 0.01000368
+Updating learning rate to 6.394955530196147e-05
+Epoch  42/100 [####################]  27/27  | used 03:02 | left 00:00 | total 2:11:57 | ETA 3:02:13
+Epoch: 42 cost time: 182.100830078125
+Epoch: 42, Steps: 27 | Train Loss: 0.0107073 Vali Loss: 0.0011228 StockMixer Select Loss: 0.0011288 Test Loss: 0.0005561
+Val Financial | IC: 0.012227 RIC: 0.107025 RankIC: -0.001062 Precision@10: 0.523320 SR(top5): 1.375012
+Test Financial | IC: -0.003119 RIC: -0.023983 RankIC: -0.002305 Precision@10: 0.488889 SR(top5): 1.319595
+Train components | MSE: 0.00038350 Rank: 0.00006402 weighted Rank: 0.00032011 MoE: 2.00073862 weighted MoE: 0.01000369
+New Best | epoch 42 | validation stockmixer_val_loss=0.00112878 | saved best.pth
+Updating learning rate to 6.243449435824276e-05
+Epoch  43/100 [####################]  27/27  | used 03:02 | left 00:00 | total 2:15:03 | ETA 2:59:01
+Epoch: 43 cost time: 182.14142394065857
+Epoch: 43, Steps: 27 | Train Loss: 0.0107053 Vali Loss: 0.0012136 StockMixer Select Loss: 0.0012196 Test Loss: 0.0005954
+Val Financial | IC: 0.021582 RIC: 0.180495 RankIC: 0.004470 Precision@10: 0.524901 SR(top5): 1.606270
+Test Financial | IC: -0.014928 RIC: -0.102186 RankIC: -0.018101 Precision@10: 0.489683 SR(top5): 1.119478
+Train components | MSE: 0.00038071 Rank: 0.00006418 weighted Rank: 0.00032091 MoE: 2.00073440 weighted MoE: 0.01000367
+Updating learning rate to 6.090716206982714e-05
+Epoch  44/100 [####################]  27/27  | used 03:02 | left 00:00 | total 2:18:08 | ETA 2:55:49
+Epoch: 44 cost time: 182.017009973526
+Epoch: 44, Steps: 27 | Train Loss: 0.0106742 Vali Loss: 0.0011782 StockMixer Select Loss: 0.0011847 Test Loss: 0.0005983
+Val Financial | IC: 0.009069 RIC: 0.069925 RankIC: 0.001022 Precision@10: 0.524901 SR(top5): 0.657058
+Test Financial | IC: -0.004913 RIC: -0.037032 RankIC: 0.000878 Precision@10: 0.494444 SR(top5): 1.182583
+Train components | MSE: 0.00036773 Rank: 0.00006056 weighted Rank: 0.00030278 MoE: 2.00074746 weighted MoE: 0.01000374
+Updating learning rate to 5.9369065729286245e-05
+Epoch  45/100 [####################]  27/27  | used 03:02 | left 00:00 | total 2:21:14 | ETA 2:52:37
+Epoch: 45 cost time: 182.12819051742554
+Epoch: 45, Steps: 27 | Train Loss: 0.0106980 Vali Loss: 0.0012071 StockMixer Select Loss: 0.0012129 Test Loss: 0.0005776
+Val Financial | IC: 0.009730 RIC: 0.078955 RankIC: 0.005961 Precision@10: 0.516601 SR(top5): 0.942149
+Test Financial | IC: -0.013073 RIC: -0.092991 RankIC: -0.004573 Precision@10: 0.495238 SR(top5): 0.449031
+Train components | MSE: 0.00038646 Rank: 0.00006158 weighted Rank: 0.00030788 MoE: 2.00073293 weighted MoE: 0.01000366
+Updating learning rate to 5.782172325201155e-05
+Epoch  46/100 [####################]  27/27  | used 03:02 | left 00:00 | total 2:24:19 | ETA 2:49:25
+Epoch: 46 cost time: 182.1359453201294
+Epoch: 46, Steps: 27 | Train Loss: 0.0106543 Vali Loss: 0.0011302 StockMixer Select Loss: 0.0011361 Test Loss: 0.0005520
+Val Financial | IC: 0.003987 RIC: 0.029935 RankIC: 0.010887 Precision@10: 0.513439 SR(top5): 1.247227
+Test Financial | IC: -0.011987 RIC: -0.091353 RankIC: -0.009538 Precision@10: 0.490476 SR(top5): 0.947802
+Train components | MSE: 0.00035377 Rank: 0.00005937 weighted Rank: 0.00029684 MoE: 2.00073737 weighted MoE: 0.01000369
+Updating learning rate to 5.6266661678215216e-05
+Epoch  47/100 [####################]  27/27  | used 03:02 | left 00:00 | total 2:27:25 | ETA 2:46:14
+Epoch: 47 cost time: 182.10698795318604
+Epoch: 47, Steps: 27 | Train Loss: 0.0106556 Vali Loss: 0.0013365 StockMixer Select Loss: 0.0013418 Test Loss: 0.0008324
+Val Financial | IC: 0.008899 RIC: 0.080094 RankIC: -0.000402 Precision@10: 0.521739 SR(top5): 1.077842
+Test Financial | IC: -0.013048 RIC: -0.093422 RankIC: -0.009869 Precision@10: 0.492857 SR(top5): 1.445232
+Train components | MSE: 0.00036615 Rank: 0.00005715 weighted Rank: 0.00028575 MoE: 2.00074178 weighted MoE: 0.01000371
+Updating learning rate to 5.470541566592573e-05
+Epoch  48/100 [####################]  27/27  | used 03:02 | left 00:00 | total 2:30:31 | ETA 2:43:03
+Epoch: 48 cost time: 182.19277596473694
+Epoch: 48, Steps: 27 | Train Loss: 0.0106977 Vali Loss: 0.0012301 StockMixer Select Loss: 0.0012360 Test Loss: 0.0005947
+Val Financial | IC: 0.009908 RIC: 0.082197 RankIC: 0.005612 Precision@10: 0.523715 SR(top5): 0.609520
+Test Financial | IC: -0.005992 RIC: -0.046859 RankIC: -0.012957 Precision@10: 0.496032 SR(top5): 1.008783
+Train components | MSE: 0.00040707 Rank: 0.00005741 weighted Rank: 0.00028704 MoE: 2.00072634 weighted MoE: 0.01000363
+Updating learning rate to 5.313952597646568e-05
+Epoch  49/100 [####################]  27/27  | used 03:02 | left 00:00 | total 2:33:36 | ETA 2:39:52
+Epoch: 49 cost time: 182.1850073337555
+Epoch: 49, Steps: 27 | Train Loss: 0.0106727 Vali Loss: 0.0011528 StockMixer Select Loss: 0.0011583 Test Loss: 0.0005591
+Val Financial | IC: 0.003564 RIC: 0.032289 RankIC: 0.003454 Precision@10: 0.521344 SR(top5): 0.864275
+Test Financial | IC: -0.015115 RIC: -0.118225 RankIC: -0.017805 Precision@10: 0.502381 SR(top5): 1.132374
+Train components | MSE: 0.00038764 Rank: 0.00005629 weighted Rank: 0.00028145 MoE: 2.00073012 weighted MoE: 0.01000365
+Updating learning rate to 5.157053795390642e-05
+Epoch  50/100 [####################]  27/27  | used 03:02 | left 00:00 | total 2:36:42 | ETA 2:36:42
+Epoch: 50 cost time: 182.13361835479736
+Epoch: 50, Steps: 27 | Train Loss: 0.0106404 Vali Loss: 0.0011384 StockMixer Select Loss: 0.0011437 Test Loss: 0.0005537
+Val Financial | IC: 0.002435 RIC: 0.020610 RankIC: 0.004349 Precision@10: 0.518972 SR(top5): 0.865311
+Test Financial | IC: -0.003278 RIC: -0.023137 RankIC: -0.004651 Precision@10: 0.500000 SR(top5): 1.821176
+Train components | MSE: 0.00036269 Rank: 0.00005481 weighted Rank: 0.00027406 MoE: 2.00073405 weighted MoE: 0.01000367
+Updating learning rate to 5e-05
+Epoch  51/100 [####################]  27/27  | used 03:02 | left 00:00 | total 2:39:47 | ETA 2:33:31
+Epoch: 51 cost time: 182.0712115764618
+Epoch: 51, Steps: 27 | Train Loss: 0.0106061 Vali Loss: 0.0011303 StockMixer Select Loss: 0.0011354 Test Loss: 0.0005419
+Val Financial | IC: 0.007248 RIC: 0.062069 RankIC: 0.000994 Precision@10: 0.520553 SR(top5): 0.999471
+Test Financial | IC: -0.007552 RIC: -0.057759 RankIC: -0.006533 Precision@10: 0.507937 SR(top5): 0.936366
+Train components | MSE: 0.00033163 Rank: 0.00005415 weighted Rank: 0.00027075 MoE: 2.00073490 weighted MoE: 0.01000367
+Updating learning rate to 4.8429462046093585e-05
+Epoch  52/100 [####################]  27/27  | used 03:02 | left 00:00 | total 2:42:53 | ETA 2:30:21
+Epoch: 52 cost time: 182.09649896621704
+Epoch: 52, Steps: 27 | Train Loss: 0.0106134 Vali Loss: 0.0011389 StockMixer Select Loss: 0.0011440 Test Loss: 0.0005341
+Val Financial | IC: 0.011766 RIC: 0.101134 RankIC: 0.007704 Precision@10: 0.519763 SR(top5): 1.045276
+Test Financial | IC: -0.010534 RIC: -0.075820 RankIC: -0.003997 Precision@10: 0.491270 SR(top5): 0.895902
+Train components | MSE: 0.00034683 Rank: 0.00005259 weighted Rank: 0.00026293 MoE: 2.00073152 weighted MoE: 0.01000366
+Updating learning rate to 4.6860474023534335e-05
+Epoch  53/100 [####################]  27/27  | used 03:02 | left 00:00 | total 2:45:59 | ETA 2:27:11
+Epoch: 53 cost time: 182.11951351165771
+Epoch: 53, Steps: 27 | Train Loss: 0.0106619 Vali Loss: 0.0012494 StockMixer Select Loss: 0.0012549 Test Loss: 0.0006195
+Val Financial | IC: 0.021009 RIC: 0.166845 RankIC: 0.001892 Precision@10: 0.528458 SR(top5): 1.914637
+Test Financial | IC: -0.019022 RIC: -0.129046 RankIC: -0.018677 Precision@10: 0.489683 SR(top5): 1.029618
+Train components | MSE: 0.00039641 Rank: 0.00005238 weighted Rank: 0.00026189 MoE: 2.00072356 weighted MoE: 0.01000362
+Updating learning rate to 4.529458433407429e-05
+Epoch  54/100 [####################]  27/27  | used 03:02 | left 00:00 | total 2:49:04 | ETA 2:24:01
+Epoch: 54 cost time: 182.0617265701294
+Epoch: 54, Steps: 27 | Train Loss: 0.0106083 Vali Loss: 0.0011415 StockMixer Select Loss: 0.0011474 Test Loss: 0.0005750
+Val Financial | IC: 0.025890 RIC: 0.192633 RankIC: 0.006585 Precision@10: 0.532016 SR(top5): 1.852002
+Test Financial | IC: -0.009911 RIC: -0.066532 RankIC: -0.019505 Precision@10: 0.496825 SR(top5): 1.571158
+Train components | MSE: 0.00034479 Rank: 0.00005199 weighted Rank: 0.00025994 MoE: 2.00072504 weighted MoE: 0.01000363
+Updating learning rate to 4.373333832178478e-05
+Epoch  55/100 [####################]  27/27  | used 03:02 | left 00:00 | total 2:52:10 | ETA 2:20:52
+Epoch: 55 cost time: 182.1834752559662
+Epoch: 55, Steps: 27 | Train Loss: 0.0106345 Vali Loss: 0.0011699 StockMixer Select Loss: 0.0011753 Test Loss: 0.0006273
+Val Financial | IC: 0.020025 RIC: 0.160680 RankIC: 0.006848 Precision@10: 0.523320 SR(top5): 1.700463
+Test Financial | IC: -0.002603 RIC: -0.020447 RankIC: -0.007699 Precision@10: 0.516667 SR(top5): 1.467427
+Train components | MSE: 0.00037618 Rank: 0.00005094 weighted Rank: 0.00025469 MoE: 2.00072450 weighted MoE: 0.01000362
+Updating learning rate to 4.2178276747988446e-05
+Epoch  56/100 [####################]  27/27  | used 03:02 | left 00:00 | total 2:55:16 | ETA 2:17:42
+Epoch: 56 cost time: 182.18988037109375
+Epoch: 56, Steps: 27 | Train Loss: 0.0105972 Vali Loss: 0.0011541 StockMixer Select Loss: 0.0011588 Test Loss: 0.0006088
+Val Financial | IC: 0.019806 RIC: 0.165799 RankIC: 0.012751 Precision@10: 0.524901 SR(top5): 1.499778
+Test Financial | IC: -0.006678 RIC: -0.046124 RankIC: -0.005522 Precision@10: 0.497619 SR(top5): 1.728608
+Train components | MSE: 0.00034200 Rank: 0.00005032 weighted Rank: 0.00025159 MoE: 2.00072344 weighted MoE: 0.01000362
+Updating learning rate to 4.063093427071376e-05
+Epoch  57/100 [####################]  27/27  | used 03:02 | left 00:00 | total 2:58:21 | ETA 2:14:33
+Epoch: 57 cost time: 182.16795921325684
+Epoch: 57, Steps: 27 | Train Loss: 0.0105853 Vali Loss: 0.0011676 StockMixer Select Loss: 0.0011725 Test Loss: 0.0006050
+Val Financial | IC: 0.008607 RIC: 0.075433 RankIC: 0.006829 Precision@10: 0.523715 SR(top5): 0.713642
+Test Financial | IC: -0.008287 RIC: -0.067508 RankIC: -0.000096 Precision@10: 0.500794 SR(top5): 1.172677
+Train components | MSE: 0.00033124 Rank: 0.00005008 weighted Rank: 0.00025041 MoE: 2.00072429 weighted MoE: 0.01000362
+Updating learning rate to 3.9092837930172884e-05
+Epoch  58/100 [####################]  27/27  | used 03:02 | left 00:00 | total 3:01:27 | ETA 2:11:24
+Epoch: 58 cost time: 182.06147360801697
+Epoch: 58, Steps: 27 | Train Loss: 0.0105768 Vali Loss: 0.0011141 StockMixer Select Loss: 0.0011188 Test Loss: 0.0005544
+Val Financial | IC: 0.017790 RIC: 0.155010 RankIC: 0.009182 Precision@10: 0.524506 SR(top5): 1.423323
+Test Financial | IC: -0.019284 RIC: -0.140721 RankIC: -0.020187 Precision@10: 0.488889 SR(top5): 0.986522
+Train components | MSE: 0.00033084 Rank: 0.00004847 weighted Rank: 0.00024236 MoE: 2.00072594 weighted MoE: 0.01000363
+New Best | epoch 58 | validation stockmixer_val_loss=0.00111876 | saved best.pth
+Updating learning rate to 3.756550564175727e-05
+Epoch  59/100 [####################]  27/27  | used 03:02 | left 00:00 | total 3:04:33 | ETA 2:08:14
+Epoch: 59 cost time: 182.08755159378052
+Epoch: 59, Steps: 27 | Train Loss: 0.0105630 Vali Loss: 0.0011158 StockMixer Select Loss: 0.0011204 Test Loss: 0.0005325
+Val Financial | IC: 0.017792 RIC: 0.150366 RankIC: 0.004649 Precision@10: 0.527273 SR(top5): 1.829048
+Test Financial | IC: -0.013087 RIC: -0.088539 RankIC: -0.015473 Precision@10: 0.487302 SR(top5): 1.330225
+Train components | MSE: 0.00031887 Rank: 0.00004811 weighted Rank: 0.00024053 MoE: 2.00071919 weighted MoE: 0.01000360
+Updating learning rate to 3.605044469803854e-05
+Epoch  60/100 [####################]  27/27  | used 03:02 | left 00:00 | total 3:07:38 | ETA 2:05:05
+Epoch: 60 cost time: 182.04858779907227
+Epoch: 60, Steps: 27 | Train Loss: 0.0105616 Vali Loss: 0.0011153 StockMixer Select Loss: 0.0011200 Test Loss: 0.0005385
+Val Financial | IC: 0.019749 RIC: 0.168328 RankIC: 0.009289 Precision@10: 0.528854 SR(top5): 1.995732
+Test Financial | IC: -0.012429 RIC: -0.093759 RankIC: -0.020675 Precision@10: 0.495238 SR(top5): 2.315437
+Train components | MSE: 0.00031782 Rank: 0.00004804 weighted Rank: 0.00024022 MoE: 2.00072177 weighted MoE: 0.01000361
+Updating learning rate to 3.4549150281252636e-05
+Epoch  61/100 [####################]  27/27  | used 03:02 | left 00:00 | total 3:10:44 | ETA 2:01:56
+Epoch: 61 cost time: 182.06628489494324
+Epoch: 61, Steps: 27 | Train Loss: 0.0105627 Vali Loss: 0.0011075 StockMixer Select Loss: 0.0011119 Test Loss: 0.0005421
+Val Financial | IC: 0.012083 RIC: 0.104723 RankIC: 0.004807 Precision@10: 0.532016 SR(top5): 1.057283
+Test Financial | IC: -0.013951 RIC: -0.109159 RankIC: -0.015229 Precision@10: 0.488889 SR(top5): 0.751303
+Train components | MSE: 0.00032622 Rank: 0.00004657 weighted Rank: 0.00023286 MoE: 2.00072626 weighted MoE: 0.01000363
+New Best | epoch 61 | validation stockmixer_val_loss=0.00111195 | saved best.pth
+Updating learning rate to 3.3063103987735433e-05
+Epoch  62/100 [####################]  27/27  | used 03:02 | left 00:00 | total 3:13:49 | ETA 1:58:48
+Epoch: 62 cost time: 182.12244749069214
+Epoch: 62, Steps: 27 | Train Loss: 0.0105731 Vali Loss: 0.0011285 StockMixer Select Loss: 0.0011329 Test Loss: 0.0005363
+Val Financial | IC: 0.008747 RIC: 0.077910 RankIC: 0.006805 Precision@10: 0.526482 SR(top5): 1.689284
+Test Financial | IC: -0.011687 RIC: -0.090017 RankIC: -0.010727 Precision@10: 0.485714 SR(top5): 0.851880
+Train components | MSE: 0.00033583 Rank: 0.00004672 weighted Rank: 0.00023362 MoE: 2.00072054 weighted MoE: 0.01000360
+Updating learning rate to 3.1593772365766105e-05
+Epoch  63/100 [####################]  27/27  | used 03:02 | left 00:00 | total 3:16:55 | ETA 1:55:39
+Epoch: 63 cost time: 182.08532238006592
+Epoch: 63, Steps: 27 | Train Loss: 0.0105454 Vali Loss: 0.0011196 StockMixer Select Loss: 0.0011241 Test Loss: 0.0005405
+Val Financial | IC: 0.013597 RIC: 0.112215 RankIC: 0.006892 Precision@10: 0.522925 SR(top5): 1.480907
+Test Financial | IC: -0.023186 RIC: -0.172295 RankIC: -0.030476 Precision@10: 0.476984 SR(top5): 0.768582
+Train components | MSE: 0.00031450 Rank: 0.00004545 weighted Rank: 0.00022727 MoE: 2.00071994 weighted MoE: 0.01000360
+Updating learning rate to 3.0142605468260978e-05
+Epoch  64/100 [####################]  27/27  | used 03:04 | left 00:00 | total 3:20:03 | ETA 1:52:32
+Epoch: 64 cost time: 184.98827266693115
+Epoch: 64, Steps: 27 | Train Loss: 0.0105519 Vali Loss: 0.0011383 StockMixer Select Loss: 0.0011428 Test Loss: 0.0005439
+Val Financial | IC: 0.004053 RIC: 0.032885 RankIC: 0.008354 Precision@10: 0.516206 SR(top5): 0.882969
+Test Financial | IC: -0.008080 RIC: -0.062377 RankIC: -0.006102 Precision@10: 0.510317 SR(top5): 0.875174
+Train components | MSE: 0.00032270 Rank: 0.00004512 weighted Rank: 0.00022562 MoE: 2.00072579 weighted MoE: 0.01000363
+Updating learning rate to 2.8711035421746367e-05
+Epoch  65/100 [####################]  27/27  | used 03:02 | left 00:00 | total 3:23:10 | ETA 1:49:23
+Epoch: 65 cost time: 182.49999618530273
+Epoch: 65, Steps: 27 | Train Loss: 0.0105461 Vali Loss: 0.0011686 StockMixer Select Loss: 0.0011730 Test Loss: 0.0005676
+Val Financial | IC: 0.010018 RIC: 0.092951 RankIC: -0.001817 Precision@10: 0.528854 SR(top5): 1.568880
+Test Financial | IC: -0.033029 RIC: -0.261523 RankIC: -0.039825 Precision@10: 0.482540 SR(top5): 0.607856
+Train components | MSE: 0.00031472 Rank: 0.00004556 weighted Rank: 0.00022782 MoE: 2.00071744 weighted MoE: 0.01000359
+Updating learning rate to 2.7300475013022663e-05
+Epoch  66/100 [####################]  27/27  | used 03:02 | left 00:00 | total 3:26:15 | ETA 1:46:15
+Epoch: 66 cost time: 182.33810472488403
+Epoch: 66, Steps: 27 | Train Loss: 0.0105736 Vali Loss: 0.0011266 StockMixer Select Loss: 0.0011311 Test Loss: 0.0005553
+Val Financial | IC: 0.015072 RIC: 0.129038 RankIC: 0.001994 Precision@10: 0.521739 SR(top5): 1.607319
+Test Financial | IC: -0.005357 RIC: -0.041589 RankIC: -0.004746 Precision@10: 0.487302 SR(top5): 1.068768
+Train components | MSE: 0.00034797 Rank: 0.00004441 weighted Rank: 0.00022205 MoE: 2.00071687 weighted MoE: 0.01000358
+Updating learning rate to 2.591231629491423e-05
+Epoch  67/100 [####################]  27/27  | used 03:02 | left 00:00 | total 3:29:21 | ETA 1:43:06
+Epoch: 67 cost time: 182.0392849445343
+Epoch: 67, Steps: 27 | Train Loss: 0.0105264 Vali Loss: 0.0011282 StockMixer Select Loss: 0.0011335 Test Loss: 0.0005425
+Val Financial | IC: 0.010066 RIC: 0.067421 RankIC: 0.011908 Precision@10: 0.520949 SR(top5): 1.257455
+Test Financial | IC: -0.012051 RIC: -0.083058 RankIC: -0.013850 Precision@10: 0.487302 SR(top5): 1.427703
+Train components | MSE: 0.00030466 Rank: 0.00004363 weighted Rank: 0.00021816 MoE: 2.00071692 weighted MoE: 0.01000358
+Updating learning rate to 2.4547929212481435e-05
+Epoch  68/100 [####################]  27/27  | used 03:02 | left 00:00 | total 3:32:26 | ETA 1:39:58
+Epoch: 68 cost time: 182.07927751541138
+Epoch: 68, Steps: 27 | Train Loss: 0.0105409 Vali Loss: 0.0011363 StockMixer Select Loss: 0.0011417 Test Loss: 0.0005729
+Val Financial | IC: 0.026067 RIC: 0.187689 RankIC: 0.003743 Precision@10: 0.532806 SR(top5): 2.053119
+Test Financial | IC: -0.007409 RIC: -0.047456 RankIC: -0.011190 Precision@10: 0.499206 SR(top5): 1.482700
+Train components | MSE: 0.00031361 Rank: 0.00004474 weighted Rank: 0.00022368 MoE: 2.00071823 weighted MoE: 0.01000359
+Updating learning rate to 2.3208660251050158e-05
+Epoch  69/100 [####################]  27/27  | used 03:02 | left 00:00 | total 3:35:32 | ETA 1:36:50
+Epoch: 69 cost time: 182.12240934371948
+Epoch: 69, Steps: 27 | Train Loss: 0.0105458 Vali Loss: 0.0011356 StockMixer Select Loss: 0.0011397 Test Loss: 0.0005618
+Val Financial | IC: 0.009542 RIC: 0.082421 RankIC: 0.008122 Precision@10: 0.518577 SR(top5): 1.374068
+Test Financial | IC: -0.020130 RIC: -0.170352 RankIC: -0.017328 Precision@10: 0.475397 SR(top5): 0.798112
+Train components | MSE: 0.00032363 Rank: 0.00004371 weighted Rank: 0.00021854 MoE: 2.00072256 weighted MoE: 0.01000361
+Updating learning rate to 2.1895831107393484e-05
+Epoch  70/100 [####################]  27/27  | used 03:02 | left 00:00 | total 3:38:38 | ETA 1:33:42
+Epoch: 70 cost time: 182.19188594818115
+Epoch: 70, Steps: 27 | Train Loss: 0.0105413 Vali Loss: 0.0011840 StockMixer Select Loss: 0.0011885 Test Loss: 0.0005653
+Val Financial | IC: 0.016628 RIC: 0.139023 RankIC: 0.005808 Precision@10: 0.532016 SR(top5): 1.696900
+Test Financial | IC: -0.015636 RIC: -0.120318 RankIC: -0.015312 Precision@10: 0.470635 SR(top5): 1.798042
+Train components | MSE: 0.00032434 Rank: 0.00004268 weighted Rank: 0.00021340 MoE: 2.00071817 weighted MoE: 0.01000359
+Updating learning rate to 2.061073738537635e-05
+Epoch  71/100 [####################]  27/27  | used 03:02 | left 00:00 | total 3:41:43 | ETA 1:30:33
+Epoch: 71 cost time: 182.11486411094666
+Epoch: 71, Steps: 27 | Train Loss: 0.0105150 Vali Loss: 0.0011301 StockMixer Select Loss: 0.0011342 Test Loss: 0.0005592
+Val Financial | IC: 0.018344 RIC: 0.157447 RankIC: 0.005083 Precision@10: 0.531621 SR(top5): 1.912238
+Test Financial | IC: -0.017653 RIC: -0.131469 RankIC: -0.018385 Precision@10: 0.488095 SR(top5): 1.230169
+Train components | MSE: 0.00030175 Rank: 0.00004194 weighted Rank: 0.00020970 MoE: 2.00071828 weighted MoE: 0.01000359
+Updating learning rate to 1.9354647317351188e-05
+Epoch  72/100 [####################]  27/27  | used 03:02 | left 00:00 | total 3:44:49 | ETA 1:27:25
+Epoch: 72 cost time: 182.10653400421143
+Epoch: 72, Steps: 27 | Train Loss: 0.0105422 Vali Loss: 0.0011325 StockMixer Select Loss: 0.0011370 Test Loss: 0.0005336
+Val Financial | IC: 0.002314 RIC: 0.017727 RankIC: 0.001437 Precision@10: 0.518972 SR(top5): 1.125084
+Test Financial | IC: -0.022306 RIC: -0.181355 RankIC: -0.020482 Precision@10: 0.487302 SR(top5): 0.599047
+Train components | MSE: 0.00032912 Rank: 0.00004189 weighted Rank: 0.00020947 MoE: 2.00071462 weighted MoE: 0.01000357
+Updating learning rate to 1.8128800512565513e-05
+Epoch  73/100 [####################]  27/27  | used 03:02 | left 00:00 | total 3:47:55 | ETA 1:24:17
+Epoch: 73 cost time: 182.14677548408508
+Epoch: 73, Steps: 27 | Train Loss: 0.0105246 Vali Loss: 0.0011662 StockMixer Select Loss: 0.0011704 Test Loss: 0.0005641
+Val Financial | IC: 0.009530 RIC: 0.077925 RankIC: 0.004460 Precision@10: 0.517787 SR(top5): 1.551458
+Test Financial | IC: -0.015791 RIC: -0.119495 RankIC: -0.009588 Precision@10: 0.500794 SR(top5): 1.327366
+Train components | MSE: 0.00031180 Rank: 0.00004184 weighted Rank: 0.00020918 MoE: 2.00071817 weighted MoE: 0.01000359
+Updating learning rate to 1.6934406733817414e-05
+Epoch  74/100 [####################]  27/27  | used 03:02 | left 00:00 | total 3:51:00 | ETA 1:21:10
+Epoch: 74 cost time: 182.0287504196167
+Epoch: 74, Steps: 27 | Train Loss: 0.0105112 Vali Loss: 0.0011210 StockMixer Select Loss: 0.0011253 Test Loss: 0.0005348
+Val Financial | IC: 0.018241 RIC: 0.151047 RankIC: 0.007605 Precision@10: 0.533597 SR(top5): 1.695066
+Test Financial | IC: -0.017932 RIC: -0.133623 RankIC: -0.011045 Precision@10: 0.487302 SR(top5): 1.275040
+Train components | MSE: 0.00030014 Rank: 0.00004150 weighted Rank: 0.00020748 MoE: 2.00071730 weighted MoE: 0.01000359
+Updating learning rate to 1.5772644703565565e-05
+Epoch  75/100 [####################]  27/27  | used 03:02 | left 00:00 | total 3:54:06 | ETA 1:18:02
+Epoch: 75 cost time: 182.11896228790283
+Epoch: 75, Steps: 27 | Train Loss: 0.0105097 Vali Loss: 0.0011167 StockMixer Select Loss: 0.0011208 Test Loss: 0.0005319
+Val Financial | IC: 0.013842 RIC: 0.116092 RankIC: 0.007740 Precision@10: 0.523715 SR(top5): 1.541258
+Test Financial | IC: -0.013036 RIC: -0.097350 RankIC: -0.012312 Precision@10: 0.475397 SR(top5): 0.867598
+Train components | MSE: 0.00030163 Rank: 0.00004089 weighted Rank: 0.00020446 MoE: 2.00071431 weighted MoE: 0.01000357
+Updating learning rate to 1.4644660940672627e-05
+Epoch  76/100 [####################]  27/27  | used 03:02 | left 00:00 | total 3:57:12 | ETA 1:14:54
+Epoch: 76 cost time: 182.08142971992493
+Epoch: 76, Steps: 27 | Train Loss: 0.0105281 Vali Loss: 0.0011453 StockMixer Select Loss: 0.0011492 Test Loss: 0.0005844
+Val Financial | IC: 0.012308 RIC: 0.109591 RankIC: 0.002707 Precision@10: 0.532411 SR(top5): 1.319675
+Test Financial | IC: -0.019535 RIC: -0.145041 RankIC: -0.024619 Precision@10: 0.480159 SR(top5): 1.302521
+Train components | MSE: 0.00032145 Rank: 0.00004061 weighted Rank: 0.00020306 MoE: 2.00071679 weighted MoE: 0.01000358
+Updating learning rate to 1.3551568628929434e-05
+Epoch  77/100 [####################]  27/27  | used 03:02 | left 00:00 | total 4:00:17 | ETA 1:11:46
+Epoch: 77 cost time: 182.13406896591187
+Epoch: 77, Steps: 27 | Train Loss: 0.0105311 Vali Loss: 0.0011610 StockMixer Select Loss: 0.0011651 Test Loss: 0.0005492
+Val Financial | IC: 0.020426 RIC: 0.170843 RankIC: 0.005818 Precision@10: 0.529249 SR(top5): 1.976404
+Test Financial | IC: -0.016742 RIC: -0.112411 RankIC: -0.019950 Precision@10: 0.480159 SR(top5): 1.633833
+Train components | MSE: 0.00032559 Rank: 0.00004038 weighted Rank: 0.00020191 MoE: 2.00071603 weighted MoE: 0.01000358
+Updating learning rate to 1.2494446518477027e-05
+Epoch  78/100 [####################]  27/27  | used 03:02 | left 00:00 | total 4:03:23 | ETA 1:08:38
+Epoch: 78 cost time: 182.06958055496216
+Epoch: 78, Steps: 27 | Train Loss: 0.0105407 Vali Loss: 0.0011266 StockMixer Select Loss: 0.0011306 Test Loss: 0.0005336
+Val Financial | IC: 0.013067 RIC: 0.110773 RankIC: 0.004510 Precision@10: 0.524506 SR(top5): 1.506191
+Test Financial | IC: -0.020159 RIC: -0.156206 RankIC: -0.016560 Precision@10: 0.488889 SR(top5): 0.804309
+Train components | MSE: 0.00033656 Rank: 0.00004012 weighted Rank: 0.00020061 MoE: 2.00071447 weighted MoE: 0.01000357
+Updating learning rate to 1.1474337861210543e-05
+Epoch  79/100 [####################]  27/27  | used 03:02 | left 00:00 | total 4:06:28 | ETA 1:05:31
+Epoch: 79 cost time: 182.18067145347595
+Epoch: 79, Steps: 27 | Train Loss: 0.0105086 Vali Loss: 0.0011544 StockMixer Select Loss: 0.0011585 Test Loss: 0.0005992
+Val Financial | IC: 0.012123 RIC: 0.103289 RankIC: 0.003280 Precision@10: 0.523715 SR(top5): 1.528690
+Test Financial | IC: -0.014136 RIC: -0.110300 RankIC: -0.008958 Precision@10: 0.490476 SR(top5): 1.185726
+Train components | MSE: 0.00030482 Rank: 0.00004005 weighted Rank: 0.00020023 MoE: 2.00071648 weighted MoE: 0.01000358
+Updating learning rate to 1.049224938121548e-05
+Epoch  80/100 [####################]  27/27  | used 03:02 | left 00:00 | total 4:09:34 | ETA 1:02:23
+Epoch: 80 cost time: 182.09852981567383
+Epoch: 80, Steps: 27 | Train Loss: 0.0105105 Vali Loss: 0.0011148 StockMixer Select Loss: 0.0011187 Test Loss: 0.0005347
+Val Financial | IC: 0.017793 RIC: 0.156476 RankIC: 0.009476 Precision@10: 0.530830 SR(top5): 1.927916
+Test Financial | IC: -0.017980 RIC: -0.142515 RankIC: -0.023803 Precision@10: 0.484127 SR(top5): 1.553372
+Train components | MSE: 0.00030759 Rank: 0.00003986 weighted Rank: 0.00019928 MoE: 2.00071576 weighted MoE: 0.01000358
+Updating learning rate to 9.549150281252633e-06
+Epoch  81/100 [####################]  27/27  | used 03:02 | left 00:00 | total 4:12:40 | ETA 59:16
+Epoch: 81 cost time: 182.14005208015442
+Epoch: 81, Steps: 27 | Train Loss: 0.0104922 Vali Loss: 0.0011161 StockMixer Select Loss: 0.0011200 Test Loss: 0.0005350
+Val Financial | IC: 0.007885 RIC: 0.069868 RankIC: 0.004049 Precision@10: 0.523715 SR(top5): 1.595363
+Test Financial | IC: -0.018594 RIC: -0.149579 RankIC: -0.021504 Precision@10: 0.480159 SR(top5): 0.767980
+Train components | MSE: 0.00029115 Rank: 0.00003949 weighted Rank: 0.00019745 MoE: 2.00072174 weighted MoE: 0.01000361
+Updating learning rate to 8.645971286271904e-06
+Epoch  82/100 [####################]  27/27  | used 03:02 | left 00:00 | total 4:15:45 | ETA 56:08
+Epoch: 82 cost time: 182.19284391403198
+Epoch: 82, Steps: 27 | Train Loss: 0.0104921 Vali Loss: 0.0011314 StockMixer Select Loss: 0.0011352 Test Loss: 0.0005360
+Val Financial | IC: 0.014502 RIC: 0.130045 RankIC: 0.006225 Precision@10: 0.529249 SR(top5): 1.657831
+Test Financial | IC: -0.018892 RIC: -0.143567 RankIC: -0.022410 Precision@10: 0.477778 SR(top5): 1.742185
+Train components | MSE: 0.00029277 Rank: 0.00003914 weighted Rank: 0.00019572 MoE: 2.00071368 weighted MoE: 0.01000357
+Updating learning rate to 7.783603724899257e-06
+Epoch  83/100 [####################]  27/27  | used 03:02 | left 00:00 | total 4:18:51 | ETA 53:01
+Epoch: 83 cost time: 182.115576505661
+Epoch: 83, Steps: 27 | Train Loss: 0.0104959 Vali Loss: 0.0011153 StockMixer Select Loss: 0.0011192 Test Loss: 0.0005331
+Val Financial | IC: 0.006629 RIC: 0.055156 RankIC: 0.008009 Precision@10: 0.524901 SR(top5): 1.135758
+Test Financial | IC: -0.018109 RIC: -0.139302 RankIC: -0.013727 Precision@10: 0.485714 SR(top5): 0.591295
+Train components | MSE: 0.00029725 Rank: 0.00003901 weighted Rank: 0.00019507 MoE: 2.00071482 weighted MoE: 0.01000357
+Updating learning rate to 6.962898649802823e-06
+Epoch  84/100 [####################]  27/27  | used 03:02 | left 00:00 | total 4:21:56 | ETA 49:53
+Epoch: 84 cost time: 182.02049899101257
+Epoch: 84, Steps: 27 | Train Loss: 0.0104907 Vali Loss: 0.0011242 StockMixer Select Loss: 0.0011281 Test Loss: 0.0005347
+Val Financial | IC: 0.011728 RIC: 0.093403 RankIC: 0.009904 Precision@10: 0.531225 SR(top5): 1.456453
+Test Financial | IC: -0.015531 RIC: -0.110696 RankIC: -0.022227 Precision@10: 0.477778 SR(top5): 1.672621
+Train components | MSE: 0.00029132 Rank: 0.00003917 weighted Rank: 0.00019585 MoE: 2.00071636 weighted MoE: 0.01000358
+Updating learning rate to 6.1846659978068265e-06
+Epoch  85/100 [####################]  27/27  | used 03:02 | left 00:00 | total 4:25:02 | ETA 46:46
+Epoch: 85 cost time: 182.11708760261536
+Epoch: 85, Steps: 27 | Train Loss: 0.0104936 Vali Loss: 0.0011148 StockMixer Select Loss: 0.0011186 Test Loss: 0.0005418
+Val Financial | IC: 0.013880 RIC: 0.125123 RankIC: 0.005418 Precision@10: 0.528458 SR(top5): 1.786508
+Test Financial | IC: -0.019250 RIC: -0.146655 RankIC: -0.021551 Precision@10: 0.475397 SR(top5): 0.931722
+Train components | MSE: 0.00029493 Rank: 0.00003902 weighted Rank: 0.00019511 MoE: 2.00071700 weighted MoE: 0.01000359
+Updating learning rate to 5.449673790581611e-06
+Epoch  86/100 [####################]  27/27  | used 03:02 | left 00:00 | total 4:28:08 | ETA 43:38
+Epoch: 86 cost time: 182.1563060283661
+Epoch: 86, Steps: 27 | Train Loss: 0.0104897 Vali Loss: 0.0011145 StockMixer Select Loss: 0.0011183 Test Loss: 0.0005353
+Val Financial | IC: 0.012428 RIC: 0.113252 RankIC: 0.007240 Precision@10: 0.520553 SR(top5): 1.762856
+Test Financial | IC: -0.019437 RIC: -0.156139 RankIC: -0.019938 Precision@10: 0.475397 SR(top5): 0.890016
+Train components | MSE: 0.00029216 Rank: 0.00003878 weighted Rank: 0.00019392 MoE: 2.00071563 weighted MoE: 0.01000358
+Updating learning rate to 4.758647376699032e-06
+Epoch  87/100 [####################]  27/27  | used 03:02 | left 00:00 | total 4:31:13 | ETA 40:31
+Epoch: 87 cost time: 182.08412218093872
+Epoch: 87, Steps: 27 | Train Loss: 0.0104854 Vali Loss: 0.0011236 StockMixer Select Loss: 0.0011274 Test Loss: 0.0005311
+Val Financial | IC: 0.011788 RIC: 0.103858 RankIC: 0.005987 Precision@10: 0.525692 SR(top5): 1.594267
+Test Financial | IC: -0.017363 RIC: -0.132022 RankIC: -0.016136 Precision@10: 0.480159 SR(top5): 1.282834
+Train components | MSE: 0.00028797 Rank: 0.00003877 weighted Rank: 0.00019383 MoE: 2.00071694 weighted MoE: 0.01000358
+Updating learning rate to 4.112268715800943e-06
+Epoch  88/100 [####################]  27/27  | used 03:02 | left 00:00 | total 4:34:19 | ETA 37:24
+Epoch: 88 cost time: 182.15189409255981
+Epoch: 88, Steps: 27 | Train Loss: 0.0104853 Vali Loss: 0.0011132 StockMixer Select Loss: 0.0011170 Test Loss: 0.0005432
+Val Financial | IC: 0.014502 RIC: 0.127586 RankIC: 0.010819 Precision@10: 0.526877 SR(top5): 1.505551
+Test Financial | IC: -0.014437 RIC: -0.109994 RankIC: -0.015130 Precision@10: 0.478571 SR(top5): 1.174120
+Train components | MSE: 0.00028843 Rank: 0.00003866 weighted Rank: 0.00019329 MoE: 2.00071404 weighted MoE: 0.01000357
+Updating learning rate to 3.511175705587433e-06
+Epoch  89/100 [####################]  27/27  | used 03:02 | left 00:00 | total 4:37:24 | ETA 34:17
+Epoch: 89 cost time: 182.0777232646942
+Epoch: 89, Steps: 27 | Train Loss: 0.0104874 Vali Loss: 0.0011219 StockMixer Select Loss: 0.0011256 Test Loss: 0.0005321
+Val Financial | IC: 0.012725 RIC: 0.112861 RankIC: 0.010491 Precision@10: 0.524111 SR(top5): 1.330993
+Test Financial | IC: -0.016203 RIC: -0.129952 RankIC: -0.015933 Precision@10: 0.481746 SR(top5): 1.094884
+Train components | MSE: 0.00029226 Rank: 0.00003832 weighted Rank: 0.00019159 MoE: 2.00071488 weighted MoE: 0.01000357
+Updating learning rate to 2.9559615522887273e-06
+Epoch  90/100 [####################]  27/27  | used 03:02 | left 00:00 | total 4:40:30 | ETA 31:10
+Epoch: 90 cost time: 182.1407995223999
+Epoch: 90, Steps: 27 | Train Loss: 0.0104819 Vali Loss: 0.0011209 StockMixer Select Loss: 0.0011247 Test Loss: 0.0005313
+Val Financial | IC: 0.008054 RIC: 0.069668 RankIC: 0.006131 Precision@10: 0.525296 SR(top5): 1.217613
+Test Financial | IC: -0.015775 RIC: -0.125569 RankIC: -0.012667 Precision@10: 0.484127 SR(top5): 1.007682
+Train components | MSE: 0.00028684 Rank: 0.00003829 weighted Rank: 0.00019145 MoE: 2.00071696 weighted MoE: 0.01000358
+Updating learning rate to 2.4471741852423237e-06
+Epoch  91/100 [####################]  27/27  | used 03:02 | left 00:00 | total 4:43:36 | ETA 28:02
+Epoch: 91 cost time: 182.09199714660645
+Epoch: 91, Steps: 27 | Train Loss: 0.0104807 Vali Loss: 0.0011144 StockMixer Select Loss: 0.0011181 Test Loss: 0.0005323
+Val Financial | IC: 0.012149 RIC: 0.108151 RankIC: 0.008531 Precision@10: 0.528063 SR(top5): 1.495376
+Test Financial | IC: -0.014739 RIC: -0.116664 RankIC: -0.013518 Precision@10: 0.488095 SR(top5): 1.288683
+Train components | MSE: 0.00028669 Rank: 0.00003810 weighted Rank: 0.00019048 MoE: 2.00071260 weighted MoE: 0.01000356
+Updating learning rate to 1.985315716152847e-06
+Epoch  92/100 [####################]  27/27  | used 03:02 | left 00:00 | total 4:46:41 | ETA 24:55
+Epoch: 92 cost time: 182.0638723373413
+Epoch: 92, Steps: 27 | Train Loss: 0.0104826 Vali Loss: 0.0011176 StockMixer Select Loss: 0.0011214 Test Loss: 0.0005308
+Val Financial | IC: 0.014792 RIC: 0.135390 RankIC: 0.006801 Precision@10: 0.527668 SR(top5): 1.701906
+Test Financial | IC: -0.015378 RIC: -0.119660 RankIC: -0.016553 Precision@10: 0.478571 SR(top5): 1.290266
+Train components | MSE: 0.00028879 Rank: 0.00003804 weighted Rank: 0.00019020 MoE: 2.00071471 weighted MoE: 0.01000357
+Updating learning rate to 1.5708419435684462e-06
+Epoch  93/100 [####################]  27/27  | used 03:02 | left 00:00 | total 4:49:47 | ETA 21:48
+Epoch: 93 cost time: 182.11436438560486
+Epoch: 93, Steps: 27 | Train Loss: 0.0104843 Vali Loss: 0.0011169 StockMixer Select Loss: 0.0011206 Test Loss: 0.0005309
+Val Financial | IC: 0.013918 RIC: 0.125183 RankIC: 0.007909 Precision@10: 0.527273 SR(top5): 1.642019
+Test Financial | IC: -0.016968 RIC: -0.131402 RankIC: -0.016825 Precision@10: 0.476190 SR(top5): 0.989012
+Train components | MSE: 0.00028825 Rank: 0.00003850 weighted Rank: 0.00019251 MoE: 2.00071640 weighted MoE: 0.01000358
+Updating learning rate to 1.2041619030626284e-06
+Epoch  94/100 [####################]  27/27  | used 03:01 | left 00:00 | total 4:52:52 | ETA 18:41
+Epoch: 94 cost time: 184.41513419151306
+Epoch: 94, Steps: 27 | Train Loss: 0.0104796 Vali Loss: 0.0011162 StockMixer Select Loss: 0.0011199 Test Loss: 0.0005335
+Val Financial | IC: 0.011642 RIC: 0.104668 RankIC: 0.006949 Precision@10: 0.527668 SR(top5): 1.466621
+Test Financial | IC: -0.015872 RIC: -0.124313 RankIC: -0.015163 Precision@10: 0.477778 SR(top5): 1.182683
+Train components | MSE: 0.00028645 Rank: 0.00003791 weighted Rank: 0.00018954 MoE: 2.00071321 weighted MoE: 0.01000357
+Updating learning rate to 8.856374635655695e-07
+Epoch  95/100 [####################]  27/27  | used 03:02 | left 00:00 | total 4:55:58 | ETA 15:34
+Epoch: 95 cost time: 182.04130268096924
+Epoch: 95, Steps: 27 | Train Loss: 0.0104789 Vali Loss: 0.0011176 StockMixer Select Loss: 0.0011213 Test Loss: 0.0005311
+Val Financial | IC: 0.012324 RIC: 0.111396 RankIC: 0.007699 Precision@10: 0.526482 SR(top5): 1.600787
+Test Financial | IC: -0.016648 RIC: -0.130008 RankIC: -0.017086 Precision@10: 0.478571 SR(top5): 1.225239
+Train components | MSE: 0.00028557 Rank: 0.00003796 weighted Rank: 0.00018981 MoE: 2.00071383 weighted MoE: 0.01000357
+Updating learning rate to 6.15582970243117e-07
+Epoch  96/100 [####################]  27/27  | used 03:02 | left 00:00 | total 4:59:03 | ETA 12:27
+Epoch: 96 cost time: 182.13284182548523
+Epoch: 96, Steps: 27 | Train Loss: 0.0104807 Vali Loss: 0.0011168 StockMixer Select Loss: 0.0011205 Test Loss: 0.0005315
+Val Financial | IC: 0.012032 RIC: 0.108486 RankIC: 0.007550 Precision@10: 0.527273 SR(top5): 1.587202
+Test Financial | IC: -0.017157 RIC: -0.136769 RankIC: -0.016634 Precision@10: 0.479365 SR(top5): 1.263820
+Train components | MSE: 0.00028665 Rank: 0.00003809 weighted Rank: 0.00019047 MoE: 2.00071520 weighted MoE: 0.01000358
+Updating learning rate to 3.9426493427611177e-07
+Epoch  97/100 [####################]  27/27  | used 03:02 | left 00:00 | total 5:02:09 | ETA 09:20
+Epoch: 97 cost time: 182.19475030899048
+Epoch: 97, Steps: 27 | Train Loss: 0.0104808 Vali Loss: 0.0011167 StockMixer Select Loss: 0.0011204 Test Loss: 0.0005313
+Val Financial | IC: 0.013099 RIC: 0.118129 RankIC: 0.007138 Precision@10: 0.531621 SR(top5): 1.606492
+Test Financial | IC: -0.016460 RIC: -0.128757 RankIC: -0.016357 Precision@10: 0.475397 SR(top5): 1.171943
+Train components | MSE: 0.00028643 Rank: 0.00003815 weighted Rank: 0.00019076 MoE: 2.00071621 weighted MoE: 0.01000358
+Updating learning rate to 2.219017698460002e-07
+Epoch  98/100 [####################]  27/27  | used 03:02 | left 00:00 | total 5:05:15 | ETA 06:13
+Epoch: 98 cost time: 182.0552999973297
+Epoch: 98, Steps: 27 | Train Loss: 0.0104776 Vali Loss: 0.0011159 StockMixer Select Loss: 0.0011196 Test Loss: 0.0005321
+Val Financial | IC: 0.012521 RIC: 0.112821 RankIC: 0.007321 Precision@10: 0.527273 SR(top5): 1.555980
+Test Financial | IC: -0.016435 RIC: -0.129009 RankIC: -0.016419 Precision@10: 0.480159 SR(top5): 1.142243
+Train components | MSE: 0.00028495 Rank: 0.00003781 weighted Rank: 0.00018907 MoE: 2.00071366 weighted MoE: 0.01000357
+Updating learning rate to 9.866357858642205e-08
+Epoch  99/100 [####################]  27/27  | used 03:02 | left 00:00 | total 5:08:20 | ETA 03:06
+Epoch: 99 cost time: 182.10165882110596
+Epoch: 99, Steps: 27 | Train Loss: 0.0104805 Vali Loss: 0.0011164 StockMixer Select Loss: 0.0011202 Test Loss: 0.0005316
+Val Financial | IC: 0.012668 RIC: 0.114158 RankIC: 0.007259 Precision@10: 0.528854 SR(top5): 1.571158
+Test Financial | IC: -0.016430 RIC: -0.128958 RankIC: -0.016391 Precision@10: 0.476984 SR(top5): 1.169933
+Train components | MSE: 0.00028649 Rank: 0.00003808 weighted Rank: 0.00019040 MoE: 2.00071602 weighted MoE: 0.01000358
+Updating learning rate to 2.467198171342e-08
+Epoch 100/100 [####################]  27/27  | used 03:02 | left 00:00 | total 5:11:26 | ETA 00:00
+Epoch: 100 cost time: 182.19525575637817
+Epoch: 100, Steps: 27 | Train Loss: 0.0104804 Vali Loss: 0.0011165 StockMixer Select Loss: 0.0011202 Test Loss: 0.0005316
+Val Financial | IC: 0.012674 RIC: 0.114242 RankIC: 0.007253 Precision@10: 0.528063 SR(top5): 1.591074
+Test Financial | IC: -0.016425 RIC: -0.128918 RankIC: -0.016386 Precision@10: 0.477778 SR(top5): 1.166368
+Train components | MSE: 0.00028589 Rank: 0.00003818 weighted Rank: 0.00019089 MoE: 2.00071670 weighted MoE: 0.01000358
+Updating learning rate to 0.0
+>>>>>>>testing : long_term_forecast_SP500_eod5_16_1_TimeFilter_SP500_ftM_sl16_ll0_pl1_dm512_nh4_el2_dl1_df2048_fc1_ebtimeF_dtTrue_test_0<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+test 126
+mse:0.0005420658271759748, mae:0.016075018793344498
+Final Test | best.pth from epoch 61
+Final Test Financial | IC: -0.013951 RIC: -0.109159 RankIC: -0.015229 Precision@10: 0.488889 SR(top5): 0.751303
+Financial results saved: D:\finance\model\Timefilter\TimeFilter\outputs\walkforward_selection_analysis\20261006_025610\fold_3\seed_2021\results\long_term_forecast_SP500_eod5_16_1_TimeFilter_SP500_ftM_sl16_ll0_pl1_dm512_nh4_el2_dl1_df2048_fc1_ebtimeF_dtTrue_test_0\financial
+test 126
+Future A (validation loss) Financial | IC: -0.013951 RIC: -0.109159 RankIC: -0.015229 Precision@10: 0.488889 SR(top5): 0.751303
+Future B (validation RankIC) Financial | IC: -0.006678 RIC: -0.046124 RankIC: -0.005522 Precision@10: 0.497619 SR(top5): 1.728608
