@@ -152,7 +152,7 @@ if __name__ == '__main__':
     parser.add_argument('--financial_norm', type=int, choices=[0, 1], default=1,
                         help='Financial TimeFilter normalization: 1 original behavior, 0 bypass')
     parser.add_argument('--financial_input_features', choices=['returns', 'eod5'], default='returns',
-                        help='SP500 input: daily returns or StockMixer five EOD features')
+                        help='Financial input: daily returns or StockMixer five EOD features')
     parser.add_argument('--finance_adaptation', type=json.loads, default=None,
                         help='Finance-only modular settings, encoded as JSON by scripts/run_financial.py')
     parser.add_argument('--financial_selection', choices=['mse', 'RankIC', 'IC', 'stockmixer_val_loss'], default='mse')
@@ -207,8 +207,8 @@ if __name__ == '__main__':
     if finance['enabled'] and finance['positional_encoding']['mode'] == 'patch_only' and args.pos != 1:
         parser.error('Patch-only positional encoding requires --pos 1')
 
-    if args.financial_input_features == 'eod5' and args.data not in ('SP500', 'S&P500'):
-        parser.error('--financial_input_features eod5 only applies to SP500')
+    if args.financial_input_features == 'eod5' and not is_financial_dataset(args.data):
+        parser.error('--financial_input_features eod5 only applies to financial datasets')
     if args.financial_input_features == 'eod5' and args.financial_norm != 0:
         parser.error('--financial_input_features eod5 requires --financial_norm 0')
     if args.financial_walkforward and args.financial_model_selection:
@@ -228,8 +228,6 @@ if __name__ == '__main__':
             parser.error('walk-forward split must satisfy seq_len < train_end < valid_end < future_end <= 1259')
     elif args.financial_split is not None:
         parser.error('--financial_split is reserved for historical selection audits')
-    if args.financial_selection == 'stockmixer_val_loss' and args.data not in ('SP500', 'S&P500'):
-        parser.error('--financial_selection stockmixer_val_loss only applies to SP500')
     if not is_financial_dataset(args.data) and (args.financial_norm != 1 or args.rank_weight != 0):
         parser.error('--financial_norm and --rank_weight only apply to financial datasets')
     if not is_financial_dataset(args.data) and args.gradient_diagnostic_epochs:
@@ -241,7 +239,7 @@ if __name__ == '__main__':
             raise SystemExit(launch_financial(args, sys.argv[1:]))
         if args.model != 'TimeFilter' or args.task_name != 'long_term_forecast':
             raise ValueError('Financial adapter requires TimeFilter and long_term_forecast')
-        validate_files(args.root_path, args.data)
+        validate_files(args.root_path, args.data, args.financial_input_features)
         if args.financial_cpu:
             args.use_gpu = False
         random.seed(args.financial_seed)

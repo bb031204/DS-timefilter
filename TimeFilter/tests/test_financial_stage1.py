@@ -24,14 +24,15 @@ class FinancialStage1Tests(unittest.TestCase):
         command = build_command(cli)
         self.assertEqual(command[command.index('--financial_norm') + 1], '0')
         config = yaml.safe_load((PROJECT_ROOT / 'config.yaml').read_text(encoding='utf-8'))
+        self.assertEqual(command[command.index('--data') + 1], config['dataset'])
         self.assertEqual(command[command.index('--rank_weight') + 1], str(config['training']['rank_weight']))
         self.assertEqual(command[command.index('--financial_input_features') + 1], 'eod5')
         self.assertEqual(command[command.index('--financial_selection') + 1], 'stockmixer_val_loss')
         self.assertEqual(command[command.index('--stockmixer_selection_rank_weight') + 1], '0.1')
         configured_alpha = config['model']['alpha']
         self.assertEqual(command[command.index('--alpha') + 1], str(configured_alpha))
-        self.assertEqual(command[command.index('--d_model') + 1], '512')
-        self.assertEqual(command[command.index('--batch_size') + 1], '32')
+        self.assertEqual(command[command.index('--d_model') + 1], str(config['model']['d_model']))
+        self.assertEqual(command[command.index('--batch_size') + 1], str(config['training']['batch_size']))
 
     def test_original_normalization_default_and_financial_bypass(self):
         settings = dict(task_name='long_term_forecast', seq_len=4, pred_len=1,

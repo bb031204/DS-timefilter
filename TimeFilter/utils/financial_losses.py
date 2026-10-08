@@ -4,6 +4,13 @@ import torch.nn.functional as F
 import torch
 
 
+def stockmixer_masked_mse_loss(prediction, target, mask):
+    """Official StockMixer MSE: masked errors averaged over all stocks."""
+    if prediction.shape != target.shape or prediction.shape != mask.shape:
+        raise ValueError('StockMixer MSE requires matching prediction, target and mask')
+    return F.mse_loss(prediction * mask, target * mask)
+
+
 def stockmixer_rank_loss(prediction, target, mask):
     """StockMixer's pairwise hinge loss, independently for each target day.
 
@@ -30,7 +37,7 @@ def stockmixer_validation_loss(prediction, target, mask, rank_weight=0.1):
     """
     if prediction.shape != target.shape or prediction.shape != mask.shape:
         raise ValueError('StockMixer validation loss requires matching arrays')
-    mse = F.mse_loss(prediction * mask, target * mask)
+    mse = stockmixer_masked_mse_loss(prediction, target, mask)
     return mse + rank_weight * stockmixer_rank_loss(prediction, target, mask)
 
 

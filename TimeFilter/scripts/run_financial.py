@@ -58,8 +58,6 @@ def build_command(cli):
     market = canonical_market(cli.dataset or config.get('dataset', 'SP500'))
     if market not in MARKETS:
         raise ValueError('dataset must be SP500, NASDAQ or NYSE')
-    if values.get('financial_input_features', 'returns') == 'eod5' and market != 'SP500':
-        raise ValueError('Five-feature input is currently supported only for SP500')
     mode = cli.mode or config.get('mode', 'train')
     if mode not in ('train', 'evaluate'):
         raise ValueError('mode must be train or evaluate')

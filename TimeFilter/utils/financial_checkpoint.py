@@ -77,7 +77,9 @@ def resolve_financial_checkpoint(args, setting, project_root):
     provenance_path = run_root / 'provenance.json'
     if provenance_path.is_file():
         saved_provenance = json.loads(provenance_path.read_text(encoding='utf-8'))
-        current_provenance = collect_provenance(project_root, args.root_path, args.data)
+        current_provenance = collect_provenance(
+            project_root, args.root_path, args.data,
+            getattr(args, 'financial_input_features', 'returns'))
         if saved_provenance.get('data_sha256') != current_provenance['data_sha256']:
             raise ValueError('Checkpoint data version differs: data_sha256. '
                              f'Restore the original data for {checkpoint}.')

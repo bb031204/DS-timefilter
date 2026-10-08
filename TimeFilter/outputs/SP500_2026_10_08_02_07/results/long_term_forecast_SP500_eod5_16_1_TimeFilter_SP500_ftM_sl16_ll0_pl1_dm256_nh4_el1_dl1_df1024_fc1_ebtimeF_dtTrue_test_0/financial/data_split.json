@@ -1,9 +1,0 @@
-{
-  "source_start_day": 915,
-  "train_end": 1006,
-  "valid_end": 1259,
-  "future_end": 1611,
-  "test_target_start": 1259,
-  "test_target_end_exclusive": 1611,
-  "test_days": 352
-}

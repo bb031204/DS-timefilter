@@ -26,7 +26,7 @@ def financial_metrics(preds, trues, masks=None):
 
 def metric_line(name, metrics):
     return (f"{name} Financial | IC: {metrics['IC']:.6f} "
-            f"RIC: {metrics['RIC']:.6f} RankIC: {metrics['RankIC']:.6f} "
+            f"RIC(Pearson ICIR): {metrics['RIC']:.6f} RankIC: {metrics['RankIC']:.6f} "
             f"Precision@10: {metrics['prec_10']:.6f} SR(top5): {metrics['sharpe5']:.6f}")
 
 

@@ -12,7 +12,7 @@
 #         financial_selection=mse、cpu=false 是适配配置，不能视为原模型超参数。
 # 最早 SP500 金融基线另使用：seq_len=16，label_len=0，pred_len=1，train_epochs=100，num_workers=0；
 # 其余上述模型/训练参数与原始默认一致，金融归一化仍开启，排序损失未启用。
-dataset: SP500  # 读取 stockmixer_dataset/SP500/SP500.npy；按目标日 1006/1259 划分
+dataset: NASDAQ  # 读取 stockmixer_dataset/SP500/SP500.npy；按目标日 1006/1259 划分
 data_root: stockmixer_dataset  # 数据父目录，其下应有对应市场的子目录
 mode: train  # train：从头训练并测试最佳权重；evaluate：只测试已有权重
 checkpoint: null  # evaluate 时填写训练输出目录内的 best.pth；会核对原实验配置

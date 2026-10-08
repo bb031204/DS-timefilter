@@ -19,6 +19,7 @@ from exp.exp_long_term_forecasting import Exp_Long_Term_Forecast
 from scripts.run_financial import build_command, PROJECT_ROOT
 from utils.financial_losses import stockmixer_validation_loss
 from utils.financial_report import financial_metrics
+from utils.financial_provenance import collect_provenance
 from utils.financial_runtime import allocate_run
 from utils.stockmixer_metrics import compute_metrics
 
@@ -44,19 +45,24 @@ class FinancialIntegrationTests(unittest.TestCase):
                 command = build_command(cli)
                 self.assertEqual(command[command.index('--c_out') + 1], str(channels))
                 self.assertEqual(command[command.index('--batch_size') + 1], '4')
-                self.assertEqual(command[command.index('--d_model') + 1], '512')
+                self.assertEqual(command[command.index('--d_model') + 1],
+                                 str(exchange_config['model']['d_model']))
                 self.assertEqual(command[command.index('--financial_optimizer') + 1], 'adamw')
                 self.assertEqual(command[command.index('--financial_weight_decay') + 1], '0.0001')
                 self.assertEqual(command[command.index('--financial_grad_clip_norm') + 1], '1.0')
                 self.assertEqual(command[command.index('--financial_test_each_epoch') + 1], '1')
                 self.assertTrue(Path(command[command.index('--root_path') + 1]).is_absolute())
 
-    def test_five_feature_config_cannot_be_used_for_another_market(self):
+    def test_five_feature_config_routes_to_nasdaq(self):
         cli = argparse.Namespace(config=str(PROJECT_ROOT / 'config.yaml'), dataset='NASDAQ',
                                  mode=None, checkpoint=None, batch_size=None, train_epochs=None,
                                  learning_rate=None)
-        with self.assertRaisesRegex(ValueError, 'only for SP500'):
-            build_command(cli)
+        command = build_command(cli)
+        self.assertEqual(command[command.index('--financial_input_features') + 1], 'eod5')
+        self.assertEqual(command[command.index('--data') + 1], 'NASDAQ')
+        self.assertEqual(command[command.index('--enc_in') + 1], '1026')
+        self.assertEqual(command[command.index('--financial_selection') + 1],
+                         'stockmixer_val_loss')
 
     def test_test_each_epoch_config_switch_accepts_only_yaml_boolean(self):
         with tempfile.TemporaryDirectory() as root:
@@ -89,26 +95,60 @@ class FinancialIntegrationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'Missing or empty'):
                 validate_files(root, 'NYSE')
 
+    def test_nasdaq_eod5_requires_released_features(self):
+        with tempfile.TemporaryDirectory() as root:
+            for name in ('price_data.pkl', 'gt_data.pkl', 'mask_data.pkl'):
+                (Path(root) / name).write_bytes(b'x')
+            validate_files(root, 'NASDAQ', 'returns')
+            with self.assertRaisesRegex(ValueError, 'eod_data.pkl'):
+                validate_files(root, 'NASDAQ', 'eod5')
+            (Path(root) / 'eod_data.pkl').write_bytes(b'original indicators')
+            project = Path(root) / 'project'
+            project.mkdir()
+            (project / 'run.py').write_text('', encoding='utf-8')
+            provenance = collect_provenance(project, root, 'NASDAQ', 'eod5')
+            self.assertIn('eod_data.pkl', provenance['data_files'])
+            (Path(root) / 'eod_data.pkl').write_bytes(b'changed indicators')
+            changed = collect_provenance(project, root, 'NASDAQ', 'eod5')
+            self.assertNotEqual(provenance['data_sha256'], changed['data_sha256'])
+
     def test_exchange_split_history_mask_and_metric_parity(self):
         rng = np.random.default_rng(9)
         prices = np.exp(np.cumsum(rng.normal(0, .01, (20, 1015)), axis=1)).astype(np.float32)
         returns = np.zeros_like(prices)
         returns[:, 1:] = prices[:, 1:] / prices[:, :-1] - 1
+        eod = np.repeat(prices[:, :, None], 5, axis=2)
+        eod[:, :, 0] = 0.25
         mask = np.ones_like(prices)
         mask[0, 1000] = 0
         args = SimpleNamespace(data='NYSE', patch_len=16, enc_in=20, dec_in=20, c_out=20)
         with tempfile.TemporaryDirectory() as root:
-            for name, value in [('price', prices), ('gt', returns), ('mask', mask)]:
+            for name, value in [('price', prices), ('gt', returns), ('mask', mask), ('eod', eod)]:
                 with (Path(root) / f'{name}_data.pkl').open('wb') as stream:
                     pickle.dump(value, stream)
             train = Dataset_Exchange(args, root, size=(16, 0, 1))
             val = Dataset_Exchange(args, root, flag='val', size=(16, 0, 1))
             test = Dataset_Exchange(args, root, flag='test', size=(16, 0, 1))
-            self.assertEqual((len(train), len(val), len(test)), (739, 252, 7))
-            np.testing.assert_array_equal(train[0][0], returns[:, 1:17].T)
+            self.assertEqual((len(train), len(val), len(test)), (740, 252, 7))
+            np.testing.assert_array_equal(train[0][0], returns[:, :16].T)
+            np.testing.assert_array_equal(train[0][1][0], returns[:, 16])
             np.testing.assert_array_equal(train[-1 + len(train)][1][0], returns[:, 755])
             self.assertEqual(test[0][3][0, 0], 0)
             np.testing.assert_array_equal(test[0][3][0, 1:], 1)
+            nasdaq_args = SimpleNamespace(data='NASDAQ', patch_len=16, enc_in=20,
+                                          dec_in=20, c_out=20,
+                                          financial_input_features='eod5', financial_norm=0)
+            nasdaq_train = Dataset_Exchange(nasdaq_args, root, size=(16, 0, 1))
+            nasdaq_val = Dataset_Exchange(nasdaq_args, root, flag='val', size=(16, 0, 1))
+            nasdaq_test = Dataset_Exchange(nasdaq_args, root, flag='test', size=(16, 0, 1))
+            self.assertEqual((len(nasdaq_train), len(nasdaq_val), len(nasdaq_test)),
+                             (740, 252, 7))
+            np.testing.assert_array_equal(nasdaq_train[0][0], eod[:, :16, :].transpose(1, 0, 2))
+            np.testing.assert_array_equal(nasdaq_val[0][0], eod[:, 740:756, :].transpose(1, 0, 2))
+            np.testing.assert_array_equal(nasdaq_val[0][1][0], returns[:, 756])
+            np.testing.assert_array_equal(nasdaq_test[0][0], eod[:, 992:1008, :].transpose(1, 0, 2))
+            np.testing.assert_array_equal(nasdaq_test[0][1][0], returns[:, 1008])
+            np.testing.assert_array_equal(nasdaq_test[0][3][0], np.min(mask[:, 992:1009], axis=1))
             targets = np.stack([test[i][1] for i in range(len(test))])
             masks = np.stack([test[i][3] for i in range(len(test))])
             predictions = rng.normal(0, .01, targets.shape).astype(np.float32)
@@ -124,7 +164,7 @@ class FinancialIntegrationTests(unittest.TestCase):
         target = torch.zeros_like(pred)
         mask = torch.tensor([[[1., 0.]]])
         loss = experiment._prediction_loss(pred, target, mask, torch.nn.MSELoss())
-        self.assertEqual(loss.item(), 4)
+        self.assertEqual(loss.item(), 2)
         loss.backward()
         self.assertEqual(pred.grad[0, 0, 1].item(), 0)
         experiment.args.data = 'SP500'

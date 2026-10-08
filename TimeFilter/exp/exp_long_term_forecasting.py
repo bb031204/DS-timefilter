@@ -5,7 +5,8 @@ from utils.metrics import metric
 from utils.financial_selection import FinancialSelection, best_epoch_for_checkpoint
 from utils.financial_progress import emit_progress
 from utils.financial_gradient_diagnostic import record_gradient_diagnostic
-from utils.financial_losses import stockmixer_rank_loss, stockmixer_validation_loss, daily_pearson_ic_loss
+from utils.financial_losses import (stockmixer_masked_mse_loss, stockmixer_rank_loss,
+                                    stockmixer_validation_loss, daily_pearson_ic_loss)
 from utils.financial_report import FinancialReport, financial_metrics, metric_line
 from utils.walkforward_selection import WalkforwardRankCheckpoint, epoch_correlations
 from data_provider.financial_registry import is_financial_dataset
@@ -101,7 +102,7 @@ class Exp_Long_Term_Forecast(Exp_Basic):
     def _prediction_loss(self, prediction, target, batch_y_mark, criterion):
         if self.args.data in ('NASDAQ', 'NYSE'):
             mask = self._financial_mask(batch_y_mark, prediction)
-            return ((prediction - target).square() * mask).sum() / mask.sum().clamp_min(1)
+            return stockmixer_masked_mse_loss(prediction, target, mask)
         return criterion(prediction, target)
 
     def _training_loss_components(self, outputs, target, batch_y_mark, criterion, rank_weight):

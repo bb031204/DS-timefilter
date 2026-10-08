@@ -91,7 +91,8 @@ def experiment_lock(root, key):
 def launch_financial(args, argv):
     import yaml
     from utils.financial_provenance import collect_provenance
-    provenance = collect_provenance(PROJECT_ROOT, args.root_path, args.data)
+    provenance = collect_provenance(PROJECT_ROOT, args.root_path, args.data,
+                                    getattr(args, 'financial_input_features', 'returns'))
     # Evaluation can intentionally use an overwritten checkpoint at the same path.
     if not args.is_training:
         return _launch_financial(args, argv, provenance)
