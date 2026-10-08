@@ -62,7 +62,7 @@ training:
   # 金融总损失 = 预测 MSE + rank_weight × 横截面排序损失 + moe_aux_weight × MoE 辅助损失。
   # 设为 0 仍保留 MoE 路由和模型结构；不同权重实验不要按总 Train Loss 大小评优。
   moe_aux_weight: 0.005  # 原始默认及 SP500 基线 0.05；当前为 0.005
-  rank_weight: 5  # 当前待验证候选；已完成实验为 0.1。训练权重与下方选模权重相互独立
+  rank_weight: 10  # 当前待验证候选；已完成实验为 0.1。训练权重与下方选模权重相互独立
   financial_seed: 2021  # 随机种子；三组使用相同种子，后续复验时再成组更换
   financial_selection: stockmixer_val_loss  # 与本次 StockMixer 一致：验证集 MSE + 0.1×排序损失，越低越好
   test_each_epoch: true  # true：每轮后评估并记录 Test，对齐 StockMixer；false：只在 best.pth 加载后最终测试

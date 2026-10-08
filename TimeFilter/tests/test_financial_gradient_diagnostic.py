@@ -2,6 +2,8 @@
 
 import argparse
 import csv
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
 import random
 import tempfile
@@ -14,7 +16,7 @@ import torch
 from models.TimeFilter import Model
 from scripts.run_financial import build_command
 from utils.financial_gradient_diagnostic import record_gradient_diagnostic
-from utils.financial_losses import stockmixer_rank_loss
+from utils.financial_losses import daily_pearson_ic_loss, stockmixer_rank_loss
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -48,7 +50,9 @@ class FinancialGradientDiagnosticTests(unittest.TestCase):
             predictions, moe = model(batch[0], None, is_training=True)
             mse = (predictions - batch[1]).square().mean()
             rank = stockmixer_rank_loss(predictions, batch[1], torch.ones_like(batch[1]))
-            return {'MSE': (mse, 1.0), 'Rank': (rank, 0.1), 'MoE': (moe, 0.005)}
+            ic = daily_pearson_ic_loss(predictions, batch[1], torch.ones_like(batch[1]))
+            return {'MSE': (mse, 1.0), 'Rank': (rank, 0.1),
+                    'IC': (ic, 0.01), 'MoE': (moe, 0.005)}
 
         before = {name: value.detach().clone() for name, value in model.named_parameters()}
         for value in model.parameters():
@@ -63,11 +67,18 @@ class FinancialGradientDiagnosticTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory)
-            record_gradient_diagnostic(model, (inputs, targets), [0, 10], losses, path, 0)
+            output = StringIO()
+            with redirect_stdout(output):
+                record_gradient_diagnostic(model, (inputs, targets), [0, 10], losses, path, 0)
             with (path / 'gradient_diagnostics.csv').open(encoding='utf-8') as stream:
                 rows = list(csv.DictReader(stream))
         self.assertEqual(len(calls), 1)
-        self.assertEqual(len(rows), 15)  # Three losses × five parameter groups.
+        self.assertEqual(len(rows), 20)  # Four losses × five parameter groups.
+        self.assertIn('Grad norm | MSE:', output.getvalue())
+        self.assertIn('Rank:', output.getvalue())
+        self.assertIn('IC:', output.getvalue())
+        self.assertIn('MoE:', output.getvalue())
+        self.assertIn('/ MSE     | Rank:', output.getvalue())
         self.assertEqual({row['stage'] for row in rows}, {'pretrain'})
         self.assertGreater(float(next(row['grad_norm'] for row in rows
                                       if row['component'] == 'MSE' and row['group'] == 'all')), 0)
@@ -78,6 +89,26 @@ class FinancialGradientDiagnosticTests(unittest.TestCase):
             torch.testing.assert_close(value, before[name])
             torch.testing.assert_close(value.grad, torch.ones_like(value))
         self.assertEqual((random.random(), np.random.rand(), torch.rand(()).item()), expected)
+
+    def test_disabled_ic_is_reported_as_zero_contribution(self):
+        model = torch.nn.Linear(1, 1)
+        inputs = torch.tensor([[1.0], [2.0]])
+
+        def losses(batch):
+            predictions = model(batch)
+            mse = predictions.square().mean()
+            return {'MSE': (mse, 1.0), 'Rank': (mse, 0.0),
+                    'IC': (mse, 0.0), 'MoE': (mse, 0.0)}
+
+        with tempfile.TemporaryDirectory() as directory:
+            output = StringIO()
+            with redirect_stdout(output):
+                record_gradient_diagnostic(model, inputs, [0, 1], losses, Path(directory), 0)
+            with (Path(directory) / 'gradient_diagnostics.csv').open(encoding='utf-8') as stream:
+                rows = list(csv.DictReader(stream))
+        ic = next(row for row in rows if row['component'] == 'IC' and row['group'] == 'all')
+        self.assertEqual(float(ic['grad_norm']), 0.0)
+        self.assertIn('IC: 0 (off)', output.getvalue())
 
 
 if __name__ == '__main__':

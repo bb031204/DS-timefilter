@@ -66,7 +66,7 @@ def record_gradient_diagnostic(model, batch, train_indices, loss_fn, report_path
             raw_losses = loss_fn(batch)
             weighted = {name: raw * weight for name, (raw, weight) in raw_losses.items()}
             differentiable = [name for name, term in weighted.items()
-                              if torch.is_tensor(term) and term.requires_grad]
+                              if raw_losses[name][1] != 0 and torch.is_tensor(term) and term.requires_grad]
             summaries = {}
             for position, name in enumerate(differentiable):
                 gradients = torch.autograd.grad(
@@ -97,9 +97,9 @@ def record_gradient_diagnostic(model, batch, train_indices, loss_fn, report_path
     index_text = '|'.join(map(str, train_indices))
     rows = []
     print(f'[Gradient Diagnostic] stage={stage} epoch={epoch} '
-          f'batch_size={len(train_indices)} train_indices={index_text}')
+          f'batch_size={len(train_indices)} train_indices={index_text} '
+          '(weighted gradients, before clipping)')
     for name, (raw, weight) in values.items():
-        print(f'  {name}: raw={raw:.8g} weight={weight:.6g} weighted={raw * weight:.8g}')
         for group in groups:
             norm, active, total = summaries[name][group]
             mse_norm = summaries['MSE'][group][0]
@@ -109,9 +109,29 @@ def record_gradient_diagnostic(model, batch, train_indices, loss_fn, report_path
                          'raw_loss': raw, 'weight': weight, 'weighted_loss': raw * weight,
                          'grad_norm': norm, 'ratio_to_mse': ratio,
                          'active_tensors': active, 'total_tensors': total})
-            ratio_text = f'{ratio:.4g}' if ratio is not None else 'n/a'
-            print(f'    {group}: grad_norm={norm:.6g} ratio_to_mse={ratio_text} '
-                  f'active_tensors={active}/{total}')
+
+    def display(name):
+        if name not in values:
+            return 'n/a'
+        norm = summaries[name]['all'][0]
+        suffix = ' (off)' if values[name][1] == 0 else ''
+        return f'{norm:.6g}{suffix}'
+
+    def display_ratio(name):
+        if name not in values:
+            return 'n/a'
+        mse_norm = summaries['MSE']['all'][0]
+        if mse_norm <= 1e-12:
+            return 'n/a'
+        suffix = ' (off)' if values[name][1] == 0 else ''
+        return f'{summaries[name]["all"][0] / mse_norm:.4g}{suffix}'
+
+    print('  Grad norm | ' + '  '.join(f'{name}: {display(name)}'
+                                      for name in ('MSE', 'Rank', 'IC', 'MoE')))
+    print('  / MSE     | ' + '  '.join(f'{name}: {display_ratio(name)}'
+                                      for name in ('Rank', 'IC', 'MoE')))
+    print('  Weights   | ' + '  '.join(f'{name}: {values[name][1]:.6g}'
+                                      for name in ('MSE', 'Rank', 'IC', 'MoE') if name in values))
 
     path = report_path / 'gradient_diagnostics.csv'
     new_file = not path.exists()

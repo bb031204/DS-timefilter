@@ -1,0 +1,24 @@
+{
+  "best": {
+    "epoch": 83,
+    "metric": "stockmixer_val_loss",
+    "value": 0.0012153891896347702,
+    "validation_metrics": {
+      "mae": 0.022264134138822556,
+      "mse": 0.0012146478529491008,
+      "flat_valid_mse": 0.001214649179019034,
+      "rmse": 0.0348518174421225,
+      "directional_accuracy": 0.478235853304648,
+      "IC": 0.006760694729098096,
+      "RIC": 0.040820875465961415,
+      "prec_10": 0.5181818181818183,
+      "sharpe5": 1.2755311955937083,
+      "RankIC": -0.0025236929782046676,
+      "RankIC_std": 0.15262146668010215,
+      "RankICIR": -0.016535635733958592,
+      "stockmixer_val_loss": 0.0012153891896347702
+    }
+  },
+  "last_epoch": 100,
+  "final_evaluation_checkpoint": "best.pth"
+}

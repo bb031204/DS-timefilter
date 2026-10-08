@@ -227,10 +227,9 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                     mse, rank = self._training_loss_components(
                         outputs, target, batch_y_mark, criterion, rank_weight)
                     components = {'MSE': (mse, 1.0), 'Rank': (rank, rank_weight),
+                                  'IC': (daily_pearson_ic_loss(
+                                      outputs, target, self._financial_mask(batch_y_mark, outputs)), ic_weight),
                                   'MoE': (moe_loss, moe_aux_weight)}
-                    if ic_weight:
-                        components['IC'] = (daily_pearson_ic_loss(
-                            outputs, target, self._financial_mask(batch_y_mark, outputs)), ic_weight)
                     return components
 
                 record_gradient_diagnostic(self.model, diagnostic_batch, train_indices,
