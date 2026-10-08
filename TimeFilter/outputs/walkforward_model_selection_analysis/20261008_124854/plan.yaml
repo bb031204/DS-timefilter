@@ -1,0 +1,15 @@
+# 新选模审计独立于日常 config.yaml 和旧 walkforward_selection.yaml。
+# 固定 10-07 的 IC=0.01 候选配置；如需审计别的配置，请新建 plan，勿改正在运行的 plan。
+base_config: outputs/SP500_2026_10_07_23_11_new_best/source_config.yaml
+output_root: outputs/walkforward_model_selection_analysis
+seeds: [2021]
+future_each_epoch: false  # 核心比较仅评估四个已选 checkpoint；true 额外记录逐轮诊断
+selection_rules: [A, B, C, D]
+decision_metrics:
+  primary: [RankIC, mean_top5_excess_return]
+  guardrails: [IC, prec_10, sharpe5]
+stability_lambda: 0.5  # D = 两子窗口 RankIC 均值 - lambda × 两者总体标准差
+folds:
+  - {name: fold_1, train_end: 628, valid_end: 881, future_end: 1007}
+  - {name: fold_2, train_end: 754, valid_end: 1007, future_end: 1133}
+  - {name: fold_3, train_end: 880, valid_end: 1133, future_end: 1259}

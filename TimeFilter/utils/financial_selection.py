@@ -10,6 +10,10 @@ def best_epoch_for_checkpoint(checkpoint):
     checkpoint = Path(checkpoint).resolve()
     candidate = {'best.pth': None, 'best_stockmixer_loss.pth': 'A',
                  'best_rankic.pth': 'B'}.get(checkpoint.name, 'unknown')
+    model_selection_rule = next((rule for rule in 'ABCD'
+                                 if checkpoint.name == f'best_rule_{rule}.pth'), None)
+    if model_selection_rule:
+        candidate = 'model_selection'
     if candidate == 'unknown':
         return None
     selection_path = (checkpoint.parents[2] / 'results' / checkpoint.parent.name / 'financial'
@@ -24,6 +28,11 @@ def best_epoch_for_checkpoint(checkpoint):
         if selection.get('final_evaluation_checkpoint') != checkpoint.name:
             return None
         epoch = (selection.get('best') or {}).get('epoch')
+    elif candidate == 'model_selection':
+        rule = (selection.get('rules') or {}).get(model_selection_rule) or {}
+        if rule.get('checkpoint') != checkpoint.name:
+            return None
+        epoch = rule.get('selected_epoch')
     else:
         if selection.get(f'{candidate}_checkpoint') != checkpoint.name:
             return None

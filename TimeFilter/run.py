@@ -160,6 +160,10 @@ if __name__ == '__main__':
                         help='Evaluate financial test set after each epoch; 0 defers testing until final best.pth')
     parser.add_argument('--financial_walkforward', action='store_true',
                         help='Run the SP500 historical A/B checkpoint-selection audit')
+    parser.add_argument('--financial_model_selection', action='store_true',
+                        help='Run the separate historical A/B/C/D checkpoint-selection audit')
+    parser.add_argument('--financial_stability_lambda', type=float, default=0.5,
+                        help='Validation RankIC early/late stability penalty for the A/B/C/D audit')
     parser.add_argument('--financial_split', type=json.loads, default=None,
                         help='Historical SP500 split JSON: train_end, valid_end, future_end')
     parser.add_argument('--stockmixer_selection_rank_weight', type=float, default=0.1,
@@ -207,18 +211,23 @@ if __name__ == '__main__':
         parser.error('--financial_input_features eod5 only applies to SP500')
     if args.financial_input_features == 'eod5' and args.financial_norm != 0:
         parser.error('--financial_input_features eod5 requires --financial_norm 0')
-    if args.financial_walkforward:
+    if args.financial_walkforward and args.financial_model_selection:
+        parser.error('Choose only one historical selection audit mode')
+    if args.financial_model_selection and (not np.isfinite(args.financial_stability_lambda)
+                                           or args.financial_stability_lambda < 0):
+        parser.error('--financial_stability_lambda must be finite and non-negative')
+    if args.financial_walkforward or args.financial_model_selection:
         if args.data not in ('SP500', 'S&P500') or args.itr != 1:
-            parser.error('--financial_walkforward requires one SP500 run')
+            parser.error('historical selection audit requires one SP500 run')
         if args.financial_selection != 'stockmixer_val_loss':
-            parser.error('--financial_walkforward requires StockMixer validation-loss selection for A')
+            parser.error('historical selection audit requires StockMixer validation-loss selection for A')
         split = args.financial_split
         if (not isinstance(split, dict) or set(split) != {'train_end', 'valid_end', 'future_end'}
                 or any(type(value) is not int for value in split.values())
                 or not args.seq_len < split['train_end'] < split['valid_end'] < split['future_end'] <= 1259):
             parser.error('walk-forward split must satisfy seq_len < train_end < valid_end < future_end <= 1259')
     elif args.financial_split is not None:
-        parser.error('--financial_split is reserved for --financial_walkforward')
+        parser.error('--financial_split is reserved for historical selection audits')
     if args.financial_selection == 'stockmixer_val_loss' and args.data not in ('SP500', 'S&P500'):
         parser.error('--financial_selection stockmixer_val_loss only applies to SP500')
     if not is_financial_dataset(args.data) and (args.financial_norm != 1 or args.rank_weight != 0):
@@ -247,7 +256,7 @@ if __name__ == '__main__':
         args.device_ids = [int(id_) for id_ in device_ids]
         args.gpu = args.device_ids[0]
 
-    if args.financial_walkforward and args.is_training and args.financial_output_dir:
+    if (args.financial_walkforward or args.financial_model_selection) and args.is_training and args.financial_output_dir:
         from pathlib import Path
         import yaml
         Path(args.financial_output_dir, 'config.yaml').write_text(
@@ -306,6 +315,9 @@ if __name__ == '__main__':
                 exp.test(setting)
                 if args.financial_walkforward:
                     exp.walkforward_evaluate(setting)
+                if args.financial_model_selection:
+                    from utils.walkforward_model_selection import evaluate_selected_future
+                    evaluate_selected_future(exp, setting)
             torch.cuda.empty_cache()
     else:
         ii = 0

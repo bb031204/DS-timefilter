@@ -55,7 +55,7 @@ finance_adaptation:
   graph:
     strict_masked_softmax: true  # true：删边在 softmax 前设为 -inf，并保留自环
   loss:
-    ic_weight: 0.005  # 额外的每日 Pearson IC 损失权重；训练 rank_weight 仍在 training 段
+    ic_weight: 0.01  # 额外的每日 Pearson IC 损失权重；训练 rank_weight 仍在 training 段
 
 # 训练与验证集选模
 training:

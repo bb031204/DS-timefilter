@@ -1,5 +1,5 @@
 # 选模规则诊断：训练配置固定为 15_49 实验快照，不读取当前 config.yaml。
-base_config: outputs/SP500_2026_10_05_15_49/source_config.yaml
+base_config: outputs/SP500_2026_10_05_15_49_baseline/source_config.yaml
 output_root: outputs/walkforward_selection_analysis
 seeds: [2021]  # 首轮单种子；观察到一致方向后再增加种子复验
 future_each_epoch: true  # 只用于事后相关性诊断；A/B 权重仅由 Selection 选出

@@ -6,3 +6,8 @@ __pycache__/
 # Training checkpoints
 TimeFilter/outputs/walkforward_selection_analysis/**/checkpoints/
 TimeFilter/outputs/walkforward_selection_analysis/**/results/
+
+# Generated experiment artifacts
+TimeFilter/outputs/.locks/
+TimeFilter/outputs/**/checkpoints/
+TimeFilter/outputs/**/results/

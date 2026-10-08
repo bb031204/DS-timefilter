@@ -55,7 +55,7 @@ finance_adaptation:
   graph:
     strict_masked_softmax: true  # true：删边在 softmax 前设为 -inf，并保留自环
   loss:
-    ic_weight: 0.005  # 额外的每日 Pearson IC 损失权重；训练 rank_weight 仍在 training 段
+    ic_weight: 0.01  # 额外的每日 Pearson IC 损失权重；训练 rank_weight 仍在 training 段
 
 # 训练与验证集选模
 training:
@@ -69,7 +69,7 @@ training:
   stockmixer_selection_rank_weight: 0.1  # 固定选模口径；独立于训练用的 rank_weight
   gradient_diagnostic_epochs: [0, 1, 5]  # 在终端打印四项加权梯度范数及相对 MSE 比例，同时保存 CSV；0 为训练前，[] 关闭
   gradient_diagnostic_batch_size: 8  # 固定取训练期均匀分布的 8 个日期；显存允许时可改为 32
-  batch_size: 8  # 每批历史窗口数；显存不足可减小，但所有对照组需一致
+  batch_size: 2  # 每批历史窗口数；显存不足可减小，但所有对照组需一致
   train_epochs: 100  # 原始默认 10；SP500 基线 100。金融流程跑满后使用验证集最优 best.pth
   learning_rate: 0.0001  # 优化器初始学习率
   optimizer: adamw  # 金融候选：adamw 或原始 adam；非金融数据仍使用原始 Adam

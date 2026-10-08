@@ -1,6 +1,6 @@
 # SP500 选模规则滚动验证
 
-本实验只比较选模：A 用 StockMixer 式验证损失最小，B 用验证 RankIC 最大。同一折只训练一次，模型结构和损失固定为 `SP500_2026_10_05_15_49/source_config.yaml` 的实际配置（`rank_weight=5`、`ic_weight=0`）。当前 `config.yaml` 的后来改动不会进入本实验。
+本实验只比较选模：A 用 StockMixer 式验证损失最小，B 用验证 RankIC 最大。同一折只训练一次，模型结构和损失固定为 `SP500_2026_10_05_15_49_baseline/source_config.yaml` 的实际配置（`rank_weight=5`、`ic_weight=0`）。当前 `config.yaml` 的后来改动不会进入本实验。
 
 在 `TimeFilter` 目录运行：
 

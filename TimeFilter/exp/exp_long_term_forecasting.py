@@ -159,7 +159,8 @@ class Exp_Long_Term_Forecast(Exp_Basic):
             )
             if stockmixer_selection:
                 self._last_financial_metrics['stockmixer_val_loss'] = selection_loss_sum / selection_days
-                if getattr(self.args, 'financial_walkforward', False):
+                if (getattr(self.args, 'financial_walkforward', False)
+                        or getattr(self.args, 'financial_model_selection', False)):
                     midpoint = len(predictions) // 2
                     for name, window in (('early', slice(None, midpoint)),
                                          ('late', slice(midpoint, None))):
@@ -198,11 +199,16 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                      if finance.get('enabled', False) and is_financial_dataset(self.args.data) else 0.0)
 
         rank_candidate = None
+        model_selection_candidates = None
         if is_financial_dataset(self.args.data):
             self._financial_report = FinancialReport(setting, self.args, 'training')
             selection = FinancialSelection(path, self._financial_report, getattr(self.args, 'financial_selection', 'mse'))
             rank_candidate = (WalkforwardRankCheckpoint(path, self._financial_report)
                               if getattr(self.args, 'financial_walkforward', False) else None)
+            if getattr(self.args, 'financial_model_selection', False):
+                from utils.walkforward_model_selection import ValidationRuleCheckpoints
+                model_selection_candidates = ValidationRuleCheckpoints(
+                    path, self._financial_report, self.args.financial_stability_lambda)
 
         if self.args.use_amp:
             scaler = torch.cuda.amp.GradScaler()
@@ -309,6 +315,8 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 stockmixer_selection=(getattr(self.args, 'financial_selection', None) == 'stockmixer_val_loss'))
             if is_financial_dataset(self.args.data):
                 val_financial = self._last_financial_metrics.copy()
+                if model_selection_candidates is not None:
+                    val_financial = model_selection_candidates.add_stability_score(val_financial)
             # Optional StockMixer-style test reporting; checkpoint selection remains validation-only.
             test_loss = self.vali(test_data, test_loader, criterion) if test_each_epoch else float("nan")
 
@@ -357,6 +365,8 @@ class Exp_Long_Term_Forecast(Exp_Basic):
                 selection.update(self.model, epoch + 1, val_financial)
                 if rank_candidate is not None:
                     rank_candidate.update(self.model, epoch + 1, val_financial)
+                if model_selection_candidates is not None:
+                    model_selection_candidates.update(self.model, epoch + 1, val_financial)
             else:
                 early_stopping(vali_loss, self.model, path)
             if early_stopping.early_stop:
@@ -370,6 +380,8 @@ class Exp_Long_Term_Forecast(Exp_Basic):
         best_model_path = selection.finish() if is_financial_dataset(self.args.data) else path + '/' + 'checkpoint.pth'
         if rank_candidate is not None:
             rank_candidate.finish(selection.best)
+        if model_selection_candidates is not None:
+            model_selection_candidates.finish(selection.best)
         self.model.load_state_dict(torch.load(best_model_path))
 
         return self.model
